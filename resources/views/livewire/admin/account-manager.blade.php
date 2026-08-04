@@ -64,11 +64,14 @@
         autoClose: true,
         persianDigit: false,
         cssClass: 'persian-datepicker-cheetah',
-        onSelect: function(unix){ $wire.set('filterDateFrom', $refs.dateFrom.value); }
+        onSelect: function(unix){
+            $wire.set('filterDateFrom', $refs.dateFrom.value);
+        }
     });
 ">
                         <input x-ref="dateFrom" type="text" readonly placeholder="ثبت از تاریخ" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded-xl p-3 focus:ring-1 focus:ring-orange-500 font-mono text-center cursor-pointer">
                     </div>
+
 
                     <div wire:ignore x-data x-init="
     $($refs.dateTo).persianDatepicker({
@@ -77,7 +80,9 @@
         autoClose: true,
         persianDigit: false,
         cssClass: 'persian-datepicker-cheetah',
-        onSelect: function(unix){ $wire.set('filterDateTo', $refs.dateTo.value); }
+        onSelect: function(unix){
+            $wire.set('filterDateTo', $refs.dateTo.value);
+        }
     });
 ">
                         <input x-ref="dateTo" type="text" readonly placeholder="ثبت تا تاریخ" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded-xl p-3 focus:ring-1 focus:ring-orange-500 font-mono text-center cursor-pointer">
