@@ -6,10 +6,10 @@
             <h1 class="text-2xl font-black text-white tracking-wide">مدیریت اکانت‌های کاربران</h1>
             <p class="text-xs text-zinc-500 mt-1">مدیریت اتصالات، ترافیک، فیلترهای پیشرفته و عملیات گروهی</p>
         </div>
-        <button wire:click="$set('isFormOpen', true)" class="px-5 py-3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+        <a href="{{route('admin.accounts.create')}}" wire:navigate class="px-5 py-3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             صدور اکانت جدید
-        </button>
+        </a>
     </div>
 
     @if (session()->has('message'))
