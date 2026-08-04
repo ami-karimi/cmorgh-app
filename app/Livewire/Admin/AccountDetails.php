@@ -405,7 +405,7 @@ class AccountDetails extends Component
             $loginLogs = \Illuminate\Support\Facades\DB::table('radpostauth')
                 ->where('username', $account->username)
                 ->orderBy('id', 'desc')
-                ->paginate(15, ['*'], 'loginPage');
+                ->paginate(10, ['*'], 'loginPage');
         }
 
         // 🟢 مقادیر پیش‌فرض ایمن برای جلوگیری از ارور count()
