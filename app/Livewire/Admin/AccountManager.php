@@ -298,7 +298,8 @@ class AccountManager extends Component
     public function render()
     {
         $accounts = $this->getAccountsQuery()->paginate($this->perPage);
-        $groups = Group::where('is_enabled', 1)->orderBy('sort_order', 'asc')->get();$creators = User::where('is_active', 1)->get();
+        $groups = Group::where('is_enabled', 1)->orderBy('sort_order', 'asc')->get();
+        $creators = User::where('is_active', 1)->whereIn('role',['agent','sub_agent','admin','manager'])->get();
 
         return view('livewire.admin.account-manager', compact('accounts', 'groups', 'creators'));
     }

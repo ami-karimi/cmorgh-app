@@ -52,12 +52,88 @@
                         @foreach($groups as $grp) <option value="{{ $grp->id }}" wire:key="f-grp-{{ $grp->id }}">{{ $grp->name }}</option> @endforeach
                     </select>
 
-                    <select wire:model.live="filterCreator" class="bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs rounded-xl p-3 focus:ring-1 focus:ring-orange-500">
-                        <option value="">سازنده / نماینده...</option>
-                        @foreach($creators as $creator) <option value="{{ $creator->id }}" wire:key="f-crt-{{ $creator->id }}">{{ $creator->name }}</option> @endforeach
-                    </select>
+                    <div x-data="{
+    open: false,
+    search: '',
+    selectedName: 'سازنده / نماینده...',
+    // لود کردن نام و آیدی نمایندگان در جاوااسکریپت برای سرچ فوق‌سریع
+    options: [
+        @foreach($creators as $creator)
+                        { id: '{{ $creator->id }}', name: '{{ addslashes($creator->name) }}' },
+        @endforeach
+                        ],
+                        get filteredOptions() {
+                            if (this.search === '') return this.options;
+                            return this.options.filter(i => i.name.toLowerCase().includes(this.search.toLowerCase()));
+                        },
+                        selectOption(id, name) {
+                            this.selectedName = name;
+                            this.open = false;
+                            // وقتی کاربر کلیک کرد، فقط آیدی به بک‌اند ارسال می‌شود
+                            $wire.set('filterCreator', id);
+                        }
+                    }" class="relative w-full md:w-48" wire:ignore>
+
+                        <button @click="open = !open" type="button" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs rounded-xl p-3 flex justify-between items-center focus:ring-1 focus:ring-orange-500 transition-colors">
+                            <span x-text="selectedName" class="truncate"></span>
+                            <svg class="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+
+                        <div x-show="open" @click.away="open = false" x-transition.opacity.duration.200ms class="absolute z-50 w-full mt-2 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl overflow-hidden" style="display: none;">
+
+                            <div class="p-2 border-b border-zinc-700 bg-zinc-900/90 backdrop-blur sticky top-0">
+                                <input x-model="search" type="text" class="w-full bg-zinc-950 border border-zinc-800 text-white text-xs rounded-lg p-2.5 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-zinc-600" placeholder="جستجوی نام نماینده...">
+                            </div>
+
+                            <div class="max-h-52 overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+                                <div @click="selectOption('', 'همه نمایندگان...')" class="px-3 py-2.5 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg cursor-pointer transition-colors mb-1">
+                                    همه نمایندگان...
+                                </div>
+
+                                <template x-for="option in filteredOptions" :key="option.id">
+                                    <div @click="selectOption(option.id, option.name)" class="px-3 py-2.5 text-xs text-zinc-300 hover:bg-orange-500/10 hover:text-orange-400 rounded-lg cursor-pointer transition-colors flex items-center gap-2">
+                                        <svg class="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                        <span x-text="option.name"></span>
+                                    </div>
+                                </template>
+
+                                <div x-show="filteredOptions.length === 0" class="px-3 py-4 text-center text-xs text-zinc-500 font-bold">
+                                    نماینده‌ای یافت نشد!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div wire:ignore x-data x-init="
+    $($refs.dateFrom).persianDatepicker({
+        format: 'YYYY/MM/DD',
+        initialValue: false,
+        autoClose: true,
+        persianDigit: false,
+        cssClass: 'persian-datepicker-cheetah',
+        onSelect: function(unix){
+            $wire.set('filterDateFrom', $refs.dateFrom.value);
+        }
+    });
+">
+                        <input x-ref="dateFrom" type="text" readonly placeholder="ثبت از تاریخ" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded-xl p-3 focus:ring-1 focus:ring-orange-500 font-mono text-center cursor-pointer">
+                    </div>
 
 
+                    <div wire:ignore x-data x-init="
+    $($refs.dateTo).persianDatepicker({
+        format: 'YYYY/MM/DD',
+        initialValue: false,
+        autoClose: true,
+        persianDigit: false,
+        cssClass: 'persian-datepicker-cheetah',
+        onSelect: function(unix){
+            $wire.set('filterDateTo', $refs.dateTo.value);
+        }
+    });
+">
+                        <input x-ref="dateTo" type="text" readonly placeholder="ثبت تا تاریخ" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded-xl p-3 focus:ring-1 focus:ring-orange-500 font-mono text-center cursor-pointer">
+                    </div>
 
                     <select wire:model.live="perPage" class="bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs rounded-xl p-3 focus:ring-1 focus:ring-orange-500 font-mono">
                         <option value="10">10 رکورد در صفحه</option>
