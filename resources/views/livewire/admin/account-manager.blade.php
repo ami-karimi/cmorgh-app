@@ -85,7 +85,8 @@
                                 <input x-model="search" type="text" class="w-full bg-zinc-950 border border-zinc-800 text-white text-xs rounded-lg p-2.5 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-zinc-600" placeholder="جستجوی نام نماینده...">
                             </div>
 
-                            <div class="max-h-52 overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+                            <div class="overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent" style="max-height: 220px;">
+
                                 <div @click="selectOption('', 'همه نمایندگان...')" class="px-3 py-2.5 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg cursor-pointer transition-colors mb-1">
                                     همه نمایندگان...
                                 </div>
@@ -100,6 +101,7 @@
                                 <div x-show="filteredOptions.length === 0" class="px-3 py-4 text-center text-xs text-zinc-500 font-bold">
                                     نماینده‌ای یافت نشد!
                                 </div>
+
                             </div>
                         </div>
                     </div>
