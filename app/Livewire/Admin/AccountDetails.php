@@ -401,12 +401,12 @@ class AccountDetails extends Component
             $expireDateFormatted = Jalalian::forge($account->expire_date)->format('Y-m-d H:i:s');
         }
 
-        $loginLogs = null;
+        $loginLogs = [];
         if ($this->activeTab === 'login_logs') {
             $loginLogs = RadPostAuth::
                 where('username', $account->username)
                 ->orderBy('id', 'desc')
-                ->paginate(10, ['*'], 'loginPage');
+                ->latest('created_at')->take(10)->get();
         }
 
         $data = [
