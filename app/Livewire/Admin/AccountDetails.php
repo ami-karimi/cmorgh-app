@@ -18,11 +18,12 @@ use App\Services\VpnManagerService;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Morilog\Jalali\Jalalian;
-
+use Livewire\WithPagination;
 #[Title('جزئیات و مانیتورینگ اکانت | همراه سیمرغ')]
 #[Layout('layouts.admin')]
 class AccountDetails extends Component
 {
+    use WithPagination;
     public $accountId;
     public $activeTab;
 
@@ -404,7 +405,7 @@ class AccountDetails extends Component
             $loginLogs = \Illuminate\Support\Facades\DB::table('radpostauth')
                 ->where('username', $account->username)
                 ->orderBy('id', 'desc')
-                ->paginate(15, ['*'], 'loginPage'); // 👈 نمایش 15 رکورد در هر صفحه
+                ->paginate(15, ['*'], 'loginPage');
         }
 
         // 🟢 مقادیر پیش‌فرض ایمن برای جلوگیری از ارور count()
