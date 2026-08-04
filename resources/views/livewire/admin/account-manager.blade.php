@@ -57,36 +57,7 @@
                         @foreach($creators as $creator) <option value="{{ $creator->id }}" wire:key="f-crt-{{ $creator->id }}">{{ $creator->name }}</option> @endforeach
                     </select>
 
-                    <div wire:ignore x-data x-init="
-    $($refs.dateFrom).persianDatepicker({
-        format: 'YYYY/MM/DD',
-        initialValue: false,
-        autoClose: true,
-        persianDigit: false,
-        cssClass: 'persian-datepicker-cheetah',
-        onSelect: function(unix){
-            $wire.set('filterDateFrom', $refs.dateFrom.value);
-        }
-    });
-">
-                        <input x-ref="dateFrom" type="text" readonly placeholder="ثبت از تاریخ" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded-xl p-3 focus:ring-1 focus:ring-orange-500 font-mono text-center cursor-pointer">
-                    </div>
 
-
-                    <div wire:ignore x-data x-init="
-    $($refs.dateTo).persianDatepicker({
-        format: 'YYYY/MM/DD',
-        initialValue: false,
-        autoClose: true,
-        persianDigit: false,
-        cssClass: 'persian-datepicker-cheetah',
-        onSelect: function(unix){
-            $wire.set('filterDateTo', $refs.dateTo.value);
-        }
-    });
-">
-                        <input x-ref="dateTo" type="text" readonly placeholder="ثبت تا تاریخ" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded-xl p-3 focus:ring-1 focus:ring-orange-500 font-mono text-center cursor-pointer">
-                    </div>
 
                     <select wire:model.live="perPage" class="bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs rounded-xl p-3 focus:ring-1 focus:ring-orange-500 font-mono">
                         <option value="10">10 رکورد در صفحه</option>
