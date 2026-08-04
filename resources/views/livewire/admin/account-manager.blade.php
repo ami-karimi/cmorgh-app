@@ -247,8 +247,8 @@
 
                                         @if($acc->is_online)
                                             <span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> آنلاین
-        </span>
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> آنلاین
+    </span>
                                         @else
                                             <span class="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-500 border border-zinc-700 text-[9px] font-bold">آفلاین</span>
                                         @endif

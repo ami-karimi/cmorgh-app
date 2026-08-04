@@ -78,4 +78,16 @@ class Accounts extends Model
     }
 
 
+    public function getIsOnlineAttribute()
+    {
+        return \Illuminate\Support\Facades\DB::table('radacct')
+            ->where('username', $this->username)
+            ->whereNull('acctstoptime')
+            ->where(function($query) {
+
+                $query->where('acctupdatetime', '>=', now()->subMinutes(10))
+                    ->orWhere('acctstarttime', '>=', now()->subMinutes(10));
+            })
+            ->exists();
+    }
 }
