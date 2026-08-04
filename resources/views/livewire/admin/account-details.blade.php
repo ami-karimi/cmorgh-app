@@ -179,7 +179,7 @@
                             'wg_configs'      => $account->service_group === 'wireguard' ? 'لیست کانفیگ‌ها (Peers)' : null
                         ] as $tabKey => $tabLabel)
                             @if($tabLabel)
-                                <button wire:click="$set('activeTab', '{{ $tabKey }}')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap {{ $activeTab === $tabKey ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50' }}">
+                                <button wire:click="$set('activeTab', '{{ $tabKey }}')" class="cursor-pointer px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap {{ $activeTab === $tabKey ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50' }}">
                                     {{ $tabLabel }}
                                 </button>
                             @endif
@@ -218,6 +218,49 @@
                             </table>
                         </div>
                     @endif
+
+                        @if($activeTab === 'login_logs')
+                            <div class="overflow-x-auto animate-fade-in" wire:key="tab-login-logs">
+                                <table class="w-full text-right text-xs">
+                                    <thead class="bg-zinc-950/50 text-zinc-400 font-bold border-b border-zinc-800/80">
+                                    <tr>
+                                        <th class="p-4 font-medium text-center w-28">وضعیت ورود</th>
+                                        <th class="p-4 font-medium">پیام سرور (دلیل خطا)</th>
+                                        <th class="p-4 font-medium">کلمه عبور ارسالی</th>
+                                        <th class="p-4 font-medium">سرور (NAS IP)</th>
+                                        <th class="p-4 font-medium">زمان تلاش</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-zinc-800/50 text-zinc-300">
+                                    @forelse($loginLogs ?? [] as $log)
+                                        <tr class="hover:bg-zinc-800/30 transition-colors">
+                                            <td class="p-4 text-center">
+                                                @if($log->reply === 'Access-Accept')
+                                                    <span class="inline-block px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold">ورود موفق</span>
+                                                @else
+                                                    <span class="inline-block px-2.5 py-1 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-bold">رد شده</span>
+                                                @endif
+                                            </td>
+                                            <td class="p-4 text-[11px] font-medium {{ $log->reply === 'Access-Accept' ? 'text-zinc-500' : 'text-rose-300' }}" dir="ltr">
+                                                {{ $log->message ?: '---' }}
+                                            </td>
+                                            <td class="p-4 font-mono text-zinc-500 text-[11px]" dir="ltr">
+                                                {{ $log->pass ?: '---' }}
+                                            </td>
+                                            <td class="p-4 font-mono text-zinc-400 text-[11px]" dir="ltr">
+                                                {{ $log->nas_ip ?: 'نامشخص' }}
+                                            </td>
+                                            <td class="p-4 font-mono text-zinc-400 text-[11px]" dir="ltr">
+                                                {{ \Morilog\Jalali\Jalalian::forge($log->created_at)->format('Y/m/d H:i:s') }}
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="5" class="py-12 text-center text-zinc-500 font-medium">هیچ لاگ ورودی برای این کاربر در ردیوس ثبت نشده است.</td></tr>
+                                    @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
 
                     @if($activeTab === 'activities')
                         <div class="overflow-x-auto animate-fade-in" wire:key="tab-activities">

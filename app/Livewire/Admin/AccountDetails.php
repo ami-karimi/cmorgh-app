@@ -421,6 +421,16 @@ class AccountDetails extends Component
             'allWgServers'        => collect(),
         ];
 
+        $loginLogs = [];
+        if ($this->activeTab === 'login_logs') {
+            $loginLogs = \Illuminate\Support\Facades\DB::table('radpostauth')
+                ->where('username', $account->username) // پیدا کردن لاگ با یوزرنیم کاربر
+                ->orderBy('id', 'desc') // مرتب‌سازی از جدید به قدیم
+                ->limit(50) // نمایش 50 لاگ آخر
+                ->get();
+        }
+        $data['loginLogs'] = $loginLogs;
+
         if ($account->service_group === 'wireguard') {
             $data['wgConfigs'] = WireGuardUsers::where('user_id', $account->id)->get();
             $data['allWgServers'] = Nas::where('is_enabled', 1)->supportsProtocol('wireguard')->get();
