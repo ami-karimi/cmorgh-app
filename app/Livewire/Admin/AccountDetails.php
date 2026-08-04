@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
 use App\Models\Accounts;
+use App\Models\RadPostAuth;
 use App\Models\Group;
 use App\Models\Nas;
 use App\Models\WireGuardUsers;
@@ -402,13 +403,12 @@ class AccountDetails extends Component
 
         $loginLogs = null;
         if ($this->activeTab === 'login_logs') {
-            $loginLogs = \Illuminate\Support\Facades\DB::table('radpostauth')
-                ->where('username', $account->username)
+            $loginLogs = RadPostAuth::
+                where('username', $account->username)
                 ->orderBy('id', 'desc')
                 ->paginate(10, ['*'], 'loginPage');
         }
 
-        // 🟢 مقادیر پیش‌فرض ایمن برای جلوگیری از ارور count()
         $data = [
             'account'             => $account,
             'daysRemaining'       => $daysRemaining,
@@ -431,7 +431,6 @@ class AccountDetails extends Component
         ];
 
 
-        $data['loginLogs'] = $loginLogs;
 
         if ($account->service_group === 'wireguard') {
             $data['wgConfigs'] = WireGuardUsers::where('user_id', $account->id)->get();
