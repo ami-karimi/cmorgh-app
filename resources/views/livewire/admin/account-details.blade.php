@@ -259,7 +259,7 @@
                                     @endforelse
                                     </tbody>
                                 </table>
-                                @if($loginLogs)
+                                @if($loginLogs instanceof \Illuminate\Pagination\LengthAwarePaginator)
                                     <div class="p-4 bg-zinc-950/40 border-t border-zinc-800/60 mt-auto" wire:key="login-logs-pagination">
                                         {{ $loginLogs->links() }}
                                     </div>
