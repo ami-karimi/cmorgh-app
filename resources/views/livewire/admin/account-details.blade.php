@@ -206,7 +206,7 @@
                                         <td class="p-4 font-mono text-white" dir="ltr">{{ $s->callingstationid }}</td>
                                         <td class="p-4 font-mono text-zinc-400" dir="ltr">{{ $s->nasipaddress }}</td>
                                         <td class="p-4 font-mono text-zinc-400" dir="ltr">{{ \Morilog\Jalali\Jalalian::forge($s->acctstarttime)->format('Y/m/d H:i') }}</td>
-                                        <td class="p-4 font-bold text-emerald-400 font-mono" dir="ltr">{{ gmdate("H:i:s", now()->diffInSeconds(Carbon::parse($s->acctstarttime))) }}</td>
+                                        <td class="p-4 font-bold text-emerald-400 font-mono" dir="ltr">{{ gmdate("H:i:s", now()->diffInSeconds($s->acctstarttime)) }}</td>
                                         <td class="p-4 text-center">
                                             <button wire:click="killSession({{ $s->radacctid }})" class="px-3 py-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg text-[10px] font-bold transition-colors">قطع اتصال</button>
                                         </td>
