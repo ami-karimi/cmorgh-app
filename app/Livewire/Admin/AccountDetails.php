@@ -399,6 +399,13 @@ class AccountDetails extends Component
             $expireDateFormatted = Jalalian::forge($account->expire_date)->format('Y-m-d H:i:s');
         }
 
+            $loginLogs = \Illuminate\Support\Facades\DB::table('radpostauth')
+                ->where('username', $account->username) // پیدا کردن لاگ با یوزرنیم کاربر
+                ->orderBy('id', 'desc') // مرتب‌سازی از جدید به قدیم
+                ->limit(50) // نمایش 50 لاگ آخر
+                ->get();
+
+
         // 🟢 مقادیر پیش‌فرض ایمن برای جلوگیری از ارور count()
         $data = [
             'account'             => $account,
@@ -411,7 +418,7 @@ class AccountDetails extends Component
             'searchedCreators'    => $searchedCreators,
             'activeSessions'      => collect(),
             'sessionHistory'      => collect(),
-            'loginLogs'           => collect(),
+            'loginLogs'           => $loginLogs,
             'totalConnections'    => 0,
             'todayConnections'    => 0,
             'lastOnlineFormatted' => 'ثبت نشده',
@@ -421,14 +428,7 @@ class AccountDetails extends Component
             'allWgServers'        => collect(),
         ];
 
-        $loginLogs = [];
-        if ($this->activeTab === 'login_logs') {
-            $loginLogs = \Illuminate\Support\Facades\DB::table('radpostauth')
-                ->where('username', $account->username) // پیدا کردن لاگ با یوزرنیم کاربر
-                ->orderBy('id', 'desc') // مرتب‌سازی از جدید به قدیم
-                ->limit(50) // نمایش 50 لاگ آخر
-                ->get();
-        }
+
         $data['loginLogs'] = $loginLogs;
 
         if ($account->service_group === 'wireguard') {
