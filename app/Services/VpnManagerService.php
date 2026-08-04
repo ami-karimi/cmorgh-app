@@ -238,10 +238,7 @@ class VpnManagerService
             if ($creatorUser && !in_array($creatorUser->role, ['admin', 'manager'])) {
 
 
-                $agentSellPrice = DB::table('agent_plan_prices')
-                ->where('agent_id', $creatorUser->id)
-                    ->where('group_id', $group->id)
-                    ->value('selling_price');
+                $agentSellPrice = $group->getSellingPriceFor($creatorUser);
 
                 if (!is_null($agentSellPrice)) {
                     $customerPrice = $agentSellPrice;

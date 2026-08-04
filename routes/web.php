@@ -51,10 +51,7 @@ Route::middleware(['auth', 'is_reseller'])->prefix('reseller')->name('reseller.'
     Route::get('/profile', \App\Livewire\Agent\ProfileSettings::class)->name('profile.show');
     Route::get('/store-order', \App\Livewire\Agent\AgentOrdersManager::class)->name('store.orders');
     Route::get('/sub-agents', \App\Livewire\Agent\SubAgentManager::class)->name('sub-agents');
-
-
     Route::get('/account/create/{customer_id?}', \App\Livewire\Agent\AccountCreate::class)->name('accounts.create');
-
     Route::get('/users/{id}', \App\Livewire\Agent\UserDetails::class)->name('users.show');
     Route::get('/account/{id}', \App\Livewire\Agent\AccountDetail::class)->name('accounts.show');
 });
@@ -62,36 +59,21 @@ Route::middleware(['auth', 'is_reseller'])->prefix('reseller')->name('reseller.'
 
 Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/',\App\Livewire\Admin\Dashboard::class)->name('dashboard');
-
-
     Route::get('/tutorial', \App\Livewire\Admin\TutorialManager::class)->name('tutorial');
-
-
     Route::get('/store-orders', \App\Livewire\Admin\StoreOrdersManager::class)->name('store.orders');
-
     Route::get('/managers/list',\App\Livewire\Admin\ManagerList::class)->name('managers.list');
     Route::get('/managers/{manager}/edit', \App\Livewire\Admin\ManagerEdit::class)->name('managers.edit');
-
-// مدیریت اطلاعیه‌ها
     Route::get('/announcements', \App\Livewire\Admin\AnnouncementsManager::class)->name('announcements');
     Route::get('/financial-transactions', \App\Livewire\Admin\AdminFinancialManager::class)->name('financial');
     Route::get('/payment-methods', \App\Livewire\Admin\AdminPaymentMethods::class)->name('payment.methods');
-    // مانیتورینگ وضعیت سرورها
     Route::get('/system-monitor', \App\Livewire\Admin\SystemMonitor::class)->name('system.monitor');
-    //
     Route::get('/charge/list',\App\Livewire\Admin\ChargeManager::class)->name('charge.list');
     Route::get('/nas/list',\App\Livewire\Admin\ServerManager::class)->name('nas.list');
     Route::get('/groups/list',\App\Livewire\Admin\GroupManager::class)->name('groups.list');
-
-
-
     Route::get('/accounts/list',\App\Livewire\Admin\AccountManager::class)->name('accounts.list');
     Route::get('/accounts/activity',\App\Livewire\Admin\ActivityLogManager::class)->name('accounts.logs');
     Route::get('/accounts/create',\App\Livewire\Admin\AccountCreate::class)->name('accounts.create');
     Route::get('/accounts/{id}',\App\Livewire\Admin\AccountDetails::class)->name('accounts.show');
-
-
-    //
     Route::get('/users',\App\Livewire\Admin\UserManager::class)->name('users.index');
     Route::get('/users/{id}',\App\Livewire\Admin\UserDetails::class)->name('users.show');
 

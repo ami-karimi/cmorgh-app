@@ -2,6 +2,7 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
 
+
         <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-5 shadow-lg relative overflow-hidden flex items-center justify-between">
             <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl"></div>
             <div class="relative z-10">
@@ -52,6 +53,71 @@
         </div>
 
     </div>
+
+    <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-4 border-b border-zinc-800/80 pb-3">
+            <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                دسترسی و میانبرهای سریع
+            </h3>
+            <span class="text-[10px] text-zinc-500 font-mono">Quick Navigation</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+
+            <a href="{{ route('admin.accounts.create') ?? '#' }}" wire:navigate
+               class="p-3.5 bg-zinc-950/60 hover:bg-orange-500/10 border border-zinc-800/80 hover:border-orange-500/30 rounded-2xl transition-all group flex flex-col items-center text-center gap-2.5">
+                <div class="w-10 h-10 bg-orange-500/10 group-hover:bg-orange-500 text-orange-500 group-hover:text-white rounded-xl flex items-center justify-center transition-colors shadow-inner">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </div>
+                <span class="text-xs font-bold text-zinc-300 group-hover:text-orange-400 transition-colors">ایجاد اکانت جدید</span>
+            </a>
+
+            <a href="{{ route('admin.accounts.list') ?? '#' }}" wire:navigate
+               class="p-3.5 bg-zinc-950/60 hover:bg-blue-500/10 border border-zinc-800/80 hover:border-blue-500/30 rounded-2xl transition-all group flex flex-col items-center text-center gap-2.5">
+                <div class="w-10 h-10 bg-blue-500/10 group-hover:bg-blue-500 text-blue-500 group-hover:text-white rounded-xl flex items-center justify-center transition-colors shadow-inner">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                </div>
+                <span class="text-xs font-bold text-zinc-300 group-hover:text-blue-400 transition-colors">لیست اکانت ها</span>
+            </a>
+
+            <a href="{{ route('admin.managers.list') ?? '#' }}" wire:navigate
+               class="p-3.5 bg-zinc-950/60 hover:bg-purple-500/10 border border-zinc-800/80 hover:border-purple-500/30 rounded-2xl transition-all group flex flex-col items-center text-center gap-2.5">
+                <div class="w-10 h-10 bg-purple-500/10 group-hover:bg-purple-500 text-purple-500 group-hover:text-white rounded-xl flex items-center justify-center transition-colors shadow-inner">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </div>
+                <span class="text-xs font-bold text-zinc-300 group-hover:text-purple-400 transition-colors">مدیریت نمایندگان</span>
+            </a>
+
+            <a href="{{ route('admin.announcements') ?? '#' }}" wire:navigate
+               class="p-3.5 bg-zinc-950/60 hover:bg-amber-500/10 border border-zinc-800/80 hover:border-amber-500/30 rounded-2xl transition-all group flex flex-col items-center text-center gap-2.5">
+                <div class="w-10 h-10 bg-amber-500/10 group-hover:bg-amber-500 text-amber-500 group-hover:text-white rounded-xl flex items-center justify-center transition-colors shadow-inner">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
+                </div>
+                <span class="text-xs font-bold text-zinc-300 group-hover:text-amber-400 transition-colors">ثبت اطلاعیه جدید</span>
+            </a>
+
+            <a href="{{ route('admin.financial') ?? '#' }}" wire:navigate
+               class="p-3.5 bg-zinc-950/60 hover:bg-emerald-500/10 border border-zinc-800/80 hover:border-emerald-500/30 rounded-2xl transition-all group flex flex-col items-center text-center gap-2.5">
+                <div class="w-10 h-10 bg-emerald-500/10 group-hover:bg-emerald-500 text-emerald-500 group-hover:text-white rounded-xl flex items-center justify-center transition-colors shadow-inner">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                </div>
+                <span class="text-xs font-bold text-zinc-300 group-hover:text-emerald-400 transition-colors">لیست تراکنش‌ها</span>
+            </a>
+
+            <a href="{{ route('admin.accounts.logs') ?? '#' }}" wire:navigate
+               class="p-3.5 bg-zinc-950/60 hover:bg-rose-500/10 border border-zinc-800/80 hover:border-rose-500/30 rounded-2xl transition-all group flex flex-col items-center text-center gap-2.5">
+                <div class="w-10 h-10 bg-rose-500/10 group-hover:bg-rose-500 text-rose-500 group-hover:text-white rounded-xl flex items-center justify-center transition-colors shadow-inner">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <span class="text-xs font-bold text-zinc-300 group-hover:text-rose-400 transition-colors">لیست رخدادها</span>
+            </a>
+
+        </div>
+    </div>
+
 
     <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-5 md:p-6 shadow-xl">
         <div class="flex items-center justify-between mb-6">

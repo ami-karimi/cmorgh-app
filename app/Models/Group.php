@@ -36,7 +36,7 @@ class Group extends Model
         $currentPrice = $basePrice;
 
         foreach ($chain as $index => $node) {
-            if ($index === 0 && !in_array($node->role, ['sub_agent', 'customer', 'user'])) {
+            if ($index === 0 && !in_array($node->role, ['customer', 'user'])) {
                 $discountPercent = $node->discount_percent ?? 0;
                 if ($discountPercent > 0) {
                     $currentPrice = $currentPrice - ($currentPrice * $discountPercent / 100);
