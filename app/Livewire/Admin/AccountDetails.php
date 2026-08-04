@@ -402,7 +402,7 @@ class AccountDetails extends Component
         $loginLogs = null;
         if ($this->activeTab === 'login_logs') {
             $loginLogs = \Illuminate\Support\Facades\DB::table('radpostauth')
-                ->where('username', $this->account->username)
+                ->where('username', $account->username)
                 ->orderBy('id', 'desc')
                 ->paginate(15, ['*'], 'loginPage'); // 👈 نمایش 15 رکورد در هر صفحه
         }
