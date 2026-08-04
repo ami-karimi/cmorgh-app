@@ -361,6 +361,11 @@ class AccountDetails extends Component
         }
     }
 
+    public function updatedActiveTab()
+    {
+        $this->resetPage();
+    }
+
     public function killSession($sessionId)
     {
         DB::table('radacct')->where('radacctid', $sessionId)->update(['acctstoptime' => now(), 'acctterminatecause' => 'Admin-Kill']);
@@ -406,7 +411,7 @@ class AccountDetails extends Component
             $loginLogs = RadPostAuth::
                 where('username', $account->username)
                 ->orderBy('id', 'desc')
-                ->latest('created_at')->take(10)->get();
+                ->paginate(10);
         }
 
         $data = [

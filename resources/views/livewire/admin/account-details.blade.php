@@ -259,9 +259,8 @@
                                     @endforelse
                                     </tbody>
                                 </table>
-
-                                @if(isset($loginLogs) && method_exists($loginLogs, 'hasPages') && $loginLogs->hasPages())
-                                    <div class="p-4 bg-zinc-950/40 border-t border-zinc-800/60 mt-auto">
+                                @if($loginLogs)
+                                    <div class="p-4 bg-zinc-950/40 border-t border-zinc-800/60 mt-auto" wire:key="login-logs-pagination">
                                         {{ $loginLogs->links() }}
                                     </div>
                                 @endif
