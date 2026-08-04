@@ -260,7 +260,7 @@
                                     </tbody>
                                 </table>
 
-                                @if($loginLogs && $loginLogs->hasPages())
+                                @if(isset($loginLogs) && method_exists($loginLogs, 'hasPages') && $loginLogs->hasPages())
                                     <div class="p-4 bg-zinc-950/40 border-t border-zinc-800/60 mt-auto">
                                         {{ $loginLogs->links() }}
                                     </div>
