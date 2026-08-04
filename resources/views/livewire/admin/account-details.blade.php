@@ -25,7 +25,7 @@
             <div class="flex flex-wrap items-center gap-3">
                 <button wire:click="toggleStatus" wire:loading.attr="disabled" class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center gap-2 {{ $account->is_enabled ? 'bg-zinc-950 text-rose-400 hover:bg-rose-500/10 border border-rose-500/20' : 'bg-zinc-950 text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20' }}">
                     <svg wire:loading wire:target="toggleStatus" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"></path></svg>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                    <svg wire:loading.remove wire:target="toggleStatus" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
                     {{ $account->is_enabled ? 'مسدودسازی' : 'فعال‌سازی' }}
                 </button>
 
@@ -169,7 +169,7 @@
                     $isRadiusService = in_array($account->service_group, ['l2tp_cisco', 'l2tp', 'openvpn']);
                 @endphp
 
-                <div class="p-2 border-b border-zinc-800/60 bg-zinc-950/30 overflow-x-auto">
+                <div class="p-2 border-b border-zinc-800/60 bg-zinc-950/30 overflow-x-auto relative">
                     <div class="flex gap-1 min-w-max">
                         @foreach([
                             'active_sessions' => $isRadiusService ? 'نشست‌های فعال (' . count($activeSessions ?? []) . ')' : null,
@@ -179,7 +179,7 @@
                             'wg_configs'      => $account->service_group === 'wireguard' ? 'لیست کانفیگ‌ها (Peers)' : null
                         ] as $tabKey => $tabLabel)
                             @if($tabLabel)
-                                <button wire:click="$set('activeTab', '{{ $tabKey }}')" class="cursor-pointer px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap {{ $activeTab === $tabKey ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50' }}">
+                                <button wire:click="$set('activeTab', '{{ $tabKey }}')" wire:loading.attr="disabled" class="cursor-pointer px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap {{ $activeTab === $tabKey ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50' }}">
                                     {{ $tabLabel }}
                                 </button>
                             @endif
@@ -187,7 +187,14 @@
                     </div>
                 </div>
 
-                <div class="p-0">
+                <div class="p-0 relative min-h-[300px]">
+                    <div wire:loading wire:target="activeTab, $set('activeTab')" class="absolute inset-0 z-50 flex items-center justify-center bg-zinc-950/50 backdrop-blur-sm transition-all rounded-b-[2rem]">
+                        <div class="flex items-center gap-3 px-5 py-3 bg-zinc-900 border border-zinc-700/50 text-white rounded-2xl shadow-2xl">
+                            <svg class="w-5 h-5 animate-spin text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"></path></svg>
+                            <span class="text-sm font-bold">درحال بارگذاری اطلاعات...</span>
+                        </div>
+                    </div>
+
                     @if($activeTab === 'active_sessions')
                         <div class="overflow-x-auto animate-fade-in" wire:key="tab-active-sessions">
                             <table class="w-full text-right text-xs">
@@ -219,53 +226,53 @@
                         </div>
                     @endif
 
-                        @if($activeTab === 'login_logs')
-                            <div class="overflow-x-auto animate-fade-in flex flex-col" wire:key="tab-login-logs">
-                                <table class="w-full text-right text-xs">
-                                    <thead class="bg-zinc-950/50 text-zinc-400 font-bold border-b border-zinc-800/80">
-                                    <tr>
-                                        <th class="p-4 font-medium text-center w-28">وضعیت ورود</th>
-                                        <th class="p-4 font-medium">پیام سرور (دلیل خطا)</th>
-                                        <th class="p-4 font-medium">کلمه عبور ارسالی</th>
-                                        <th class="p-4 font-medium">سرور (NAS IP)</th>
-                                        <th class="p-4 font-medium">زمان تلاش</th>
+                    @if($activeTab === 'login_logs')
+                        <div class="overflow-x-auto animate-fade-in flex flex-col" wire:key="tab-login-logs">
+                            <table class="w-full text-right text-xs">
+                                <thead class="bg-zinc-950/50 text-zinc-400 font-bold border-b border-zinc-800/80">
+                                <tr>
+                                    <th class="p-4 font-medium text-center w-28">وضعیت ورود</th>
+                                    <th class="p-4 font-medium">پیام سرور (دلیل خطا)</th>
+                                    <th class="p-4 font-medium">کلمه عبور ارسالی</th>
+                                    <th class="p-4 font-medium">سرور (NAS IP)</th>
+                                    <th class="p-4 font-medium">زمان تلاش</th>
+                                </tr>
+                                </thead>
+                                <tbody class="divide-y divide-zinc-800/50 text-zinc-300">
+                                @forelse($loginLogs ?? [] as $log)
+                                    <tr class="hover:bg-zinc-800/30 transition-colors">
+                                        <td class="p-4 text-center">
+                                            @if($log->reply === 'Access-Accept')
+                                                <span class="inline-block px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold">ورود موفق</span>
+                                            @else
+                                                <span class="inline-block px-2.5 py-1 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-bold">رد شده</span>
+                                            @endif
+                                        </td>
+                                        <td class="p-4 text-[11px] font-medium {{ $log->reply === 'Access-Accept' ? 'text-zinc-500' : 'text-rose-300' }}" dir="ltr">
+                                            {{ $log->message ?: '---' }}
+                                        </td>
+                                        <td class="p-4 font-mono text-zinc-500 text-[11px]" dir="ltr">
+                                            {{ $log->pass ?: '---' }}
+                                        </td>
+                                        <td class="p-4 font-mono text-zinc-400 text-[11px]" dir="ltr">
+                                            {{ $log->nas_ip ?: 'نامشخص' }}
+                                        </td>
+                                        <td class="p-4 font-mono text-zinc-400 text-[11px]" dir="ltr">
+                                            {{ \Morilog\Jalali\Jalalian::forge($log->created_at)->format('Y/m/d H:i:s') }}
+                                        </td>
                                     </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-zinc-800/50 text-zinc-300">
-                                    @forelse($loginLogs ?? [] as $log)
-                                        <tr class="hover:bg-zinc-800/30 transition-colors">
-                                            <td class="p-4 text-center">
-                                                @if($log->reply === 'Access-Accept')
-                                                    <span class="inline-block px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold">ورود موفق</span>
-                                                @else
-                                                    <span class="inline-block px-2.5 py-1 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-bold">رد شده</span>
-                                                @endif
-                                            </td>
-                                            <td class="p-4 text-[11px] font-medium {{ $log->reply === 'Access-Accept' ? 'text-zinc-500' : 'text-rose-300' }}" dir="ltr">
-                                                {{ $log->message ?: '---' }}
-                                            </td>
-                                            <td class="p-4 font-mono text-zinc-500 text-[11px]" dir="ltr">
-                                                {{ $log->pass ?: '---' }}
-                                            </td>
-                                            <td class="p-4 font-mono text-zinc-400 text-[11px]" dir="ltr">
-                                                {{ $log->nas_ip ?: 'نامشخص' }}
-                                            </td>
-                                            <td class="p-4 font-mono text-zinc-400 text-[11px]" dir="ltr">
-                                                {{ \Morilog\Jalali\Jalalian::forge($log->created_at)->format('Y/m/d H:i:s') }}
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr><td colspan="5" class="py-12 text-center text-zinc-500 font-medium">هیچ لاگ ورودی برای این کاربر در ردیوس ثبت نشده است.</td></tr>
-                                    @endforelse
-                                    </tbody>
-                                </table>
-                                @if($loginLogs instanceof \Illuminate\Pagination\LengthAwarePaginator)
-                                    <div class="p-4 bg-zinc-950/40 border-t border-zinc-800/60 mt-auto" wire:key="login-logs-pagination">
-                                        {{ $loginLogs->links() }}
-                                    </div>
-                                @endif
-                            </div>
-                        @endif
+                                @empty
+                                    <tr><td colspan="5" class="py-12 text-center text-zinc-500 font-medium">هیچ لاگ ورودی برای این کاربر در ردیوس ثبت نشده است.</td></tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                            @if($loginLogs instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                                <div class="p-4 bg-zinc-950/40 border-t border-zinc-800/60 mt-auto" wire:key="login-logs-pagination">
+                                    {{ $loginLogs->links() }}
+                                </div>
+                            @endif
+                        </div>
+                    @endif
 
                     @if($activeTab === 'activities')
                         <div class="overflow-x-auto animate-fade-in" wire:key="tab-activities">
@@ -408,14 +415,55 @@
                     <div>
                         <span class="text-xs font-bold text-orange-400/80">اعتبار باقیمانده سرویس</span>
                         <div class="flex items-baseline gap-1 mt-0.5">
-                            <span class="text-3xl font-black text-white font-mono">{{ $daysRemaining }}</span>
-                            <span class="text-sm text-orange-200">روز</span>
+                            @if($account->expired || ($account->expire_date && $daysRemaining <= 0))
+                                <span class="text-2xl font-black text-rose-500 font-mono animate-pulse">منقضی شده</span>
+                            @elseif(!$account->expire_date)
+                                <span class="text-2xl font-black text-white font-mono">بدون انقضا</span>
+                            @else
+                                <span class="text-3xl font-black text-white font-mono">{{ $daysRemaining }}</span>
+                                <span class="text-sm text-orange-200">روز</span>
+                            @endif
                         </div>
                     </div>
                 </div>
                 <div class="text-[11px] font-bold text-orange-300 bg-orange-500/10 px-3 py-2 rounded-xl border border-orange-500/20 relative z-10" dir="ltr">انقضا: {{ $expireDateFormatted }}</div>
                 <svg class="absolute -bottom-4 -right-4 w-32 h-32 text-orange-500/10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"></path></svg>
             </div>
+
+            @if($account->max_usage > 0)
+                @php
+                    $usage = $account->usage ?? 0;
+                    $maxUsage = $account->max_usage;
+                    $usagePercent = min(100, round(($usage / $maxUsage) * 100, 1));
+                    $volTextColor = $usagePercent >= 90 ? 'text-rose-400' : ($usagePercent >= 75 ? 'text-amber-400' : 'text-blue-400');
+                    $volBgColor   = $usagePercent >= 90 ? 'bg-rose-500 shadow-rose-500/50' : ($usagePercent >= 75 ? 'bg-amber-500 shadow-amber-500/50' : 'bg-blue-500 shadow-blue-500/50');
+                @endphp
+                <div class="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border border-blue-500/20 rounded-[2rem] p-6 shadow-lg shadow-blue-500/5 relative overflow-hidden">
+                    <div class="flex items-center gap-4 mb-4 relative z-10">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center text-blue-400 border border-blue-500/30">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-blue-400/80">ترافیک باقیمانده حساب</span>
+                            <div class="flex items-baseline gap-1 mt-0.5">
+                                <span class="text-2xl font-black {{ $volTextColor }} font-mono" dir="ltr">{{ $account->formatBytes(max(0, $maxUsage - $usage)) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative z-10">
+                        <div class="flex justify-between text-[11px] font-bold text-zinc-400 mb-2">
+                            <span>مصرف: <span dir="ltr">{{ $account->formatBytes($usage) }}</span></span>
+                            <span>سقف: <span dir="ltr">{{ $account->formatBytes($maxUsage) }}</span></span>
+                        </div>
+                        <div class="w-full bg-zinc-950/60 rounded-full h-2 border border-zinc-800/50 overflow-hidden">
+                            <div class="{{ $volBgColor }} h-full rounded-full transition-all duration-1000 shadow-lg" style="width: {{ $usagePercent }}%"></div>
+                        </div>
+                    </div>
+
+                    <svg class="absolute -top-4 -left-4 w-32 h-32 text-blue-500/5 rotate-180" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"></path></svg>
+                </div>
+            @endif
 
             <div class="bg-zinc-900/50 border border-zinc-800/60 rounded-[2rem] p-6 shadow-xl relative">
                 <div class="flex items-center gap-3 mb-6">
@@ -788,10 +836,4 @@
         </div>
     @endif
 
-
 </div>
-
-
-
-
-
