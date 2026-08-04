@@ -399,12 +399,13 @@ class AccountDetails extends Component
             $expireDateFormatted = Jalalian::forge($account->expire_date)->format('Y-m-d H:i:s');
         }
 
+        $loginLogs = null;
+        if ($this->activeTab === 'login_logs') {
             $loginLogs = \Illuminate\Support\Facades\DB::table('radpostauth')
-                ->where('username', $account->username) // پیدا کردن لاگ با یوزرنیم کاربر
-                ->orderBy('id', 'desc') // مرتب‌سازی از جدید به قدیم
-                ->limit(50) // نمایش 50 لاگ آخر
-                ->get();
-
+                ->where('username', $this->account->username)
+                ->orderBy('id', 'desc')
+                ->paginate(15, ['*'], 'loginPage'); // 👈 نمایش 15 رکورد در هر صفحه
+        }
 
         // 🟢 مقادیر پیش‌فرض ایمن برای جلوگیری از ارور count()
         $data = [

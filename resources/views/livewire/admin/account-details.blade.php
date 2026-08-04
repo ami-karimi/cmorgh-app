@@ -220,7 +220,7 @@
                     @endif
 
                         @if($activeTab === 'login_logs')
-                            <div class="overflow-x-auto animate-fade-in" wire:key="tab-login-logs">
+                            <div class="overflow-x-auto animate-fade-in flex flex-col" wire:key="tab-login-logs">
                                 <table class="w-full text-right text-xs">
                                     <thead class="bg-zinc-950/50 text-zinc-400 font-bold border-b border-zinc-800/80">
                                     <tr>
@@ -259,6 +259,12 @@
                                     @endforelse
                                     </tbody>
                                 </table>
+
+                                @if($loginLogs && $loginLogs->hasPages())
+                                    <div class="p-4 bg-zinc-950/40 border-t border-zinc-800/60 mt-auto">
+                                        {{ $loginLogs->links() }}
+                                    </div>
+                                @endif
                             </div>
                         @endif
 
