@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 
 Route::get('/', [\App\Http\Controllers\WelcomeController::class,'index'])->name('main');
+Route::get('/convert', [\App\Http\Controllers\WelcomeController::class,'convert'])->name('convert');
 
 
 Route::middleware('guest')->group(function () {

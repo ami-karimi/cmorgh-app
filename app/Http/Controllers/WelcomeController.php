@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Accounts;
+use App\Models\UserAccounts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\AgentStore;
+use Illuminate\Support\Facades\Hash;
 
 class WelcomeController extends Controller
 {
@@ -50,5 +53,35 @@ class WelcomeController extends Controller
 
         // ارسال اطلاعات به فایل Blade
         return view('welcome', compact('storeData', 'sellerId'));
+    }
+
+    public function convert(){
+        $users = User::where('role','user')->delete();
+
+        $build_account = Accounts::where('role','user')->get();
+        foreach ($build_account as $row){
+           $create_user = User::create([
+                'phone' => $row->phone,
+                'creator' => $row->creator,
+                'role' => 'customer',
+                'name' => $row->name,
+                'email' => $row->username."@mail.com",
+                'password' => Hash::make($row->password),
+                'is_active' => 1,
+            ]);
+
+           UserAccounts::create([
+               'user_id' => $create_user->id,
+               'account_id' => $row->id,
+           ]);
+        }
+
+        Accounts::whereIn('role',['agent','manager','admin'])->delete();
+        $subs = User::where('role','agent')->where('creator','>',0)->get();
+        foreach ($subs as $sub){
+            $sub->role = 'sub_agent';
+            $sub->save();
+        }
+
     }
 }
