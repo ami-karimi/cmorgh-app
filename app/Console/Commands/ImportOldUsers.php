@@ -31,7 +31,7 @@ class ImportOldUsers extends Command
 
                 foreach ($build_account as $row) {
                     $create_user = User::create([
-                        'phone' => $row->phone ?: null,
+                        'phone' => $row->phone ?: '',
                         'creator' => $row->creator,
                         'role' => 'customer',
                         'name' => $row->name ?: $row->username,
