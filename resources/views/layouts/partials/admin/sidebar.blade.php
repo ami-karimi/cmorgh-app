@@ -11,14 +11,22 @@
     <div class="h-24 flex items-center justify-center border-b border-zinc-800/80 px-8 relative overflow-hidden flex-shrink-0">
         <div class="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-500/10 opacity-50"></div>
         <div class="flex items-center gap-3 relative z-10 w-full">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-orange-500/20 overflow-hidden shrink-0">
+                @if(setting('SITE_LOGO'))
+                    <img src="{{ setting('SITE_LOGO') }}" alt="{{ setting('SITE_TITLE', 'پنل ادمین') }}" class="w-full h-full object-cover">
+                @else
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                @endif
             </div>
-            <div>
-                <h1 class="text-xl font-black text-white tracking-widest">سیمرغ</h1>
-                <span class="text-xs text-orange-500 font-bold tracking-widest uppercase">Admin Core</span>
+
+            <div class="flex flex-col justify-center">
+                <h1 class="text-xl font-black text-white tracking-tight truncate max-w-[180px]">
+                    {{ setting('SITE_TITLE', 'همراه سیمرغ') }}
+                </h1>
+                <span class="text-[10px] text-orange-500 font-bold tracking-widest uppercase mt-0.5">Admin Core</span>
             </div>
         </div>
+
         <button @click="sidebarOpen = false" class="lg:hidden absolute left-4 text-zinc-400 hover:text-white focus:outline-none">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
@@ -183,7 +191,7 @@
         </div>
 
         <!-- مدیریت سایت -->
-        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100 transition-all">
+        <a href="{{route('admin.settings')}}" wire:navigate class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100 transition-all">
             <svg class="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
             <span class="font-medium text-sm">مدیریت سایت</span>
         </a>

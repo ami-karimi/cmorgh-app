@@ -16,7 +16,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        if (file_exists(app_path('Helper/Helper.php'))) {
+            require_once app_path('Helper/Helper.php');
+        }
     }
 
     /**
@@ -44,8 +46,8 @@ class AppServiceProvider extends ServiceProvider
                 $brand_name = $agent->brand_name ?? 'پنل کاربری';
                 $brand_logo = $agent->brand_logo ? asset('storage/' . $agent->brand_logo) : null;
             } else {
-                $brand_name = 'سیمرغ پرو';
-                $brand_logo = null;
+                $brand_name = setting('SITE_TITLE', 'همراه سیمرغ');
+                $brand_logo = setting('SITE_LOGO');
             }
 
             // ارسال متغیرها به فایل Blade
@@ -71,8 +73,8 @@ class AppServiceProvider extends ServiceProvider
                 $brand_name = $agent->brand_name ?? 'پنل کاربری';
                 $brand_logo = $agent->brand_logo ? asset('storage/' . $agent->brand_logo) : null;
             } else {
-                $brand_name = 'سیمرغ پرو';
-                $brand_logo = null;
+                $brand_name = setting('SITE_TITLE', 'همراه سیمرغ');
+                $brand_logo = setting('SITE_LOGO');
             }
 
             // ارسال متغیرها به فایل Blade
@@ -99,8 +101,8 @@ class AppServiceProvider extends ServiceProvider
                 $brand_name = $agent->brand_name ?? 'پنل کاربری';
                 $brand_logo = $agent->brand_logo ? asset('storage/' . $agent->brand_logo) : null;
             } else {
-                $brand_name = 'سیمرغ پرو';
-                $brand_logo = null;
+                $brand_name = setting('SITE_TITLE', 'همراه سیمرغ');
+                $brand_logo = setting('SITE_LOGO');
             }
 
             // ارسال متغیرها به فایل Blade

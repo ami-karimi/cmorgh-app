@@ -56,9 +56,9 @@ class Storefront extends Component
             }
         } else {
             $this->storeData = [
-                'brand_name' => 'سیمرغ پرو',
-                'logo' => null,
-                'support_link' => '#',
+                'brand_name' => setting('SITE_TITLE', 'همراه سیمرغ'),
+                'logo' => setting('SITE_LOGO'),
+                'support_link' =>  setting('TELEGRAM_SUPPORT'),
                 'description' => 'پلتفرم جامع مدیریت و فروش سرویس اینترنت آزاد',
             ];
             $mng= User::where('role','manager')->first();

@@ -5,9 +5,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [\App\Http\Controllers\WelcomeController::class,'index'])->name('main');
+
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', \App\Livewire\Auth\Login::class)->name('login');
@@ -84,6 +83,7 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     Route::get('/accounts/create',\App\Livewire\Admin\AccountCreate::class)->name('accounts.create');
     Route::get('/accounts/{id}',\App\Livewire\Admin\AccountDetails::class)->name('accounts.show');
     Route::get('/users',\App\Livewire\Admin\UserManager::class)->name('users.index');
+    Route::get('/settings',\App\Livewire\Admin\SiteSettings::class)->name('settings');
     Route::get('/users/{id}',\App\Livewire\Admin\UserDetails::class)->name('users.show');
 
 });

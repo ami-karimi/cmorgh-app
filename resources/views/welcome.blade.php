@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>همراه سیمرغ ایران | پرواز بدون محدودیت در دنیای آزاد</title>
+    <title>{{ $storeData['brand_name'] }} | {{ $storeData['description'] }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -21,12 +21,18 @@
 <nav class="fixed w-full z-50 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-900 transition-all shadow-sm">
     <div class="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
         <div class="flex items-center gap-2 sm:gap-3">
-            <svg class="w-7 h-7 sm:w-9 sm:h-9 text-orange-500 animate-pulse shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2L2 22l10-6 10 6L12 2z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V9"></path>
-            </svg>
-            <div class="text-base sm:text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-l from-orange-400 to-red-500 truncate">
-                همراه سیمرغ
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-orange-500/10 flex items-center justify-center overflow-hidden shrink-0">
+                @if($storeData['logo'])
+                    <img src="{{ $storeData['logo'] }}" alt="{{ $storeData['brand_name'] }}" class="w-full h-full object-cover">
+                @else
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-orange-500 animate-pulse" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 2L2 22l10-6 10 6L12 2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V9"></path>
+                    </svg>
+                @endif
+            </div>
+            <div class="text-base sm:text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-l from-orange-400 to-red-500 truncate max-w-[150px] sm:max-w-[250px]">
+                {{ $storeData['brand_name'] }}
             </div>
         </div>
 
@@ -59,12 +65,13 @@
         </div>
 
         <h1 class="text-3xl sm:text-5xl md:text-7xl font-black mb-6 sm:mb-8 leading-[1.3] md:leading-[1.2] text-zinc-100">
-            عبور از محدودیت‌ها،<br class="sm:hidden"> با بال‌های <span class="text-transparent bg-clip-text bg-gradient-to-l from-orange-400 to-red-500">سیمرغ</span>
+            عبور از محدودیت‌ها،<br class="sm:hidden"> با شبکه قدرتمند <span class="text-transparent bg-clip-text bg-gradient-to-l from-orange-400 to-red-500">{{ $storeData['brand_name'] }}</span>
         </h1>
 
         <p class="text-sm sm:text-base md:text-xl text-zinc-400 mb-10 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-2">
-            شبکه خصوصی و فوق‌العاده پایدار <span class="text-zinc-200 font-bold">همراه سیمرغ ایران</span> با روتینگ پیشرفته، امن‌ترین کانال ارتباطی را برای وب‌گردی، استریم 4K و پینگ طلایی فراهم می‌سازد.
+            شبکه خصوصی و فوق‌العاده پایدار <span class="text-zinc-200 font-bold">{{ $storeData['brand_name'] }}</span> با روتینگ پیشرفته، امن‌ترین کانال ارتباطی را برای وب‌گردی، استریم 4K و پینگ طلایی فراهم می‌سازد.
         </p>
+
 
         <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4 sm:px-0">
             <a href="#pricing" class="w-full sm:w-auto px-6 py-3.5 sm:px-8 sm:py-4 text-sm sm:text-base font-bold bg-zinc-100 text-zinc-950 hover:bg-white rounded-full transition shadow-[0_0_20px_rgba(249,115,22,0.2)] text-center">
@@ -121,10 +128,10 @@
 <footer class="bg-zinc-950 border-t border-zinc-900 py-8 sm:py-12">
     <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
         <div class="flex items-center text-center sm:text-right">
-            <span class="text-zinc-500 text-xs sm:text-sm">© ۲۰۲۶ تمامی حقوق برای <strong>همراه سیمرغ</strong> محفوظ است.</span>
+            <span class="text-zinc-500 text-xs sm:text-sm">© ۲۰۲۶ تمامی حقوق برای <strong>{{ $storeData['brand_name'] }}</strong> محفوظ است.</span>
         </div>
         <div class="flex gap-6 text-zinc-400 text-xs sm:text-sm font-medium">
-            <a href="#" class="hover:text-orange-400 transition">پشتیبانی تلگرام</a>
+            <a href="{{ $storeData['support_link'] }}" target="_blank" class="hover:text-orange-400 transition">پشتیبانی تلگرام</a>
             <a href="#" class="hover:text-orange-400 transition">قوانین و مقررات</a>
         </div>
     </div>
