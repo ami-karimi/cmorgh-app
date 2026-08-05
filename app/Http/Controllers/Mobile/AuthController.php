@@ -19,7 +19,7 @@ class AuthController extends Controller
 
     public $panel_link = 'https://www.arta20.top/t/';
 
-    public function formatBytes(int $size,int $format = 2, int $precision = 2) : string
+    public function formatBytes( $size, $format = 2,  $precision = 2)
     {
         $base = log($size, 1024);
 
