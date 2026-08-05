@@ -61,9 +61,16 @@ class WelcomeController extends Controller
 
         User::where('role','user')->delete();
 
+        $subs = User::where('role','agent')->where('creator','>',0)->get();
+        foreach ($subs as $sub){
+            $sub->role = 'sub_agent';
+            $sub->save();
+        }
+
         $build_account = Accounts::where('role','user')->get();
         foreach ($build_account as $row){
-
+            $find = User::where('email',$row->username."@mail.com")->first();
+            if(!$find){
            $create_user = User::create([
                 'phone' => ($row->phone ? $row->phone : ''),
                 'creator' => $row->creator,
@@ -77,15 +84,11 @@ class WelcomeController extends Controller
            UserAccounts::create([
                'user_id' => $create_user->id,
                'account_id' => $row->id,
-           ]);
+               ]);
+            }
         }
 
-        Accounts::whereIn('role',['agent','manager','admin'])->delete();
-        $subs = User::where('role','agent')->where('creator','>',0)->get();
-        foreach ($subs as $sub){
-            $sub->role = 'sub_agent';
-            $sub->save();
-        }
+
 
     }
 }
