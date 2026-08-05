@@ -97,4 +97,4 @@ Route::prefix('api')->group(function () {
         Route::get('/get-ip', [\App\Http\Controllers\Mobile\AuthController::class, 'get_ip'])->name('get_ip');
 
     });
-})
+});
