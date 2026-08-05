@@ -14,6 +14,7 @@ use App\Services\AccountProvisioningService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Accounts;
+use Illuminate\Support\Str;
 #[Title('صدور اکانت جدید | همراه سیمرغ')]
 #[Layout('layouts.admin')]
 
