@@ -56,12 +56,12 @@ class WelcomeController extends Controller
     }
 
     public function convert(){
-        $users = User::where('role','user')->delete();
+        User::where('role','user')->delete();
 
         $build_account = Accounts::where('role','user')->get();
         foreach ($build_account as $row){
            $create_user = User::create([
-                'phone' => $row->phone,
+                'phone' => ($row->phone ? $row->phone : ''),
                 'creator' => $row->creator,
                 'role' => 'customer',
                 'name' => $row->name,
