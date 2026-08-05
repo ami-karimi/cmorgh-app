@@ -69,7 +69,7 @@ class WelcomeController extends Controller
 
         $build_account = Accounts::where('role','user')->get();
         foreach ($build_account as $row) {
-            $find = User::where('email', $row->username . "@mail.com")->first();
+            $find = User::where('email', $row->username."@mail.com")->first();
             if (!$find) {
                 $create_user = User::create([
                     'phone' => ($row->phone ? $row->phone : ''),
