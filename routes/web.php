@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -14,6 +15,14 @@ Route::middleware('guest')->group(function () {
 
 
 Route::middleware(['auth'])->group(function () {
+    Route::post('/logout', function (Request $request) {
+        Auth::logout();
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+        return redirect('/login');
+    })->name('logout');
+
     Route::get('/dashboard')->name('user.dashboard');
 });
 
