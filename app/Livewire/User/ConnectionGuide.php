@@ -1,16 +1,18 @@
 <?php
 namespace App\Livewire\User;
 
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use App\Models\Tutorial;
 use Livewire\Attributes\Title;
 
 #[Title('راهنمای اتصال به سرویس‌ها')]
+#[Layout('layouts.app')]
+
 class ConnectionGuide extends Component
 {
-    // پلتفرم‌های موجود: Android, iOS, Windows, macOS
     public $activePlatform = 'Android';
-    public $selectedProtocol = ''; // فیلتر اختیاری بر اساس پروتکل (مثل WireGuard یا V2Ray)
+    public $selectedProtocol = '';
 
     public function setPlatform($platform)
     {

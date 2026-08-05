@@ -3,9 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'همراه سیمرغ ایران' }}</title>
+    <title>{{ $title ?? $brand_name }}</title>
 
-    <!-- Tailwind CSS (Vite) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
     <style>
@@ -14,18 +13,24 @@
 </head>
 <body class="bg-zinc-950 text-zinc-200 antialiased selection:bg-orange-500 selection:text-white min-h-screen flex flex-col">
 
-<!-- یک هدر ساده برای صفحات داخلی -->
 <nav class="border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-xl sticky top-0 z-50 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.5)]">
     <div class="container mx-auto px-6 py-4 flex justify-between items-center">
 
         <a href="/" class="flex items-center gap-3 group" wire:navigate>
-            <div class="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center group-hover:bg-orange-500/20 transition duration-300">
-                <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 2L2 22l10-6 10 6L12 2z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V9"></path>
-                </svg>
+            <div class="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center group-hover:bg-orange-500/20 transition duration-300 overflow-hidden shrink-0">
+                @if($brand_logo)
+                    <img src="{{ $brand_logo }}" alt="{{ $brand_name }}" class="w-full h-full object-cover">
+                @else
+                    <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 2L2 22l10-6 10 6L12 2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V9"></path>
+                    </svg>
+                @endif
             </div>
-            <span class="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-l from-orange-400 to-red-500">همراه سیمرغ</span>
+
+            <span class="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-l from-orange-400 to-red-500">
+                {{ $brand_name }}
+            </span>
         </a>
 
         <div class="hidden md:flex items-center gap-8 bg-zinc-900/50 px-6 py-2.5 rounded-2xl border border-zinc-800/50">
