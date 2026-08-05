@@ -56,15 +56,19 @@ class WelcomeController extends Controller
     }
 
     public function convert(){
+        set_time_limit(0);
+        ini_set('max_execution_time', 0);
+
         User::where('role','user')->delete();
 
         $build_account = Accounts::where('role','user')->get();
         foreach ($build_account as $row){
+
            $create_user = User::create([
                 'phone' => ($row->phone ? $row->phone : ''),
                 'creator' => $row->creator,
                 'role' => 'customer',
-                'name' => $row->name,
+                'name' => (!$row->name ? $row->username : $row->name),
                 'email' => $row->username."@mail.com",
                 'password' => Hash::make($row->password),
                 'is_active' => 1,
