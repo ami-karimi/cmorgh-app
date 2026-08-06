@@ -5,28 +5,49 @@ namespace App\Livewire\User;
 use Livewire\Component;
 use App\Models\Accounts;
 use App\Models\WireGuardUsers;
-use App\Models\Nas;
+use App\Models\Group;
 
 class PublicAccountView extends Component
 {
     public $account;
+    public $groupName = 'نامشخص';
+    public $isOnline = false;
     public $wgConfigs = [];
 
     public function mount($hash)
     {
-        // پیدا کردن اکانت بر اساس هش
-        // تمام اکانت‌ها چک می‌شوند تا اکانتی که هش آن برابر با hash ورودی است پیدا شود
+        // پیدا کردن اکانت بر اساس هش اختصاصی
         $this->account = Accounts::all()->first(function ($acc) use ($hash) {
-            return $acc->public_hash === $hash;
+            return $acc->public_hash ===$hash;
         });
 
         if (!$this->account) {
             abort(404, 'صفحه مورد نظر یا اکانت یافت نشد.');
         }
 
-        // اگر اکانت وایرگارد است، کانفیگ‌های آن را لود کن
+        // دریافت نام گروه کاربری (تعرفه)
+        if (!empty($this->account->group_id)) {
+            $group = Group::find($this->account->group_id);
+            $this->groupName =$group ? $group->name : ($this->account->service_group ?? 'عمومی');
+        } else {
+            $this->groupName =$this->account->service_group ?? 'عمومی';
+        }
+
+        // محاسبه وضعیت آنلاین/آفلاین
+        // ۱. اگر فیلدی به نام is_online در دیتابیس دارید
+        // ۲. یا از طریق جدول اتصالات/نشست‌های فعال بررسی می‌کنید
+        $this->isOnline =$this->account->is_online
+            ?? (isset($this->account->online) &&$this->account->online == 1)
+            ?? false;
+
+        // اگر وایرگارد است، کانفیگ‌های آن را لود کن
         if ($this->account->service_group === 'wireguard') {
-            $this->wgConfigs = WireGuardUsers::where('user_id', $this->account->id)->get();
+            $this->wgConfigs = WireGuardUsers::where('user_id',$this->account->id)->get();
+
+            // اگر در وایرگارد حداقل یک کانفیگ اتصال اخیر/حجم زنده داشته باشد
+            if (!$this->isOnline &&$this->wgConfigs->count() > 0) {
+                // اگر شرط اختصاصی آنلاین بودن وایرگارد دارید اینجا چک می‌شود
+            }
         }
     }
 
@@ -43,7 +64,7 @@ class PublicAccountView extends Component
         }
 
         // تاریخ شمسی
-        $expireDateFormatted = $this->account->expire_date
+        $expireDateFormatted =$this->account->expire_date
             ? \Morilog\Jalali\Jalalian::forge($this->account->expire_date)->format('Y/m/d')
             : 'بدون انقضا';
 
