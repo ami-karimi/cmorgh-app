@@ -259,7 +259,7 @@ class User extends Authenticatable
             ->whereIn('type', ['minus_amn'])
             ->sum('price');
 
-        $finalDebt = (int) ($totalPlus - $totalMinus);
+        $finalDebt = (int) ($totalMinus - $totalPlus);
 
         return $finalDebt;
     }
