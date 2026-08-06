@@ -163,6 +163,7 @@
             </div>
 
             <div class="bg-zinc-900/50 border border-zinc-800/60 rounded-[2rem] overflow-hidden shadow-xl">
+
                 <div class="p-2 border-b border-zinc-800/60 bg-zinc-950/30 overflow-x-auto">
                     <div class="flex gap-1 min-w-max">
                         @foreach([
@@ -172,7 +173,8 @@
                             'wg_configs'      => $account->service_group === 'wireguard' ? 'لیست کانفیگ‌ها (Peers)' : null
                         ] as $tabKey => $tabLabel)
                             @if($tabLabel)
-                                <button wire:click="$set('activeTab', '{{ $tabKey }}')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap {{ $activeTab === $tabKey ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50' }}">
+                                <button wire:click="$set('activeTab', '{{ $tabKey }}')"
+                                        class="relative px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap {{ $activeTab === $tabKey ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50' }}">
                                     {{ $tabLabel }}
                                 </button>
                             @endif
@@ -180,103 +182,115 @@
                     </div>
                 </div>
 
-                <div class="p-0">
-                    @if($activeTab === 'active_sessions' && $isRadiusService)
-                        <div class="p-6 text-center text-zinc-500 text-sm">لیست نشست‌های فعال...</div>
-                    @endif
+                <div class="p-0 relative min-h-[200px]">
 
-                    @if($activeTab === 'activities')
-                        <div class="overflow-x-auto animate-fade-in" wire:key="tab-activities">
-                            <table class="w-full text-right text-xs">
-                                <thead class="bg-zinc-950/50 text-zinc-400 font-bold border-b border-zinc-800/80">
-                                <tr>
-                                    <th class="p-4 font-medium">شرح رخداد</th>
-                                    <th class="p-4 font-medium w-40">مجری</th>
-                                    <th class="p-4 font-medium w-40">زمان</th>
-                                </tr>
-                                </thead>
-                                <tbody class="divide-y divide-zinc-800/50 text-zinc-300">
-                                @forelse($activities ?? [] as $act)
-                                    <tr class="hover:bg-zinc-800/30 transition-colors">
-                                        <td class="p-4 text-[13px] font-medium text-white leading-relaxed">{{ $act->content }}</td>
-                                        <td class="p-4">
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-800/50 text-zinc-300 border border-zinc-700/50 font-medium">
-                                            <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                                            {{ $act->causer->name ?? 'سیستم' }}
-                                        </span>
-                                        </td>
-                                        <td class="p-4 font-mono text-zinc-400 text-[11px]" dir="ltr">{{ \Morilog\Jalali\Jalalian::forge($act->created_at)->format('Y/m/d H:i') }}</td>
+                    <div wire:loading wire:target="activeTab" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-zinc-900/80 backdrop-blur-sm">
+                        <svg class="w-8 h-8 text-orange-500 animate-spin mb-3" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"></path>
+                        </svg>
+                        <span class="text-xs font-bold text-zinc-400 animate-pulse">در حال دریافت اطلاعات...</span>
+                    </div>
+
+                    <div wire:loading.class="opacity-0 pointer-events-none" class="transition-opacity duration-300">
+
+                        @if($activeTab === 'active_sessions' && $isRadiusService)
+                            <div class="p-6 text-center text-zinc-500 text-sm">لیست نشست‌های فعال...</div>
+                        @endif
+
+                        @if($activeTab === 'activities')
+                            <div class="overflow-x-auto animate-fade-in" wire:key="tab-activities">
+                                <table class="w-full text-right text-xs">
+                                    <thead class="bg-zinc-950/50 text-zinc-400 font-bold border-b border-zinc-800/80">
+                                    <tr>
+                                        <th class="p-4 font-medium">شرح رخداد</th>
+                                        <th class="p-4 font-medium w-40">مجری</th>
+                                        <th class="p-4 font-medium w-40">زمان</th>
                                     </tr>
-                                @empty
-                                    <tr><td colspan="3" class="py-12 text-center text-zinc-500 font-medium">رخدادی برای این کاربر ثبت نشده است.</td></tr>
-                                @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
+                                    </thead>
+                                    <tbody class="divide-y divide-zinc-800/50 text-zinc-300">
+                                    @forelse($activities ?? [] as $act)
+                                        <tr class="hover:bg-zinc-800/30 transition-colors">
+                                            <td class="p-4 text-[13px] font-medium text-white leading-relaxed">{{ $act->content }}</td>
+                                            <td class="p-4">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-800/50 text-zinc-300 border border-zinc-700/50 font-medium">
+                                    <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                    {{ $act->causer->name ?? 'سیستم' }}
+                                </span>
+                                            </td>
+                                            <td class="p-4 font-mono text-zinc-400 text-[11px]" dir="ltr">{{ \Morilog\Jalali\Jalalian::forge($act->created_at)->format('Y/m/d H:i') }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="3" class="py-12 text-center text-zinc-500 font-medium">رخدادی برای این کاربر ثبت نشده است.</td></tr>
+                                    @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
 
-                    @if($account->service_group === 'wireguard' && $activeTab === 'wg_configs')
-                        <div class="p-6 animate-fade-in" wire:key="tab-wg">
-                            <div class="mb-6 flex items-center justify-between">
-                                <div>
-                                    <h2 class="text-sm font-bold text-white">کانفیگ‌های متصل (Peers)</h2>
+                        @if($account->service_group === 'wireguard' && $activeTab === 'wg_configs')
+                            <div class="p-6 animate-fade-in" wire:key="tab-wg">
+                                <div class="mb-6 flex items-center justify-between">
+                                    <div>
+                                        <h2 class="text-sm font-bold text-white">کانفیگ‌های متصل (Peers)</h2>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                                    @forelse($wgConfigs ?? [] as $wg)
+                                        @php $srv = \App\Models\Nas::find($wg->server_id); @endphp
+                                        <div class="bg-zinc-950 border {{ $wg->is_enabled ? 'border-zinc-800/80' : 'border-rose-900/50 bg-rose-950/10' }} rounded-[1.5rem] p-5 flex flex-col transition-all hover:border-zinc-700">
+                                            <div class="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <h3 class="text-sm font-bold text-white font-mono flex items-center gap-2" dir="ltr">
+                                                        <svg class="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                                        {{ $wg->profile_name }}
+                                                    </h3>
+                                                    <span class="text-[10px] text-zinc-500 font-mono mt-1.5 block" dir="ltr">IP: {{ $wg->user_ip }} | سرور: {{ $srv->name ?? 'نامشخص' }}</span>
+                                                </div>
+                                                <button wire:click="toggleWgConfig({{ $wg->id }})" class="relative h-5 w-9 rounded-full transition-colors duration-200 {{ $wg->is_enabled ? 'bg-emerald-500' : 'bg-zinc-700' }}">
+                                                    <span class="absolute top-[2px] bg-white w-4 h-4 rounded-full transition-transform duration-200 {{ $wg->is_enabled ? 'left-[2px]' : 'translate-x-[16px] left-[2px]' }}"></span>
+                                                </button>
+                                            </div>
+
+                                            <div class="bg-zinc-900/80 rounded-xl p-3 mb-4 flex justify-between items-center border border-zinc-800/50">
+                                                <div class="text-center w-full">
+                                                    <span class="block text-[9px] text-zinc-500 mb-1">دانلود (TX)</span>
+                                                    <span class="text-xs font-bold text-emerald-400 font-mono" dir="ltr">{{ method_exists($account, 'formatBytes') ? $account->formatBytes($wg->tx) : '0 B' }}</span>
+                                                </div>
+                                                <div class="w-px h-6 bg-zinc-800 mx-2"></div>
+                                                <div class="text-center w-full">
+                                                    <span class="block text-[9px] text-zinc-500 mb-1">آپلود (RX)</span>
+                                                    <span class="text-xs font-bold text-blue-400 font-mono" dir="ltr">{{ method_exists($account, 'formatBytes') ? $account->formatBytes($wg->rx) : '0 B' }}</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="grid grid-cols-3 gap-2 mt-auto border-t border-zinc-800/60 pt-4">
+                                                <a href="{{ asset('configs/' . $wg->profile_name . '.png') }}" target="_blank" title="مشاهده بارکد" class="py-2.5 flex justify-center items-center bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-[10px] font-bold transition-colors">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                                                    بارکد QR
+                                                </a>
+
+                                                <a href="{{ asset('configs/' . $wg->profile_name . '.conf') }}" download="{{ $wg->profile_name }}.conf" title="دانلود فایل" class="py-2.5 flex justify-center items-center bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-[10px] font-bold transition-colors">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                                    دانلود فایل
+                                                </a>
+
+                                                <button wire:click="openChangeServerModal({{ $wg->id }})" title="انتقال سرور" class="py-2.5 flex justify-center items-center bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white rounded-xl text-[10px] font-bold transition-colors">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                                    انتقال سرور
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="col-span-full py-12 text-center text-sm font-bold text-zinc-500 border-2 border-dashed border-zinc-800/50 rounded-[1.5rem]">
+                                            کانفیگی یافت نشد.
+                                        </div>
+                                    @endforelse
                                 </div>
                             </div>
-
-                            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                                @forelse($wgConfigs ?? [] as $wg)
-                                    @php $srv = \App\Models\Nas::find($wg->server_id); @endphp
-                                    <div class="bg-zinc-950 border {{ $wg->is_enabled ? 'border-zinc-800/80' : 'border-rose-900/50 bg-rose-950/10' }} rounded-[1.5rem] p-5 flex flex-col transition-all hover:border-zinc-700">
-                                        <div class="flex justify-between items-start mb-4">
-                                            <div>
-                                                <h3 class="text-sm font-bold text-white font-mono flex items-center gap-2" dir="ltr">
-                                                    <svg class="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                                    {{ $wg->profile_name }}
-                                                </h3>
-                                                <span class="text-[10px] text-zinc-500 font-mono mt-1.5 block" dir="ltr">IP: {{ $wg->user_ip }} | سرور: {{ $srv->name ?? 'نامشخص' }}</span>
-                                            </div>
-                                            <button wire:click="toggleWgConfig({{ $wg->id }})" class="relative h-5 w-9 rounded-full transition-colors duration-200 {{ $wg->is_enabled ? 'bg-emerald-500' : 'bg-zinc-700' }}">
-                                                <span class="absolute top-[2px] bg-white w-4 h-4 rounded-full transition-transform duration-200 {{ $wg->is_enabled ? 'left-[2px]' : 'translate-x-[16px] left-[2px]' }}"></span>
-                                            </button>
-                                        </div>
-
-                                        <div class="bg-zinc-900/80 rounded-xl p-3 mb-4 flex justify-between items-center border border-zinc-800/50">
-                                            <div class="text-center w-full">
-                                                <span class="block text-[9px] text-zinc-500 mb-1">دانلود (TX)</span>
-                                                <span class="text-xs font-bold text-emerald-400 font-mono" dir="ltr">{{ method_exists($account, 'formatBytes') ? $account->formatBytes($wg->tx) : '0 B' }}</span>
-                                            </div>
-                                            <div class="w-px h-6 bg-zinc-800 mx-2"></div>
-                                            <div class="text-center w-full">
-                                                <span class="block text-[9px] text-zinc-500 mb-1">آپلود (RX)</span>
-                                                <span class="text-xs font-bold text-blue-400 font-mono" dir="ltr">{{ method_exists($account, 'formatBytes') ? $account->formatBytes($wg->rx) : '0 B' }}</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="grid grid-cols-3 gap-2 mt-auto border-t border-zinc-800/60 pt-4">
-                                            <a href="{{ asset('configs/' . $wg->profile_name . '.png') }}" target="_blank" title="مشاهده بارکد" class="py-2.5 flex justify-center items-center bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-[10px] font-bold transition-colors">
-                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                                                بارکد QR
-                                            </a>
-
-                                            <a href="{{ asset('configs/' . $wg->profile_name . '.conf') }}" download="{{ $wg->profile_name }}.conf" title="دانلود فایل" class="py-2.5 flex justify-center items-center bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-[10px] font-bold transition-colors">
-                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                                دانلود فایل
-                                            </a>
-
-                                            <button wire:click="openChangeServerModal({{ $wg->id }})" title="انتقال سرور" class="py-2.5 flex justify-center items-center bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white rounded-xl text-[10px] font-bold transition-colors">
-                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                                                انتقال سرور
-                                            </button>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <div class="col-span-full py-12 text-center text-sm font-bold text-zinc-500 border-2 border-dashed border-zinc-800/50 rounded-[1.5rem]">
-                                        کانفیگی یافت نشد.
-                                    </div>
-                                @endforelse
-                            </div>
-                        </div>
-                    @endif
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
