@@ -73,7 +73,7 @@ class PublicAccountView extends Component
                 // پشتیبانی تلگرام
                 $this->supportId =$agentStore->support_id ?? null;
 
-                $this->brandLogo = $agent->logo ?? null;
+                $this->brandLogo = $agent->brand_logo ?? null;
             }
         }
     }
