@@ -184,6 +184,7 @@ class VpnManagerService
 
             $account->first_login = null;
             $account->is_enabled = 1;
+            $account->limited = 0;
             $account->save();
 
             self::applyRechargeToServer($account, $group);
