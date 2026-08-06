@@ -339,7 +339,7 @@ class AuthController extends Controller
             ]
             ]);
         }
-        $findUser = User::where('id',$check->user_id)->first();
+        $findUser = Accounts::where('id',$check->user_id)->first();
         if(!$findUser){
             return response()->json(['status' => false, 'result' =>[
                 'login'=> true,
