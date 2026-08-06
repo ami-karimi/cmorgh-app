@@ -381,4 +381,106 @@
 
         </div>
     </div>
+
+
+    @if($isSuccessModalOpen)
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-md transition-all animate-fade-in" wire:key="success-creation-modal">
+            <div class="relative w-full max-w-lg bg-zinc-900 border border-zinc-700/60 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+
+                <div class="flex items-center justify-between px-7 py-5 border-b border-zinc-800/80 bg-zinc-900/80">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">صدور سرویس با موفقیت انجام شد</h2>
+                            <p class="text-[10px] text-zinc-400 mt-0.5">مشخصات سرویس(های) صادر شده به شرح زیر است</p>
+                        </div>
+                    </div>
+                    <button wire:click="resetFormAndCloseModal" class="p-2 text-zinc-400 hover:text-white bg-zinc-800/60 hover:bg-zinc-700 rounded-full transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <div class="p-7 overflow-y-auto space-y-4 max-h-[60vh]">
+                    @foreach($createdAccountsList as $acc)
+                        <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 space-y-3 relative overflow-hidden">
+                            <div class="flex justify-between items-center border-b border-zinc-800/80 pb-2">
+                                <span class="text-xs font-bold text-orange-400 font-mono">{{ $acc['group_name'] }}</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 font-mono uppercase border border-zinc-800">{{ $acc['service_group'] }}</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 text-xs font-mono" dir="ltr">
+                                <div class="bg-zinc-900/80 p-2.5 rounded-xl border border-zinc-800">
+                                    <span class="text-[9px] text-zinc-500 font-sans block mb-0.5 text-right">نام کاربری:</span>
+                                    <span class="text-white font-bold select-all">{{ $acc['username'] }}</span>
+                                </div>
+                                <div class="bg-zinc-900/80 p-2.5 rounded-xl border border-zinc-800">
+                                    <span class="text-[9px] text-zinc-500 font-sans block mb-0.5 text-right">کلمه عبور:</span>
+                                    <span class="text-emerald-400 font-bold select-all">{{ $acc['password'] }}</span>
+                                </div>
+                            </div>
+
+                            @if($acc['id'])
+                                <div class="pt-1 text-left">
+                                    <a href="{{ route('reseller.accounts.show', $acc['id']) }}" wire:navigate class="inline-flex items-center gap-1.5 text-[11px] font-bold text-orange-400 hover:text-orange-300 transition-colors">
+                                        مشاهده و مدیریت کامل این اکانت
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="px-7 py-5 border-t border-zinc-800/80 bg-zinc-900/80 space-y-3">
+                    <p class="text-[11px] text-zinc-400 font-bold text-center">اکنون تمایل دارید چه عملیاتی انجام دهید؟</p>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button wire:click="resetFormAndCloseModal" class="flex-1 py-3 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all text-center">
+                            ➕ ساخت اکانت جدید
+                        </button>
+                        <a href="{{ route('reseller.accounts.index') }}" wire:navigate class="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-xs rounded-xl border border-zinc-700/50 transition-all text-center">
+                            📋 مشاهده لیست اکانت‌ها
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    @endif
+
+    @if($isErrorModalOpen)
+        <div class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-md transition-all animate-fade-in" wire:key="error-modal">
+            <div class="relative w-full max-w-md bg-zinc-900 border border-rose-500/50 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col transform transition-all">
+
+                <div class="flex items-center justify-between px-7 py-5 border-b border-zinc-800/80 bg-zinc-900/80">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">خطا در انجام عملیات</h2>
+                            <p class="text-[10px] text-zinc-400 mt-0.5">عملیات متوقف شد</p>
+                        </div>
+                    </div>
+                    <button wire:click="$set('isErrorModalOpen', false)" class="p-2 text-zinc-400 hover:text-white bg-zinc-800/60 hover:bg-zinc-700 rounded-full transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <div class="p-7 text-center space-y-4">
+                    <p class="text-sm font-bold text-zinc-300 leading-loose">
+                        {{ $errorMessage }}
+                    </p>
+                </div>
+
+                <div class="px-7 py-5 border-t border-zinc-800/80 bg-zinc-900/80 flex justify-center">
+                    <button wire:click="$set('isErrorModalOpen', false)" class="px-8 py-2.5 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white font-bold text-xs rounded-xl transition-all shadow-lg">
+                        متوجه شدم
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
 </div>

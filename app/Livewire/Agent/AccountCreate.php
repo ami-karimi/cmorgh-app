@@ -20,6 +20,10 @@ class AccountCreate extends Component
 {
     public $creationType = 'single';
     public $selectedWgServer = 'auto';
+
+    public $isErrorModalOpen = false;
+    public $errorMessage = '';
+
     // متغیرهای مشترک
     public $group_id = '';
     public $service_group = 'wireguard'; // پروتکل پیش‌فرض
@@ -39,6 +43,8 @@ class AccountCreate extends Component
     public $bulkCount = 5;
     public $prefix = '';
 
+    public $isSuccessModalOpen = false;
+    public $createdAccountsList = [];
 
     public function mount($customer_id = null)
     {
@@ -82,65 +88,105 @@ class AccountCreate extends Component
     {
         $agent = Auth::user();
 
-        $this->validate([
+        // ==========================================
+        // ۱. جمع‌آوری تمام قوانین و پیام‌های خطا به صورت یکجا
+        // ==========================================
+        $rules = [
             'group_id'      => 'required|exists:groups,id',
             'service_group' => 'required|in:wireguard,l2tp_cisco,openvpn',
-        ]);
+        ];
 
+        $messages = [
+            'group_id.required'      => 'انتخاب تعرفه الزامی است.',
+            'service_group.required' => 'انتخاب پروتکل الزامی است.',
+        ];
+
+        // اگر مشتری جدید بود، قوانین مشتری هم اضافه شود
+        if ($this->customer_id === 'new') {
+            $rules['newCustomerName']  = 'required|string|max:255';
+            $rules['newCustomerPhone'] = 'nullable|string|max:20';
+            $rules['newCustomerEmail'] = 'required|email|max:255';
+
+            $messages['newCustomerName.required']  = 'وارد کردن نام مشتری الزامی است.';
+            $messages['newCustomerEmail.required'] = 'وارد کردن ایمیل الزامی است.';
+            $messages['newCustomerEmail.email']    = 'فرمت ایمیل صحیح نیست.';
+        }
+
+        // بررسی نوع ساخت (تکی یا گروهی) و افزودن قوانین مربوطه
+        if ($this->creationType === 'single') {
+            // اگر وایرگارد بود و یوزرنیم خالی بود، خودش قبل از ولیدیشن پرش کنه
+            if ($this->service_group === 'wireguard' && empty($this->username)) {
+                $this->generateRandomCredentials();
+            }
+
+            $rules['username']    = 'required|string|unique:accounts,username';
+            $rules['password']    = 'required|string|min:4';
+            $rules['customer_id'] = 'required';
+
+            $messages['username.required']    = 'وارد کردن نام کاربری الزامی است.';
+            $messages['username.unique']      = 'این نام کاربری قبلاً ثبت شده است.';
+            $messages['password.required']    = 'وارد کردن کلمه عبور الزامی است.';
+            $messages['password.min']         = 'کلمه عبور حداقل 4 کاراکتر باشد.';
+            $messages['customer_id.required'] = 'لطفاً یک مشتری انتخاب کنید.';
+        } else {
+            $rules['bulkCount'] = 'required|numeric|min:2|max:100';
+            $rules['prefix']    = 'nullable|string|max:10';
+
+            $messages['bulkCount.required'] = 'وارد کردن تعداد الزامی است.';
+            $messages['bulkCount.min']      = 'حداقل تعداد صدور باید 2 باشد.';
+        }
+
+        // ==========================================
+        // ۲. اجرای یکپارچه اعتبارسنجی (شلیک تمام ارورها با هم)
+        // ==========================================
+        $this->validate($rules, $messages);
+
+        // ==========================================
+        // ۳. بررسی موجودی کیف پول (فقط وقتی اجرا میشه که فرم بدون خطا باشه)
+        // ==========================================
         $group = Group::find($this->group_id);
-
-        // بررسی موجودی اولیه
         $agentCostPerAccount = $group->getFinalPriceFor($agent);
         $totalAccountsToCreate = $this->creationType === 'bulk' ? (int) $this->bulkCount : 1;
         $totalCost = $agentCostPerAccount * $totalAccountsToCreate;
 
         if ($agent->balance < $totalCost) {
-            $this->addError('balance', 'موجودی کیف پول شما برای این عملیات کافی نیست.');
+            $this->errorMessage = 'موجودی کیف پول شما برای این عملیات کافی نیست. لطفاً ابتدا حساب خود را شارژ کنید.';
+            $this->isErrorModalOpen = true;
             return;
         }
 
-        $provisioningService = new \App\Services\AccountProvisioningService();
-        $targetUser = null;
-        $existingUserId = null;
-
-        if ($this->customer_id === 'me') {
-            $targetUser = User::firstOrCreate(
-                ['creator' => $agent->id, 'role' => 'customer', 'email' => 'archive_' . $agent->id . '@local.system'],
-                ['name' => '🗂️ آرشیو اکانت‌های من', 'username' => 'archive_agent_' . $agent->id, 'password' => \Illuminate\Support\Facades\Hash::make(Str::random(16)), 'is_active' => 1]
-            );
-            $existingUserId = $targetUser->id;
-        } elseif (is_numeric($this->customer_id)) {
-            $targetUser = User::find($this->customer_id);
-            $existingUserId = $targetUser->id;
-        } elseif ($this->customer_id === 'new') {
-            $this->validate([
-                'newCustomerName'  => 'required|string|max:255',
-                'newCustomerPhone' => 'nullable|string|max:20',
-                'newCustomerEmail' => 'nullable|email|max:255',
-            ]);
-
-            // ساخت یک مدل مجازی در رم (در کلاس Service ذخیره خواهد شد)
-            $targetUser = new User([
-                'name'     => $this->newCustomerName,
-                'username' => $this->newCustomerPhone ?? Str::random(10),
-                'email'    => $this->newCustomerEmail,
-                'phone'    => $this->newCustomerPhone,
-            ]);
-        }
-
+        // ==========================================
+        // ۴. شروع تراکنش دیتابیس و ساخت اکانت
+        // ==========================================
         DB::beginTransaction();
         try {
-            if ($this->creationType === 'single') {
-                if ($this->service_group === 'wireguard' && empty($this->username)) {
-                    $this->generateRandomCredentials();
-                }
+            $provisioningService = new \App\Services\AccountProvisioningService();
+            $targetUser = null;
+            $existingUserId = null;
 
-                $this->validate([
-                    'username'    => 'required|string|unique:accounts,username',
-                    'password'    => 'required|string|min:4',
-                    'customer_id' => 'required',
+            // ثبت یا پیدا کردن مشتری
+            if ($this->customer_id === 'me') {
+                $targetUser = User::firstOrCreate(
+                    ['creator' => $agent->id, 'role' => 'customer', 'email' => 'archive_' . $agent->id . '@local.system'],
+                    ['name' => '🗂️ آرشیو اکانت‌های من', 'username' => 'archive_agent_' . $agent->id, 'password' => \Illuminate\Support\Facades\Hash::make(Str::random(16)), 'is_active' => 1]
+                );
+                $existingUserId = $targetUser->id;
+            } elseif (is_numeric($this->customer_id)) {
+                $targetUser = User::find($this->customer_id);
+                $existingUserId = $targetUser->id;
+            } elseif ($this->customer_id === 'new') {
+                $targetUser = new User([
+                    'name'     => $this->newCustomerName,
+                    'username' => $this->newCustomerPhone ?? Str::random(10),
+                    'email'    => $this->newCustomerEmail,
+                    'phone'    => $this->newCustomerPhone,
                 ]);
+            }
 
+            $createdList = [];
+
+            // ثبت اکانت تکی
+            if ($this->creationType === 'single') {
                 $overrides = [
                     'username'      => strtolower($this->username),
                     'password'      => $this->password,
@@ -154,32 +200,30 @@ class AccountCreate extends Component
                 $preparedData = $provisioningService->prepareAccountData($group, $targetUser, $this->newCustomerPhone ?? null, $overrides);
 
                 $result = $provisioningService->createFullAccount(
-                    $preparedData['userData'],
-                    $preparedData['configData'],
-                    $existingUserId,
-                    true,
-                    false
+                    $preparedData['userData'], $preparedData['configData'], $existingUserId, true, false
                 );
 
                 if (is_array($result) && isset($result['status']) && !$result['status']) {
                     throw new \Exception($result['message']);
                 }
 
-            } else {
-                $this->validate([
-                    'bulkCount' => 'required|numeric|min:2|max:100',
-                    'prefix'    => 'nullable|string|max:10',
-                ]);
+                $accountObj = $result['account'] ?? null;
+                $createdList[] = [
+                    'id'            => $accountObj ? $accountObj->id : null,
+                    'username'      => strtolower($this->username),
+                    'password'      => $this->password,
+                    'service_group' => $this->service_group,
+                    'group_name'    => $group->name,
+                ];
 
-                $defaultWgServerId = null;
-                if ($this->service_group === 'wireguard') {
-                    $defaultWgServerId = \App\Models\Nas::where('type', 'wireguard')->value('id');
-                }
+                // ثبت اکانت گروهی
+            } else {
+                $defaultWgServerId = $this->service_group === 'wireguard' ? \App\Models\Nas::where('type', 'wireguard')->value('id') : null;
 
                 for ($i = 0; $i < $this->bulkCount; $i++) {
                     do {
                         $randUser = strtolower($this->prefix . Str::random(5) . rand(10, 99));
-                    } while (Accounts::where('username', $randUser)->exists());
+                    } while (\App\Models\Accounts::where('username', $randUser)->exists());
 
                     $randPass = (string) rand(100000, 999999);
 
@@ -193,30 +237,45 @@ class AccountCreate extends Component
                     $preparedData = $provisioningService->prepareAccountData($group, $targetUser, null, $overrides);
 
                     $result = $provisioningService->createFullAccount(
-                        $preparedData['userData'],
-                        $preparedData['configData'],
-                        $existingUserId,
-                        true,
-                        false
+                        $preparedData['userData'], $preparedData['configData'], $existingUserId, true, false
                     );
 
                     if (is_array($result) && isset($result['status']) && !$result['status']) {
                         throw new \Exception("خطا در ساخت اکانت گروهی: " . $result['message']);
                     }
+
+                    $accountObj = $result['account'] ?? null;
+                    $createdList[] = [
+                        'id'            => $accountObj ? $accountObj->id : null,
+                        'username'      => $randUser,
+                        'password'      => $randPass,
+                        'service_group' => $this->service_group,
+                        'group_name'    => $group->name,
+                    ];
                 }
             }
 
             DB::commit();
 
+            $this->createdAccountsList = $createdList;
+            $this->isSuccessModalOpen = true;
+
             $this->reset(['username', 'password', 'group_id', 'newCustomerName', 'newCustomerPhone', 'newCustomerEmail']);
             $this->customer_id = 'new';
-            session()->flash('success_msg', 'عملیات با موفقیت انجام شد و اکانت(ها) صادر گردید.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->addError('balance', 'خطا: ' . $e->getMessage());
+            $this->errorMessage = 'خطای سیستمی رخ داد: ' . $e->getMessage();
+            $this->isErrorModalOpen = true;
         }
     }
+
+    public function resetFormAndCloseModal()
+    {
+        $this->isSuccessModalOpen = false;
+        $this->createdAccountsList = [];
+    }
+
 
     public function render()
     {
