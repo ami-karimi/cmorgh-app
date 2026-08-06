@@ -57,14 +57,19 @@
             </div>
         </div>
 
-        <div class="p-6 rounded-3xl bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800/80 shadow-sm flex flex-col justify-between">
-            <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">کل خریدهای انجام شده</span>
-            <div class="mt-4 flex items-baseline gap-1.5">
-                <span class="text-3xl font-black font-mono-digit text-zinc-900 dark:text-white">
-                    {{ number_format($totalSpent) }}
-                </span>
+        <div class="p-6 rounded-3xl bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800/80 shadow-sm flex flex-col justify-between relative overflow-hidden">
+            <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">میزان بدهی به سیستم</span>
+
+            <div class="mt-4 flex items-baseline gap-1.5 relative z-10">
+        <span class="text-3xl font-black font-mono-digit {{ $this->debt_balance > 0 ? 'text-rose-500' : 'text-zinc-900 dark:text-white' }}">
+            {{ number_format($this->debt_balance) }}
+        </span>
                 <span class="text-xs font-medium text-zinc-400">تومان</span>
             </div>
+
+            @if($debt > 0)
+                <div class="absolute -left-10 -bottom-10 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            @endif
         </div>
 
         <div class="p-6 rounded-3xl bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800/80 shadow-sm flex flex-col justify-between">

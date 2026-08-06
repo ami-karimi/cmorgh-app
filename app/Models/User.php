@@ -247,6 +247,20 @@ class User extends Authenticatable
 
         return (int) ($totalPlus - $totalMinus);
     }
+    public function getDebtBalanceAttribute()
+    {
+        $totalPlus = $this->financials()
+            ->where('approved', 1)
+            ->whereIn('type', ['plus_amn'])
+            ->sum('price');
+
+        $totalMinus = $this->financials()
+            ->where('approved', 1)
+            ->whereIn('type', ['minus_amn'])
+            ->sum('price');
+
+        return (int) ($totalPlus - $totalMinus);
+    }
 
     public function getFormattedBalanceAttribute()
     {
