@@ -90,4 +90,18 @@ class Accounts extends Model
             })
             ->exists();
     }
+
+    public function getPublicHashAttribute()
+    {
+        return md5($this->id . '-' .$this->username . '-' . config('app.key'));
+    }
+
+    /**
+     * دریافت لینک کامل صفحه عمومی کاربر
+     */
+    public function getSubscriptionUrlAttribute()
+    {
+        return route('public.account.show', ['hash' => $this->public_hash]);
+    }
+
 }

@@ -74,6 +74,12 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-3">
+                <button onclick="navigator.clipboard.writeText('{{ $account->subscription_url }}'); alert('لینک اختصاصی کاربر کپی شد!');"
+                        class="px-4 py-2.5 bg-zinc-800/80 hover:bg-zinc-700 text-amber-400 border border-amber-500/20 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    کپی لینک اختصاصی کاربر
+                </button>
+
                 <button wire:click="toggleStatus" wire:loading.attr="disabled" class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center gap-2 {{ $account->is_enabled ? 'bg-zinc-950 text-rose-400 hover:bg-rose-500/10 border border-rose-500/20' : 'bg-zinc-950 text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20' }}">
                     <svg wire:loading wire:target="toggleStatus" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"></path></svg>
                     {{ $account->is_enabled ? 'مسدودسازی' : 'فعال‌سازی' }}

@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 Route::get('/', [\App\Http\Controllers\WelcomeController::class,'index'])->name('main');
 Route::get('/convert', [\App\Http\Controllers\WelcomeController::class,'convert'])->name('convert');
 
+Route::get('/sub/{hash}', \App\Livewire\User\PublicAccountView::class)->name('public.account.show');
+
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', \App\Livewire\Auth\Login::class)->name('login');
