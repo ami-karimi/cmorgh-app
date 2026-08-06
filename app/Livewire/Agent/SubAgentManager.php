@@ -177,10 +177,7 @@ class SubAgentManager extends Component
                 $amount = (float)$this->walletAmount;
 
                 if ($this->walletType === 'plus') {
-                    // افزایش شارژ زیرنماینده ⬅️ کسر از کیف پول نماینده
-                    if ($myUser->balance <$amount) {
-                        throw new \Exception('موجودی کیف پول شما برای شارژ این زیر‌نماینده کافی نیست!');
-                    }
+
 
                     Financial::create([
                         'creator'     => $myUser->id,
