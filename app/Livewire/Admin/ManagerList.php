@@ -45,8 +45,9 @@ class ManagerList extends Component
         // لاگین مستقیم با ID کاربر مورد نظر
         Auth::loginUsingId($userId);
 
+        $user = User::where('id',$userId)->first();
         // هدایت (ریدایرکت) به مسیر داشبورد نماینده
-        return redirect()->route('dashboard'); // مسیر داشبورد را بر اساس پروژه خود تنظیم کنید
+        return redirect()->route($user->dashboard_url);
     }
 
     public function bulkAction($action)
