@@ -22,6 +22,6 @@ class Nas extends Model
     }
 
     public function getUsersOnline(){
-        return $this->hasMany(RadAcct::class,'nasipaddress','ipaddress')->where('acctstoptime','=',NULL);
+        return $this->hasMany(Radacct::class,'nasipaddress','ipaddress')->where('acctstoptime','=',NULL);
     }
 }
