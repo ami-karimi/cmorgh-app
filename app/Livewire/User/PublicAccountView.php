@@ -107,6 +107,10 @@ class PublicAccountView extends Component
             'isFirstLogin'        => $isFirstLogin,
             'daysRemaining'       => $daysRemaining,
             'expireDateFormatted' => $expireDateFormatted,
-        ])->layout('layouts.app');
+        ])->layout('layouts.public', [
+            'brandName' => $this->brandName,
+            'brandLogo' => $this->brandLogo,
+            'supportId' => $this->supportId,
+        ]);
     }
 }
