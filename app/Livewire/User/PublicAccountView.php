@@ -68,19 +68,12 @@ class PublicAccountView extends Component
                     ->where('user_id', $agent->id)
                     ->first();
 
-                // اولویت نام برند: عنوان فروشگاه -> نام برند -> نام نماینده -> نام سیستم
-                $this->brandName =$agentStore->title
-                    ?? $agent->brand_name
-                    ?? $agent->name
-                    ?? config('app.name', 'سامانه VPN');
+                $this->brandName = $agent->brand_name ?? config('app.name', 'سامانه VPN');
 
                 // پشتیبانی تلگرام
                 $this->supportId =$agentStore->support_id ?? null;
 
-                // لوگوی نماینده (در صورت وجود)
-                $this->brandLogo =$agentStore->logo_url
-                    ?? $agent->logo
-                    ?? null;
+                $this->brandLogo = $agent->logo ?? null;
             }
         }
     }
