@@ -58,8 +58,8 @@
         </div>
         <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden">
             <p class="text-xs font-bold text-zinc-400 mb-1 uppercase tracking-wider">میزان بدهی به سیستم</p>
-            <p class="text-xl font-black {{ $debt > 0 ? 'text-red-400' : 'text-zinc-500' }} font-mono relative z-10">{{ number_format($debt) }} <span class="text-xs font-sans">تومان</span></p>
-            @if($debt > 0) <div class="absolute -left-10 -bottom-10 w-24 h-24 bg-red-500/10 rounded-full blur-2xl"></div> @endif
+            <p class="text-xl font-black {{ $manager->debt_balance > 0 ? 'text-red-400' : 'text-zinc-500' }} font-mono relative z-10">{{ number_format($manager->debt_balance) }} <span class="text-xs font-sans">تومان</span></p>
+            @if($manager->debt_balance > 0) <div class="absolute -left-10 -bottom-10 w-24 h-24 bg-red-500/10 rounded-full blur-2xl"></div> @endif
         </div>
     </div>
 
