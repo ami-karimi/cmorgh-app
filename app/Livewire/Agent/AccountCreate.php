@@ -72,7 +72,7 @@ class AccountCreate extends Component
         $this->username = strtolower(Str::random(6)) . rand(10, 99);$this->password = (string) rand(100000, 999999);
     }
 
-    // تولید ایمیل تصادفی برای مشتری جدید
+    // تولید ایمیل تصادفی برای مشتری جدیدf
     public function generateRandomEmail()
     {
         $this->newCustomerEmail = 'user_' . Str::random(5) . rand(10, 99) . '@domain.com';
@@ -223,7 +223,7 @@ class AccountCreate extends Component
         $agent = Auth::user();
 
         // محاسبه موجودی
-        $plus = $agent->balance;
+        $balance = $agent->balance;
 
         $hiddenGroups = DB::table('agent_hidden_groups')->where('agent_id',$agent->id)->pluck('group_id')->toArray();
 
