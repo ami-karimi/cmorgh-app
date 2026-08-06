@@ -245,7 +245,7 @@
 
                             @if($modalAccount->service_group === 'wireguard')
                                 @php
-                                    $wg = \App\Models\WireguardUsers::where('user_id', $modalAccount->id)->first();
+                                    $wg = \App\Models\WireGuardUsers::where('user_id', $modalAccount->id)->first();
                                 @endphp
                                 @if($wg)
                                     <div class="grid grid-cols-2 gap-2 pt-1">

@@ -37,7 +37,7 @@ class AccountProvisioningService
                 // یافتن خلوت‌ترین سرور به صورت خودکار
                 $finalWgServerId = \App\Models\Nas::where('is_enabled', 1)
                     ->supportsProtocol('wireguard')
-                    ->addSelect(['users_count' => \App\Models\WireguardUsers::selectRaw('count(*)')
+                    ->addSelect(['users_count' => \App\Models\WireGuardUsers::selectRaw('count(*)')
                         ->whereColumn('server_id', 'nas.id')
                     ])
                     ->orderBy('users_count', 'asc')

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Agent;
 
-use App\Models\WireguardUsers;
+use App\Models\WireGuardUsers;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;

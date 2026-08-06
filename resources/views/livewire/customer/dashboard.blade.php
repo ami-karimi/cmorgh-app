@@ -241,7 +241,7 @@
 
                                 @if($acc->service_group === 'wireguard')
                                     @php
-                                        $wgConfig = \App\Models\WireguardUsers::where('user_id', $acc->id)->first();
+                                        $wgConfig = \App\Models\WireGuardUsers::where('user_id', $acc->id)->first();
                                     @endphp
 
                                     <div class="grid grid-cols-2 gap-2 mb-2">

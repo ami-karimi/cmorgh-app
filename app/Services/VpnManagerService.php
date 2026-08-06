@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\Accounts;
-use App\Models\WireguardUsers;
+use App\Models\WireGuardUsers;
 use App\Models\Nas;
 use App\Models\Charge;
 use App\Services\ActivityLogger;
