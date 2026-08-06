@@ -7,9 +7,11 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
 use App\Models\User;
 use App\Models\LastBack;
+use Illuminate\Support\Facades\Auth;
 
 #[Title('لیست مدیران و نمایندگان | همراه سیمرغ')]
 #[Layout('layouts.admin')]
+
 class ManagerList extends Component
 {
     use WithPagination;
@@ -32,6 +34,19 @@ class ManagerList extends Component
         } else {
             $this->selectedManagers = [];
         }
+    }
+    public function loginAs($userId)
+    {
+        // چک کردن دسترسی ادمین (اختیاری ولی به شدت توصیه می‌شود)
+        if (auth()->user()->role !== 'admin' && auth()->user()->role !== 'manager') {
+            abort(403, 'شما دسترسی ورود به حساب نمایندگان را ندارید.');
+        }
+
+        // لاگین مستقیم با ID کاربر مورد نظر
+        Auth::loginUsingId($userId);
+
+        // هدایت (ریدایرکت) به مسیر داشبورد نماینده
+        return redirect()->route('dashboard'); // مسیر داشبورد را بر اساس پروژه خود تنظیم کنید
     }
 
     public function bulkAction($action)

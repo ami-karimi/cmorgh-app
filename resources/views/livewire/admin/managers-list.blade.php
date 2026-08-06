@@ -62,6 +62,7 @@
                     <th class="p-5">نقش کاربری</th>
                     <th class="p-5">وضعیت حساب</th>
                     <th class="p-5">تاریخ ثبت‌نام</th>
+                    <th class="p-5">موجودی حساب</th>
                     <th class="p-5">آخرین فعالیت</th>
                     <th class="p-5 text-center">عملیات</th>
                 </tr>
@@ -98,7 +99,7 @@
                         </td>
 
                         <td class="p-5">
-                          <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold border transition-colors {{ $user->role_css }}">{{ $user->role_label }}</span>
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold border transition-colors {{ $user->role_css }}">{{ $user->role_label }}</span>
                         </td>
 
                         <td class="p-5">
@@ -127,6 +128,12 @@
 
                         <td class="p-5 text-center">
                             <div class="flex items-center justify-center gap-2">
+                                <button wire:click="loginAs({{ $user->id }})" title="ورود به پنل این نماینده" class="p-2 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white rounded-lg border border-emerald-500/20 transition inline-flex items-center justify-center">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                                    </svg>
+                                </button>
+
                                 <a href="{{ route('admin.managers.edit', $user->id) }}" wire:navigate title="مشاهده و ویرایش پروفایل" class="p-2 bg-zinc-800/60 hover:bg-zinc-700 text-zinc-400 hover:text-orange-400 rounded-lg border border-zinc-700/50 transition inline-flex items-center justify-center">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -138,7 +145,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="p-10 text-center text-zinc-500 font-medium">
+                        <td colspan="9" class="p-10 text-center text-zinc-500 font-medium">
                             هیچ مدیر یا نماینده‌ای با مشخصات وارد شده پیدا نشد.
                         </td>
                     </tr>

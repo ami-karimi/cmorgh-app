@@ -1,5 +1,29 @@
 <div class="space-y-6 pb-12 font-sans" wire:key="agent-account-detail-view">
 
+    @php
+        // محاسبه وضعیت انقضا
+        $isExpired = $account->expire_date && \Carbon\Carbon::parse($account->expire_date)->isPast();
+        $isFirstLogin = is_null($account->expire_date); // اگر نال باشد یعنی منتظر اولین اتصال است
+
+        // وضعیت آنلاین (اگر متغیر متفاوتی دارید جایگزین کنید)
+        $isOnline = $account->is_online ?? (isset($activeSessions) && count($activeSessions) > 0) ?? false;
+
+        // متغیرهای حجم برای همه سرویس‌ها
+        $maxUsage = $account->max_usage ?? 0;
+        $usage = $account->usage ?? 0;
+
+        $maxUsageStr = ($maxUsage == 0) ? 'نامحدود' : (method_exists($account, 'formatBytes') ? $account->formatBytes($maxUsage) : $maxUsage);
+        $usageStr = method_exists($account, 'formatBytes') ? $account->formatBytes($usage) : $usage;
+        $remainingBytes = ($maxUsage == 0) ? 0 : max(0, $maxUsage - $usage);
+        $remainingStr = ($maxUsage == 0) ? 'نامحدود' : (method_exists($account, 'formatBytes') ? $account->formatBytes($remainingBytes) : $remainingBytes);
+
+        $usagePercent = ($maxUsage > 0) ? min(100, round(($usage / $maxUsage) * 100)) : 0;
+        $volTextColor = $usagePercent > 90 ? 'text-rose-400' : ($usagePercent > 75 ? 'text-amber-400' : 'text-emerald-400');
+        $volBgColor   = $usagePercent > 90 ? 'bg-rose-500 shadow-rose-500/50' : ($usagePercent > 75 ? 'bg-amber-500 shadow-amber-500/50' : 'bg-emerald-500 shadow-emerald-500/50');
+
+        $isRadiusService = in_array($account->service_group, ['l2tp_cisco', 'l2tp', 'openvpn']);
+    @endphp
+
     @if($customer)
         <div class="bg-gradient-to-r from-zinc-900 to-zinc-950 border border-zinc-800/80 rounded-[1.5rem] p-4 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3">
@@ -41,6 +65,10 @@
                             <div class="w-2 h-2 rounded-full {{ $account->is_enabled ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' }}"></div>
                             وضعیت: {{ $account->is_enabled ? 'فعال' : 'مسدود' }}
                         </span>
+                        <span class="flex items-center gap-1.5 border-r border-zinc-700 pr-4">
+                            <div class="w-2 h-2 rounded-full {{ $isOnline ? 'bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]' : 'bg-zinc-600' }}"></div>
+                            اتصال: <span class="{{ $isOnline ? 'text-blue-400 font-bold' : 'text-zinc-500' }}">{{ $isOnline ? 'آنلاین (متصل)' : 'آفلاین' }}</span>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -70,277 +98,276 @@
         </div>
     @endif
 
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-            <div class="xl:col-span-2 space-y-6">
+        <div class="xl:col-span-2 space-y-6">
 
-                @php $isRadiusService = in_array($account->service_group, ['l2tp_cisco', 'l2tp', 'openvpn']); @endphp
-
-                @if($isRadiusService)
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="bg-zinc-900/50 border border-zinc-800/60 rounded-[2rem] p-6">
-                            <div class="flex items-center gap-4 mb-4">
-                                <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                </div>
-                                <div>
-                                    <span class="text-xs font-bold text-zinc-400">تعداد اتصالات موفق</span>
-                                    <div class="flex items-baseline gap-1 mt-0.5">
-                                        <span class="text-2xl font-black text-white font-mono">{{ $totalConnections ?? 0 }}</span>
-                                    </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-zinc-900/50 border border-zinc-800/60 rounded-[2rem] p-6 hover:-translate-y-1 transition-transform duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-zinc-400 block mb-0.5">ترافیک باقیمانده</span>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-xl font-black {{ $volTextColor }} font-mono" dir="ltr">{{ $remainingStr }}</span>
                                 </div>
                             </div>
                         </div>
+                        <span class="text-lg font-black text-zinc-700 font-mono">{{ $usagePercent }}%</span>
                     </div>
-                @endif
-
-                @if($account->service_group === 'wireguard')
-                    @php
-                        $maxUsageStr = (isset($account->max_usage) && $account->max_usage == 0) ? 'نامحدود' : (method_exists($account, 'formatBytes') ? $account->formatBytes($account->max_usage) : $account->max_usage);
-                        $usageStr = method_exists($account, 'formatBytes') ? $account->formatBytes($account->usage) : $account->usage;
-                        $remainingBytes = (isset($account->max_usage) && $account->max_usage == 0) ? 0 : max(0, $account->max_usage - $account->usage);
-                        $remainingStr = (isset($account->max_usage) && $account->max_usage == 0) ? 'نامحدود' : (method_exists($account, 'formatBytes') ? $account->formatBytes($remainingBytes) : $remainingBytes);
-
-                        $usagePercent = (isset($account->max_usage) && $account->max_usage > 0) ? min(100, round(($account->usage / $account->max_usage) * 100)) : 0;
-                        $volTextColor = $usagePercent > 90 ? 'text-rose-400' : ($usagePercent > 75 ? 'text-amber-400' : 'text-emerald-400');
-                        $volBgColor   = $usagePercent > 90 ? 'bg-rose-500 shadow-rose-500/50' : ($usagePercent > 75 ? 'bg-amber-500 shadow-amber-500/50' : 'bg-emerald-500 shadow-emerald-500/50');
-                    @endphp
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="bg-zinc-900/50 border border-zinc-800/60 rounded-[2rem] p-6 hover:-translate-y-1 transition-transform duration-300">
-                            <div class="flex items-center gap-4 mb-4">
-                                <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                                </div>
-                                <div>
-                                    <span class="text-xs font-bold text-zinc-400">پروتکل فعال سرویس</span>
-                                    <h3 class="text-xl font-black text-white mt-0.5 tracking-wider uppercase">WireGuard</h3>
-                                </div>
-                            </div>
-                            <div class="text-[11px] font-bold text-purple-400 bg-purple-500/10 px-3 py-1.5 rounded-lg inline-block">تعداد {{ count($wgConfigs ?? []) }} دستگاه متصل (Peers)</div>
+                    @if($maxUsage > 0)
+                        <div class="w-full bg-zinc-950 rounded-full h-2 border border-zinc-800/50 overflow-hidden shadow-inner">
+                            <div class="{{ $volBgColor }} h-full rounded-full transition-all duration-1000 shadow-lg" style="width: {{ $usagePercent }}%"></div>
                         </div>
-
-                        <div class="bg-zinc-900/50 border border-zinc-800/60 rounded-[2rem] p-6 hover:-translate-y-1 transition-transform duration-300">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                    </div>
-                                    <div>
-                                        <span class="text-xs font-bold text-zinc-400 block mb-0.5">ترافیک باقیمانده</span>
-                                        <div class="flex items-baseline gap-1">
-                                            <span class="text-xl font-black {{ $volTextColor }} font-mono" dir="ltr">{{ $remainingStr }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <span class="text-lg font-black text-zinc-700 font-mono">{{ $usagePercent }}%</span>
-                            </div>
-                            @if((isset($account->max_usage) && $account->max_usage > 0))
-                                <div class="w-full bg-zinc-950 rounded-full h-2 border border-zinc-800/50 overflow-hidden shadow-inner">
-                                    <div class="{{ $volBgColor }} h-full rounded-full transition-all duration-1000 shadow-lg" style="width: {{ $usagePercent }}%"></div>
-                                </div>
-                                <div class="text-left mt-2"><span class="text-[10px] font-bold text-zinc-500">مصرف شده: <span dir="ltr">{{ $usageStr }}</span></span></div>
-                            @endif
-                        </div>
-                    </div>
-                @endif
-
-                <div class="bg-zinc-900/50 border border-zinc-800/60 rounded-[2rem] overflow-hidden shadow-xl">
-                    <div class="p-2 border-b border-zinc-800/60 bg-zinc-950/30 overflow-x-auto">
-                        <div class="flex gap-1 min-w-max">
-                            @foreach([
-                                'active_sessions' => $isRadiusService ? 'نشست‌های فعال (' . count($activeSessions ?? []) . ')' : null,
-                                'session_history' => $isRadiusService ? 'تاریخچه نشست‌ها' : null,
-                                'activities'      => 'رخدادها و تغییرات',
-                                'wg_configs'      => $account->service_group === 'wireguard' ? 'لیست کانفیگ‌ها (Peers)' : null
-                            ] as $tabKey => $tabLabel)
-                                @if($tabLabel)
-                                    <button wire:click="$set('activeTab', '{{ $tabKey }}')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap {{ $activeTab === $tabKey ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50' }}">
-                                        {{ $tabLabel }}
-                                    </button>
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div class="p-0">
-                        @if($activeTab === 'active_sessions' && $isRadiusService)
-                            <div class="p-6 text-center text-zinc-500 text-sm">لیست نشست‌های فعال...</div>
-                        @endif
-
-                        @if($activeTab === 'activities')
-                            <div class="overflow-x-auto animate-fade-in" wire:key="tab-activities">
-                                <table class="w-full text-right text-xs">
-                                    <thead class="bg-zinc-950/50 text-zinc-400 font-bold border-b border-zinc-800/80">
-                                    <tr>
-                                        <th class="p-4 font-medium">شرح رخداد</th>
-                                        <th class="p-4 font-medium w-40">مجری</th>
-                                        <th class="p-4 font-medium w-40">زمان</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-zinc-800/50 text-zinc-300">
-                                    @forelse($activities ?? [] as $act)
-                                        <tr class="hover:bg-zinc-800/30 transition-colors">
-                                            <td class="p-4 text-[13px] font-medium text-white leading-relaxed">{{ $act->content }}</td>
-                                            <td class="p-4">
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-800/50 text-zinc-300 border border-zinc-700/50 font-medium">
-                                            <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                                            {{ $act->causer->name ?? 'سیستم' }}
-                                        </span>
-                                            </td>
-                                            <td class="p-4 font-mono text-zinc-400 text-[11px]" dir="ltr">{{ \Morilog\Jalali\Jalalian::forge($act->created_at)->format('Y/m/d H:i') }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr><td colspan="3" class="py-12 text-center text-zinc-500 font-medium">رخدادی برای این کاربر ثبت نشده است.</td></tr>
-                                    @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-                        @endif
-
-                        @if($account->service_group === 'wireguard' && $activeTab === 'wg_configs')
-                            <div class="p-6 animate-fade-in" wire:key="tab-wg">
-                                <div class="mb-6 flex items-center justify-between">
-                                    <div>
-                                        <h2 class="text-sm font-bold text-white">کانفیگ‌های متصل (Peers)</h2>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                                    @forelse($wgConfigs ?? [] as $wg)
-                                        @php $srv = \App\Models\Nas::find($wg->server_id); @endphp
-                                        <div class="bg-zinc-950 border {{ $wg->is_enabled ? 'border-zinc-800/80' : 'border-rose-900/50 bg-rose-950/10' }} rounded-[1.5rem] p-5 flex flex-col transition-all hover:border-zinc-700">
-                                            <div class="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <h3 class="text-sm font-bold text-white font-mono flex items-center gap-2" dir="ltr">
-                                                        <svg class="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                                        {{ $wg->profile_name }}
-                                                    </h3>
-                                                    <span class="text-[10px] text-zinc-500 font-mono mt-1.5 block" dir="ltr">IP: {{ $wg->user_ip }} | سرور: {{ $srv->name ?? 'نامشخص' }}</span>
-                                                </div>
-                                                <button wire:click="toggleWgConfig({{ $wg->id }})" class="relative h-5 w-9 rounded-full transition-colors duration-200 {{ $wg->is_enabled ? 'bg-emerald-500' : 'bg-zinc-700' }}">
-                                                    <span class="absolute top-[2px] bg-white w-4 h-4 rounded-full transition-transform duration-200 {{ $wg->is_enabled ? 'left-[2px]' : 'translate-x-[16px] left-[2px]' }}"></span>
-                                                </button>
-                                            </div>
-
-                                            <div class="bg-zinc-900/80 rounded-xl p-3 mb-4 flex justify-between items-center border border-zinc-800/50">
-                                                <div class="text-center w-full">
-                                                    <span class="block text-[9px] text-zinc-500 mb-1">دانلود (TX)</span>
-                                                    <span class="text-xs font-bold text-emerald-400 font-mono" dir="ltr">{{ method_exists($account, 'formatBytes') ? $account->formatBytes($wg->tx) : '0 B' }}</span>
-                                                </div>
-                                                <div class="w-px h-6 bg-zinc-800 mx-2"></div>
-                                                <div class="text-center w-full">
-                                                    <span class="block text-[9px] text-zinc-500 mb-1">آپلود (RX)</span>
-                                                    <span class="text-xs font-bold text-blue-400 font-mono" dir="ltr">{{ method_exists($account, 'formatBytes') ? $account->formatBytes($wg->rx) : '0 B' }}</span>
-                                                </div>
-                                            </div>
-
-                                            <div class="grid grid-cols-3 gap-2 mt-auto border-t border-zinc-800/60 pt-4">
-                                                <a href="{{ asset('configs/' . $wg->profile_name . '.png') }}" target="_blank" title="مشاهده بارکد" class="py-2.5 flex justify-center items-center bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-[10px] font-bold transition-colors">
-                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                                                    بارکد QR
-                                                </a>
-                                                <a href="{{ asset('configs/' . $wg->profile_name . '.conf') }}" download title="دانلود فایل" class="py-2.5 flex justify-center items-center bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-[10px] font-bold transition-colors">
-                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                                    دانلود فایل
-                                                </a>
-                                                <button wire:click="openChangeServerModal({{ $wg->id }})" title="انتقال سرور" class="py-2.5 flex justify-center items-center bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white rounded-xl text-[10px] font-bold transition-colors">
-                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                                                    انتقال سرور
-                                                </button>
-                                            </div>
-                                        </div>
-                                    @empty
-                                        <div class="col-span-full py-12 text-center text-sm font-bold text-zinc-500 border-2 border-dashed border-zinc-800/50 rounded-[1.5rem]">
-                                            کانفیگی یافت نشد.
-                                        </div>
-                                    @endforelse
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <div class="space-y-6">
-
-                <div class="bg-gradient-to-br from-amber-500/10 to-orange-500/5 border border-amber-500/20 rounded-[2rem] p-6 shadow-lg relative overflow-hidden">
-                    <div class="flex items-center gap-4 mb-4 relative z-10">
-                        <div class="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-500 border border-amber-500/30">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        </div>
-                        <div>
-                            <span class="text-xs font-bold text-amber-500/80">اعتبار باقیمانده سرویس</span>
-                            <div class="flex items-baseline gap-1 mt-0.5">
-                                <span class="text-3xl font-black text-white font-mono">{{ $daysRemaining ?? 0 }}</span>
-                                <span class="text-sm text-amber-200">روز</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-[11px] font-bold text-amber-300 bg-amber-500/10 px-3 py-2 rounded-xl border border-amber-500/20 relative z-10" dir="ltr">انقضا: {{ $expireDateFormatted ?? 'بدون انقضا' }}</div>
-                </div>
-
-                <div class="bg-zinc-900/50 border border-zinc-800/60 rounded-[2rem] p-6 shadow-xl relative">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="p-2 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 01-2-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 01-2-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-white">زنجیره سازندگان و بالادستی</h3>
-                            <p class="text-[10px] text-zinc-400 mt-0.5">مسیر سلسله‌مراتب ساخت و نظارت اکانت</p>
-                        </div>
-                    </div>
-
-                    @php
-                        $currentCreator = \App\Models\User::find($account->creator);
-                        $level = 1;
-                    @endphp
-
-                    @if($currentCreator)
-                        <div class="relative space-y-4">
-                            @while($currentCreator)
-                                @php
-                                    $isUserRole = in_array($currentCreator->role, ['user', 'customer']);
-                                    $profileUrl = $isUserRole
-                                        ? route('reseller.users.show', $currentCreator->id)
-                                        : "#";
-                                @endphp
-
-                                <div class="relative flex items-center gap-4">
-                                    <div class="w-9 h-9 rounded-full bg-zinc-900 border-2 border-zinc-700 flex items-center justify-center text-purple-400 font-black text-[10px] z-10 shrink-0 shadow-md">
-                                        L{{ $level }}
-                                    </div>
-                                    <div class="flex-1 bg-zinc-950 border border-zinc-800/80 rounded-2xl p-3 flex flex-col justify-center hover:border-purple-500/40 transition-colors">
-                                        <div class="flex justify-between items-center mb-1">
-                                            <a href="{{ $profileUrl }}" wire:navigate class="text-xs font-bold text-white hover:text-purple-400 transition-colors">
-                                                {{ $currentCreator->name }}
-                                            </a>
-                                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-zinc-900 text-purple-400 border border-zinc-800">
-                                        {{ $currentCreator->role ?? 'نامشخص' }}
-                                    </span>
-                                        </div>
-                                        <div class="flex items-center gap-2 text-[10px] text-zinc-500 font-mono" dir="ltr">
-                                            <span>{{ $currentCreator->phone ?? $currentCreator->email ?? 'بدون اطلاعات تماس' }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                @php
-                                    $currentCreator = $currentCreator->parentAgent ?? $currentCreator->creatorUser ?? null;
-                                    $level++;
-                                @endphp
-                            @endwhile
-                        </div>
-                    @else
-                        <div class="text-center py-6 text-xs font-medium text-zinc-500 bg-zinc-950/50 rounded-2xl border border-zinc-800/50 border-dashed">
-                            این اکانت بالادستی ندارد.
+                        <div class="flex justify-between mt-2">
+                            <span class="text-[10px] font-bold text-zinc-500">مصرف شده: <span dir="ltr">{{ $usageStr }}</span></span>
+                            <span class="text-[10px] font-bold text-zinc-600">کل: <span dir="ltr">{{ $maxUsageStr }}</span></span>
                         </div>
                     @endif
                 </div>
 
+                @if($account->service_group === 'wireguard')
+                    <div class="bg-zinc-900/50 border border-zinc-800/60 rounded-[2rem] p-6 hover:-translate-y-1 transition-transform duration-300">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-zinc-400">پروتکل فعال سرویس</span>
+                                <h3 class="text-xl font-black text-white mt-0.5 tracking-wider uppercase">WireGuard</h3>
+                            </div>
+                        </div>
+                        <div class="text-[11px] font-bold text-purple-400 bg-purple-500/10 px-3 py-1.5 rounded-lg inline-block">تعداد {{ count($wgConfigs ?? []) }} دستگاه متصل (Peers)</div>
+                    </div>
+                @endif
+
+                @if($isRadiusService)
+                    <div class="bg-zinc-900/50 border border-zinc-800/60 rounded-[2rem] p-6 hover:-translate-y-1 transition-transform duration-300">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-zinc-400">تعداد اتصالات موفق</span>
+                                <div class="flex items-baseline gap-1 mt-0.5">
+                                    <span class="text-2xl font-black text-white font-mono">{{ $totalConnections ?? 0 }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-[11px] font-bold text-blue-400 bg-blue-500/10 px-3 py-1.5 rounded-lg inline-block">سرویس Radius فعال</div>
+                    </div>
+                @endif
+            </div>
+
+            <div class="bg-zinc-900/50 border border-zinc-800/60 rounded-[2rem] overflow-hidden shadow-xl">
+                <div class="p-2 border-b border-zinc-800/60 bg-zinc-950/30 overflow-x-auto">
+                    <div class="flex gap-1 min-w-max">
+                        @foreach([
+                            'active_sessions' => $isRadiusService ? 'نشست‌های فعال (' . count($activeSessions ?? []) . ')' : null,
+                            'session_history' => $isRadiusService ? 'تاریخچه نشست‌ها' : null,
+                            'activities'      => 'رخدادها و تغییرات',
+                            'wg_configs'      => $account->service_group === 'wireguard' ? 'لیست کانفیگ‌ها (Peers)' : null
+                        ] as $tabKey => $tabLabel)
+                            @if($tabLabel)
+                                <button wire:click="$set('activeTab', '{{ $tabKey }}')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap {{ $activeTab === $tabKey ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50' }}">
+                                    {{ $tabLabel }}
+                                </button>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="p-0">
+                    @if($activeTab === 'active_sessions' && $isRadiusService)
+                        <div class="p-6 text-center text-zinc-500 text-sm">لیست نشست‌های فعال...</div>
+                    @endif
+
+                    @if($activeTab === 'activities')
+                        <div class="overflow-x-auto animate-fade-in" wire:key="tab-activities">
+                            <table class="w-full text-right text-xs">
+                                <thead class="bg-zinc-950/50 text-zinc-400 font-bold border-b border-zinc-800/80">
+                                <tr>
+                                    <th class="p-4 font-medium">شرح رخداد</th>
+                                    <th class="p-4 font-medium w-40">مجری</th>
+                                    <th class="p-4 font-medium w-40">زمان</th>
+                                </tr>
+                                </thead>
+                                <tbody class="divide-y divide-zinc-800/50 text-zinc-300">
+                                @forelse($activities ?? [] as $act)
+                                    <tr class="hover:bg-zinc-800/30 transition-colors">
+                                        <td class="p-4 text-[13px] font-medium text-white leading-relaxed">{{ $act->content }}</td>
+                                        <td class="p-4">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-800/50 text-zinc-300 border border-zinc-700/50 font-medium">
+                                            <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                            {{ $act->causer->name ?? 'سیستم' }}
+                                        </span>
+                                        </td>
+                                        <td class="p-4 font-mono text-zinc-400 text-[11px]" dir="ltr">{{ \Morilog\Jalali\Jalalian::forge($act->created_at)->format('Y/m/d H:i') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="3" class="py-12 text-center text-zinc-500 font-medium">رخدادی برای این کاربر ثبت نشده است.</td></tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+
+                    @if($account->service_group === 'wireguard' && $activeTab === 'wg_configs')
+                        <div class="p-6 animate-fade-in" wire:key="tab-wg">
+                            <div class="mb-6 flex items-center justify-between">
+                                <div>
+                                    <h2 class="text-sm font-bold text-white">کانفیگ‌های متصل (Peers)</h2>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                                @forelse($wgConfigs ?? [] as $wg)
+                                    @php $srv = \App\Models\Nas::find($wg->server_id); @endphp
+                                    <div class="bg-zinc-950 border {{ $wg->is_enabled ? 'border-zinc-800/80' : 'border-rose-900/50 bg-rose-950/10' }} rounded-[1.5rem] p-5 flex flex-col transition-all hover:border-zinc-700">
+                                        <div class="flex justify-between items-start mb-4">
+                                            <div>
+                                                <h3 class="text-sm font-bold text-white font-mono flex items-center gap-2" dir="ltr">
+                                                    <svg class="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                                    {{ $wg->profile_name }}
+                                                </h3>
+                                                <span class="text-[10px] text-zinc-500 font-mono mt-1.5 block" dir="ltr">IP: {{ $wg->user_ip }} | سرور: {{ $srv->name ?? 'نامشخص' }}</span>
+                                            </div>
+                                            <button wire:click="toggleWgConfig({{ $wg->id }})" class="relative h-5 w-9 rounded-full transition-colors duration-200 {{ $wg->is_enabled ? 'bg-emerald-500' : 'bg-zinc-700' }}">
+                                                <span class="absolute top-[2px] bg-white w-4 h-4 rounded-full transition-transform duration-200 {{ $wg->is_enabled ? 'left-[2px]' : 'translate-x-[16px] left-[2px]' }}"></span>
+                                            </button>
+                                        </div>
+
+                                        <div class="bg-zinc-900/80 rounded-xl p-3 mb-4 flex justify-between items-center border border-zinc-800/50">
+                                            <div class="text-center w-full">
+                                                <span class="block text-[9px] text-zinc-500 mb-1">دانلود (TX)</span>
+                                                <span class="text-xs font-bold text-emerald-400 font-mono" dir="ltr">{{ method_exists($account, 'formatBytes') ? $account->formatBytes($wg->tx) : '0 B' }}</span>
+                                            </div>
+                                            <div class="w-px h-6 bg-zinc-800 mx-2"></div>
+                                            <div class="text-center w-full">
+                                                <span class="block text-[9px] text-zinc-500 mb-1">آپلود (RX)</span>
+                                                <span class="text-xs font-bold text-blue-400 font-mono" dir="ltr">{{ method_exists($account, 'formatBytes') ? $account->formatBytes($wg->rx) : '0 B' }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-3 gap-2 mt-auto border-t border-zinc-800/60 pt-4">
+                                            <a href="{{ asset('configs/' . $wg->profile_name . '.png') }}" target="_blank" title="مشاهده بارکد" class="py-2.5 flex justify-center items-center bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-[10px] font-bold transition-colors">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                                                بارکد QR
+                                            </a>
+
+                                            <a href="{{ asset('configs/' . $wg->profile_name . '.conf') }}" download="{{ $wg->profile_name }}.conf" title="دانلود فایل" class="py-2.5 flex justify-center items-center bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-[10px] font-bold transition-colors">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                                دانلود فایل
+                                            </a>
+
+                                            <button wire:click="openChangeServerModal({{ $wg->id }})" title="انتقال سرور" class="py-2.5 flex justify-center items-center bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white rounded-xl text-[10px] font-bold transition-colors">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                                انتقال سرور
+                                            </button>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="col-span-full py-12 text-center text-sm font-bold text-zinc-500 border-2 border-dashed border-zinc-800/50 rounded-[1.5rem]">
+                                        کانفیگی یافت نشد.
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+
+            <div class="bg-gradient-to-br from-amber-500/10 to-orange-500/5 border border-amber-500/20 rounded-[2rem] p-6 shadow-lg relative overflow-hidden">
+                <div class="flex items-center gap-4 mb-4 relative z-10">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-500 border border-amber-500/30">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-amber-500/80">وضعیت زمانی سرویس</span>
+                        <div class="flex items-baseline gap-1 mt-0.5">
+                            @if($isExpired)
+                                <span class="text-xl font-black text-rose-500 drop-shadow-md">منقضی شده</span>
+                            @elseif($isFirstLogin)
+                                <span class="text-lg font-black text-blue-400 drop-shadow-md">در انتظار اولین اتصال</span>
+                            @else
+                                <span class="text-3xl font-black text-white font-mono">{{ $daysRemaining ?? 0 }}</span>
+                                <span class="text-sm text-amber-200">روز باقیمانده</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <div class="text-[11px] font-bold text-amber-300 bg-amber-500/10 px-3 py-2 rounded-xl border border-amber-500/20 relative z-10" dir="ltr">
+                    انقضا: {{ $isFirstLogin ? 'محاسبه بعد از اولین اتصال' : ($expireDateFormatted ?? 'نامشخص') }}
+                </div>
+            </div>
+
+            <div class="bg-zinc-900/50 border border-zinc-800/60 rounded-[2rem] p-6 shadow-xl relative">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-2 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 01-2-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 01-2-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white">زنجیره سازندگان و بالادستی</h3>
+                        <p class="text-[10px] text-zinc-400 mt-0.5">مسیر سلسله‌مراتب ساخت و نظارت اکانت</p>
+                    </div>
+                </div>
+
+                @php
+                    $currentCreator = \App\Models\User::find($account->creator);
+                    $level = 1;
+                @endphp
+
+                @if($currentCreator)
+                    <div class="relative space-y-4">
+                        @while($currentCreator)
+                            @php
+                                $isUserRole = in_array($currentCreator->role, ['user', 'customer']);
+                                $profileUrl = $isUserRole
+                                    ? route('reseller.users.show', $currentCreator->id)
+                                    : "#";
+                            @endphp
+
+                            <div class="relative flex items-center gap-4">
+                                <div class="w-9 h-9 rounded-full bg-zinc-900 border-2 border-zinc-700 flex items-center justify-center text-purple-400 font-black text-[10px] z-10 shrink-0 shadow-md">
+                                    L{{ $level }}
+                                </div>
+                                <div class="flex-1 bg-zinc-950 border border-zinc-800/80 rounded-2xl p-3 flex flex-col justify-center hover:border-purple-500/40 transition-colors">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <a href="{{ $profileUrl }}" wire:navigate class="text-xs font-bold text-white hover:text-purple-400 transition-colors">
+                                            {{ $currentCreator->name }}
+                                        </a>
+                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-zinc-900 text-purple-400 border border-zinc-800">
+                                        {{ $currentCreator->role ?? 'نامشخص' }}
+                                    </span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-[10px] text-zinc-500 font-mono" dir="ltr">
+                                        <span>{{ $currentCreator->phone ?? $currentCreator->email ?? 'بدون اطلاعات تماس' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @php
+                                $currentCreator = $currentCreator->parentAgent ?? $currentCreator->creatorUser ?? null;
+                                $level++;
+                            @endphp
+                        @endwhile
+                    </div>
+                @else
+                    <div class="text-center py-6 text-xs font-medium text-zinc-500 bg-zinc-950/50 rounded-2xl border border-zinc-800/50 border-dashed">
+                        این اکانت بالادستی ندارد.
+                    </div>
+                @endif
             </div>
 
         </div>
+
+    </div>
 
     @if($isRechargeModalOpen)
         <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-md transition-all animate-fade-in" wire:key="recharge-modal">
