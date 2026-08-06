@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Mobile;
 use App\Http\Controllers\Controller;
 use App\Models\Accounts;
 use App\Models\Blog;
-use App\Models\RadAcct;
+use App\Models\Radacct;
 use App\Models\Nas;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -100,7 +100,7 @@ class AuthController extends Controller
                 $down_and_up =  $this->formatBytes($findUser->download_usage)."/". $this->formatBytes($findUser->upload_usage);
 
             }
-            $onlineCount = RadAcct::where('username',$findUser->username)->where('acctstoptime',NULL)->count();
+            $onlineCount = Radacct::where('username',$findUser->username)->where('acctstoptime',NULL)->count();
 
             $expired = false;
             if($findUser->expire_set) {
@@ -262,7 +262,7 @@ class AuthController extends Controller
             $total_bandwidth =  $this->formatBytes($findUser->max_usage);
             $down_and_up =  $this->formatBytes($findUser->download_usage)."/". $this->formatBytes($findUser->upload_usage);
         }
-        $onlineCount = RadAcct::where('username',$findUser->username)->where('acctstoptime',NULL)->count();
+        $onlineCount = Radacct::where('username',$findUser->username)->where('acctstoptime',NULL)->count();
 
         $expired = false;
         $left_date = null;
