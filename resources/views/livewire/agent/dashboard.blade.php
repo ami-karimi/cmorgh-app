@@ -61,8 +61,8 @@
             <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">میزان بدهی به سیستم</span>
 
             <div class="mt-4 flex items-baseline gap-1.5 relative z-10">
-        <span class="text-3xl font-black font-mono-digit {{ $this->debtbalance > 0 ? 'text-rose-500' : 'text-zinc-900 dark:text-white' }}">
-            {{ number_format($this->debtbalance) }}
+        <span class="text-3xl font-black font-mono-digit {{ auth()->user()->debt_balance > 0 ? 'text-rose-500' : 'text-zinc-900 dark:text-white' }}">
+            {{ number_format(auth()->user()->debt_balance) }}
         </span>
                 <span class="text-xs font-medium text-zinc-400">تومان</span>
             </div>
