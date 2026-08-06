@@ -1,5 +1,28 @@
-<div class="min-h-screen bg-zinc-950 text-zinc-100 font-sans p-4 sm:p-6 flex justify-center items-start pt-8 pb-16">
+<div class="min-h-screen bg-zinc-950 text-zinc-100 font-sans p-4 sm:p-6 flex justify-center items-start pt-6 pb-16">
     <div class="w-full max-w-xl space-y-6">
+
+        <div class="bg-zinc-900/60 backdrop-blur-xl border border-zinc-800/80 rounded-[2rem] p-4 px-6 flex items-center justify-between shadow-xl">
+            <div class="flex items-center gap-3.5">
+                @if($brandLogo)
+                    <img src="{{ asset($brandLogo) }}" alt="{{ $brandName }}" class="w-11 h-11 rounded-2xl object-cover border border-zinc-700/50 shadow-md">
+                @else
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-orange-500/20">
+                        {{ mb_substr($brandName, 0, 1) }}
+                    </div>
+                @endif
+                <div>
+                    <span class="text-[10px] font-bold text-zinc-500 block">ارائه‌دهنده سرویس</span>
+                    <h2 class="text-sm font-black text-white tracking-wide">{{ $brandName }}</h2>
+                </div>
+            </div>
+
+            @if($supportId)
+                <a href="https://t.me/{{ ltrim($supportId, '@') }}" target="_blank" class="px-3.5 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.01-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.23.14.33-.01.06-.01.18-.02.26z"/></svg>
+                    پشتیبانی
+                </a>
+            @endif
+        </div>
 
         @php
             $maxUsage = $account->max_usage ?? 0;

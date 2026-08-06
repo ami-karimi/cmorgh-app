@@ -6,6 +6,8 @@ use Livewire\Component;
 use App\Models\Accounts;
 use App\Models\WireGuardUsers;
 use App\Models\Group;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class PublicAccountView extends Component
 {
@@ -13,6 +15,11 @@ class PublicAccountView extends Component
     public $groupName = 'نامشخص';
     public $isOnline = false;
     public $wgConfigs = [];
+
+    // 🟢 متغیرهای جدید برندینگ نماینده
+    public $brandName = 'سامانه VPN';
+    public $brandLogo = null;
+    public $supportId = null;
 
     public function mount($hash)
     {
@@ -25,6 +32,9 @@ class PublicAccountView extends Component
             abort(404, 'صفحه مورد نظر یا اکانت یافت نشد.');
         }
 
+        // 🟢 استخراج برندینگ و لوگوی نماینده سازنده اکانت
+        $this->loadAgentBranding();
+
         // دریافت نام گروه کاربری (تعرفه)
         if (!empty($this->account->group_id)) {
             $group = Group::find($this->account->group_id);
@@ -34,8 +44,6 @@ class PublicAccountView extends Component
         }
 
         // محاسبه وضعیت آنلاین/آفلاین
-        // ۱. اگر فیلدی به نام is_online در دیتابیس دارید
-        // ۲. یا از طریق جدول اتصالات/نشست‌های فعال بررسی می‌کنید
         $this->isOnline =$this->account->is_online
             ?? (isset($this->account->online) &&$this->account->online == 1)
             ?? false;
@@ -43,10 +51,36 @@ class PublicAccountView extends Component
         // اگر وایرگارد است، کانفیگ‌های آن را لود کن
         if ($this->account->service_group === 'wireguard') {
             $this->wgConfigs = WireGuardUsers::where('user_id',$this->account->id)->get();
+        }
+    }
 
-            // اگر در وایرگارد حداقل یک کانفیگ اتصال اخیر/حجم زنده داشته باشد
-            if (!$this->isOnline &&$this->wgConfigs->count() > 0) {
-                // اگر شرط اختصاصی آنلاین بودن وایرگارد دارید اینجا چک می‌شود
+    /**
+     * 🟢 بررسی و دریافت اطلاعات برندینگ نماینده بالادستی
+     */
+    private function loadAgentBranding()
+    {
+        if (!empty($this->account->creator)) {
+            $agent = User::find($this->account->creator);
+
+            if ($agent) {
+                // دریافت اطلاعات فروشگاه نماینده از جدول agent_stores
+                $agentStore = DB::table('agent_stores')
+                    ->where('user_id', $agent->id)
+                    ->first();
+
+                // اولویت نام برند: عنوان فروشگاه -> نام برند -> نام نماینده -> نام سیستم
+                $this->brandName =$agentStore->title
+                    ?? $agent->brand_name
+                    ?? $agent->name
+                    ?? config('app.name', 'سامانه VPN');
+
+                // پشتیبانی تلگرام
+                $this->supportId =$agentStore->support_id ?? null;
+
+                // لوگوی نماینده (در صورت وجود)
+                $this->brandLogo =$agentStore->logo_url
+                    ?? $agent->logo
+                    ?? null;
             }
         }
     }
