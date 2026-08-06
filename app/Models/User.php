@@ -261,8 +261,7 @@ class User extends Authenticatable
 
         $finalDebt = (int) ($totalPlus - $totalMinus);
 
-        // اگر عدد منفی شد، همان 0 را برگرداند
-        return max(0, $finalDebt);
+        return $finalDebt;
     }
 
     public function getFormattedBalanceAttribute()
