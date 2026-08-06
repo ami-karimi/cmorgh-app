@@ -21,4 +21,7 @@ class Nas extends Model
         return $query->whereJsonContains('server_type', $protocol);
     }
 
+    public function getUsersOnline(){
+        return $this->hasMany(RadAcct::class,'nasipaddress','ipaddress')->where('acctstoptime','=',NULL);
+    }
 }
