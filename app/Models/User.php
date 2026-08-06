@@ -259,7 +259,10 @@ class User extends Authenticatable
             ->whereIn('type', ['minus_amn'])
             ->sum('price');
 
-        return (int) ($totalPlus - $totalMinus);
+        $finalDebt = (int) ($totalPlus - $totalMinus);
+
+        // اگر عدد منفی شد، همان 0 را برگرداند
+        return max(0, $finalDebt);
     }
 
     public function getFormattedBalanceAttribute()
