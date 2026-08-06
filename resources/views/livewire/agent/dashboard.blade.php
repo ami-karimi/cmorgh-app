@@ -67,7 +67,7 @@
                 <span class="text-xs font-medium text-zinc-400">تومان</span>
             </div>
 
-            @if($debt > 0)
+            @if(auth()->user()->debt_balance > 0)
                 <div class="absolute -left-10 -bottom-10 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl pointer-events-none"></div>
             @endif
         </div>
