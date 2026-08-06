@@ -19,7 +19,7 @@
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-orange-500/20 overflow-hidden shrink-0 border border-zinc-700/50">
                 @if(!empty($brandLogo))
-                    <img src="{{ asset($brandLogo) }}" alt="{{ $brandName }}" class="w-full h-full object-cover">
+                    <img src="{{ asset("storage".$brandLogo) }}" alt="{{ $brandName }}" class="w-full h-full object-cover">
                 @else
                     {{ mb_substr($brandName ?? 'S', 0, 1) }}
                 @endif
