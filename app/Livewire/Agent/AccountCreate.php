@@ -223,7 +223,7 @@ class AccountCreate extends Component
         $agent = Auth::user();
 
         // محاسبه موجودی
-        $plus = Financial::where('for', $agent->id)->whereIn('type', ['plus', 'plus_amn'])->where('approved', 1)->sum('price');$minus = Financial::where('for', $agent->id)->whereIn('type', ['minus', 'minus_amn'])->where('approved', 1)->sum('price');$balance = $plus -$minus;
+        $plus = $agent->balance;
 
         $hiddenGroups = DB::table('agent_hidden_groups')->where('agent_id',$agent->id)->pluck('group_id')->toArray();
 
