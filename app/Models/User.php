@@ -255,7 +255,7 @@ class User extends Authenticatable
             ->sum('price');
 
         $totalMinus = $this->financials()
-            ->where('approved', 1)
+            ->where('approved', 0)
             ->whereIn('type', ['minus_amn'])
             ->sum('price');
 
