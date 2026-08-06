@@ -78,21 +78,32 @@
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-2">نام و نام خانوادگی</label>
                         <input wire:model="name" type="text" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-orange-500/50 block p-3 transition shadow-inner text-sm">
+                        @error('name') <span class="text-red-500 text-[10px] mt-1 block font-bold">{{ $message }}</span> @enderror
                     </div>
+
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-2">شماره تماس (اجباری)</label>
                         <input wire:model="phone" type="text" dir="ltr" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-orange-500/50 block p-3 transition shadow-inner font-mono text-sm">
+                        @error('phone') <span class="text-red-500 text-[10px] mt-1 block font-bold">{{ $message }}</span> @enderror
                     </div>
+
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-2">آدرس ایمیل</label>
                         <input wire:model="email" type="email" dir="ltr" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-orange-500/50 block p-3 transition shadow-inner font-mono text-sm">
+                        @error('email') <span class="text-red-500 text-[10px] mt-1 block font-bold">{{ $message }}</span> @enderror
                     </div>
+
                     <div class="pt-2 border-t border-zinc-800/80">
                         <label class="block text-xs font-bold text-zinc-400 mb-2">کلمه عبور جدید (اختیاری)</label>
                         <input wire:model="password" type="password" dir="ltr" placeholder="••••••••" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-orange-500/50 block p-3 transition shadow-inner text-sm">
+                        @error('password') <span class="text-red-500 text-[10px] mt-1 block font-bold">{{ $message }}</span> @enderror
                     </div>
+
                     <div class="pt-2">
-                        <button type="submit" class="w-full py-3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all">ذخیره مشخصات همکار</button>
+                        <button type="submit" wire:loading.attr="disabled" class="w-full py-3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                            <span wire:loading.remove wire:target="updateProfile">ذخیره مشخصات همکار</span>
+                            <span wire:loading wire:target="updateProfile" class="animate-pulse">درحال پردازش...</span>
+                        </button>
                     </div>
                 </form>
             </div>

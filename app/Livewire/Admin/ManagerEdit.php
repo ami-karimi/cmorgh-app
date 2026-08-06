@@ -214,13 +214,17 @@ class ManagerEdit extends Component
 
     public function updateProfile()
     {
+        // تبدیل رشته خالی به null برای جلوگیری از ارور دیتابیس (وقتی ایمیل خالی ارسال میشه)
+        $this->email = empty($this->email) ? null : $this->email;
+
         $rules = [
             'name'  => 'required|string|max:255',
             'phone' => 'required|string|max:20|unique:users,phone,' . $this->manager->id,
             'email' => 'nullable|email|max:255|unique:users,email,' . $this->manager->id,
         ];
 
-        if (!empty($this->password)) {$rules['password'] = 'required|min:6';
+        if (!empty($this->password)) {
+            $rules['password'] = 'required|min:6';
         }
 
         $this->validate($rules);
@@ -229,17 +233,19 @@ class ManagerEdit extends Component
             'name'      => $this->name,
             'phone'     => $this->phone,
             'email'     => $this->email,
-            'is_active' => $this->is_active,
         ];
 
         if (!empty($this->password)) {
             $data['password'] = \Illuminate\Support\Facades\Hash::make($this->password);
         }
 
-        $this->manager->update($data);$this->password = '';
+        $this->manager->update($data);
+
+        $this->password = ''; // پاک کردن فیلد پسورد بعد از ذخیره
 
         session()->flash('profile_message', 'اطلاعات هویتی با موفقیت بروزرسانی شد.');
     }
+
 
     public function addTransaction()
     {
