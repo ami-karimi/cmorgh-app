@@ -47,7 +47,7 @@ class ManagerList extends Component
 
         $user = User::where('id',$userId)->first();
         // هدایت (ریدایرکت) به مسیر داشبورد نماینده
-        return redirect()->route($user->dashboard_url);
+        return redirect()->route('login');
     }
 
     public function bulkAction($action)
