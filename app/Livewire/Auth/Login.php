@@ -37,7 +37,7 @@ class Login extends Component
 
         // تشخیص ایمیل یا شماره تماس
         if (filter_var($this->identifier, FILTER_VALIDATE_EMAIL)) {$this->loginType = 'email';
-            $userExists = User::where('email',$this->identifier)->exists();
+            $userExists = User::where('email',$this->identifier)->where('is_active',1)->exists();
         } else {
             $this->loginType = 'phone';
 
@@ -46,7 +46,7 @@ class Login extends Component
             }
 
             $formattedPhone = $this->normalizePhoneNumber($this->identifier);
-            $userExists = User::where('phone',$formattedPhone)->exists();
+            $userExists = User::where('phone',$formattedPhone)->where('is_active',1)->exists();
         }
 
         if ($userExists) {
