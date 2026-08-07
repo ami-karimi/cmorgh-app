@@ -74,7 +74,10 @@
                                         <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-zinc-600"></span>
                                     @endif
                                 </div>
-                                <span class="font-mono text-sm font-bold text-zinc-100">{{ $acc->username }}</span>
+                                <span class="font-mono text-sm font-bold text-zinc-100"></span>
+                                <a href="{{ route('reseller.accounts.show', $acc->id) }}" wire:navigate class="font-mono text-sm font-bold text-zinc-100" title="مشاهده جزئیات">
+                                    {{ $acc->username }}
+                                </a>
                             </div>
                             <div class="text-[9px] text-zinc-500 uppercase mt-0.5 font-mono mr-4">
                                 @if($acc->service_group === 'wireguard')
