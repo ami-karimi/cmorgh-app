@@ -254,12 +254,23 @@
                                         @endif
                                     </div>
                                     @if($acc->name)
-                                        <span class="text-[10px] text-orange-400/80 font-bold block mb-0.5">{{ $acc->name }}</span>
+                                        <span class="text-[10px] text-ray-gray/80 font-bold block mb-0.5">{{ $acc->name }}</span>
                                     @endif
-                                    <span class="text-[10px] text-zinc-500 flex items-center gap-1 font-mono">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
-                                            {{ $acc->password }}
-                                        </span>
+                                    <span class="text-[10px] text-zinc-500 flex items-center gap-1 font-mono" title="نماینده بالادستی">
+    <svg class="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 01-2-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 01-2-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+    </svg>
+@if($acc->creatorUser && $acc->creatorUser->parentAgent)
+                                            <a href="{{ route('admin.managers.edit', $acc->creatorUser->parentAgent->id) }}" wire:navigate class="text-[10px] font-bold text-orange-400 hover:text-orange-300">
+                                            {{ $acc->creatorUser->parentAgent->name }}
+                                        </a>
+                                        @else
+                                            <span class="text-[10px] text-zinc-400 font-bold">سیستم</span>
+                                        @endif
+</span>
+
+
+
                                 </div>
                             </div>
                         </td>
@@ -308,9 +319,9 @@
                                     {{ str_replace('_', ' / ', $acc->service_group) }}
                                 </span>
                             <div class="mt-1">
-                                <span class="text-[9px] text-zinc-500">ثبت:</span>
+                                <span class="text-[9px] text-zinc-500">کاربر:</span>
                                 @if($acc->creatorUser)
-                                    <a href="{{ route('admin.managers.edit', $acc->creatorUser->id) }}" wire:navigate class="text-[10px] font-bold text-orange-400 hover:text-orange-300">
+                                    <a href="{{ route('admin.users.show', $acc->creatorUser->id) }}" wire:navigate class="text-[10px] font-bold text-orange-400 hover:text-orange-300">
                                         {{ $acc->creatorUser->name }}
                                     </a>
                                 @else

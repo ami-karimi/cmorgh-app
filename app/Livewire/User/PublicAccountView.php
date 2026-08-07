@@ -59,8 +59,8 @@ class PublicAccountView extends Component
      */
     private function loadAgentBranding()
     {
-        if (!empty($this->account->creator)) {
-            $agent =$this->account->parentAgent;
+        if (!empty($this->account->creatorUser)) {
+            $agent =$this->account->creatorUser->parentAgent;
 
             if ($agent) {
                 // دریافت اطلاعات فروشگاه نماینده از جدول agent_stores
