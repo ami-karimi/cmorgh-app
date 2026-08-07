@@ -66,7 +66,7 @@ class SyncRadiusUsage extends Command
             }
         }
 
-        $this->info("همگام‌سازی با موفقیت انجام شد. تعداد {$updatedCount} اکانت به‌روزرسانی شدند.");
+        $this->info("Synchronization was successful. Number  {$updatedCount} Accounts have been updated.");
 
         return Command::SUCCESS;
     }
