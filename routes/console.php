@@ -14,4 +14,9 @@ Schedule::command('vpn:sync-wg-usage')
     ->appendOutputTo(storage_path('logs/wireguard_sync.log'));
 
 
+Schedule::command('vpn:sync-radius-usage')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/radius_sync.log'));
+
 Schedule::command('vpn:disable-expired')->dailyAt('00:00');
