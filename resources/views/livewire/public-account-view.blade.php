@@ -111,9 +111,48 @@
                             </div>
 
                             <div class="grid grid-cols-2 gap-3">
-                                <a href="{{ asset('configs/' . $wg->profile_name . '.png') }}" target="_blank" class="py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-xs font-bold text-center border border-zinc-800 transition flex items-center justify-center gap-1.5">
-                                    📷 بارکد QR
-                                </a>
+                                <div x-data="{ showQrModal: false }">
+                                    <button type="button"
+                                            @click="showQrModal = true"
+                                            title="مشاهده بارکد"
+                                            class="w-full py-2.5 flex justify-center items-center bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-[10px] font-bold transition-colors">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                                        </svg>
+                                        بارکد QR
+                                    </button>
+
+                                    <div x-show="showQrModal"
+                                         x-transition.opacity.duration.200ms
+                                         @keydown.escape.window="showQrModal = false"
+                                         style="display: none;"
+                                         class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-zinc-950/90 backdrop-blur-md">
+
+                                        <div class="fixed inset-0" @click="showQrModal = false"></div>
+
+                                        <div class="relative w-full max-w-xs bg-zinc-900 border border-zinc-700/50 rounded-[2.5rem] p-6 shadow-2xl flex flex-col items-center text-center space-y-4 z-10">
+
+                                            <button @click="showQrModal = false" class="absolute top-4 left-4 p-2 text-zinc-400 hover:text-white bg-zinc-800/60 hover:bg-zinc-700 rounded-full transition-all">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            </button>
+
+                                            <div class="space-y-1 pt-2">
+                                                <h3 class="text-sm font-bold text-white">اسکن بارکد اتصال (QR)</h3>
+                                                <p class="text-[10px] text-zinc-400 font-medium">با دوربین گوشی اسکن کنید</p>
+                                            </div>
+
+                                            <div class="p-3 bg-white rounded-2xl shadow-inner border border-zinc-200">
+                                                <img src="{{ asset('configs/' . $wg->profile_name . '.png') }}" alt="QR Code" class="w-52 h-52 object-contain">
+                                            </div>
+
+                                            <button @click="showQrModal = false" class="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white font-bold text-xs rounded-xl transition-all">
+                                                بستن
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+
                                 <a  href="{{ route('download.wg.config', ['profile' => $wg->profile_name]) }}" download="{{ $wg->profile_name }}.conf" class="py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold text-center transition flex items-center justify-center gap-1.5 shadow-lg shadow-orange-600/20">
                                     📥 دانلود فایل Conf
                                 </a>
