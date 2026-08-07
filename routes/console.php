@@ -19,4 +19,9 @@ Schedule::command('vpn:sync-radius-usage')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/radius_sync.log'));
 
+Schedule::command('app:clear-radius')
+    ->everySixHours()
+    ->withoutOverlapping();
+
+
 Schedule::command('vpn:disable-expired')->dailyAt('00:00');
