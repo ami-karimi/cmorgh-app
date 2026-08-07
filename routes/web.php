@@ -15,6 +15,24 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', \App\Livewire\Auth\Login::class)->name('login');
 });
 
+use Illuminate\Support\Facades\File;
+
+Route::get('/download-wg/{profile}', function ($profile) {
+    $path = public_path('configs/' . $profile . '.conf');
+
+    if (!File::exists($path)) {
+        abort(404, 'فایل کانفیگ یافت نشد.');
+    }
+
+    // اجبار مرورگر به دانلود فایل بدون تغییر پسوند
+    $headers = [
+        'Content-Type' => 'application/octet-stream',
+        'Cache-Control' => 'no-store, no-cache',
+    ];
+
+    return response()->download($path, $profile . '.conf', $headers);
+})->name('download.wg.config');
+
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', function (Request $request) {

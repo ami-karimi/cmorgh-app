@@ -114,7 +114,7 @@
                                 <a href="{{ asset('configs/' . $wg->profile_name . '.png') }}" target="_blank" class="py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-xs font-bold text-center border border-zinc-800 transition flex items-center justify-center gap-1.5">
                                     📷 بارکد QR
                                 </a>
-                                <a href="{{ asset('configs/' . $wg->profile_name . '.conf') }}" download="{{ $wg->profile_name }}.conf" class="py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold text-center transition flex items-center justify-center gap-1.5 shadow-lg shadow-orange-600/20">
+                                <a  href="{{ route('download.wg.config', ['profile' => $wg->profile_name]) }}" download="{{ $wg->profile_name }}.conf" class="py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold text-center transition flex items-center justify-center gap-1.5 shadow-lg shadow-orange-600/20">
                                     📥 دانلود فایل Conf
                                 </a>
                             </div>
