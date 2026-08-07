@@ -19,7 +19,7 @@ Schedule::command('vpn:sync-radius-usage')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/radius_sync.log'));
 
-Schedule::command('app:clear-radius')
+Schedule::command('vpn:clear-radius')
     ->everySixHours()
     ->withoutOverlapping();
 
