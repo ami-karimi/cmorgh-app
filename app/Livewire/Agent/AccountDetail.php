@@ -33,6 +33,7 @@ class AccountDetail extends Component
     public $searchCustomer = '';
     public $selectedCustomerName = '';
 
+    public $showQrModal = false;
     // متغیرهای پرداخت و مالی
     public $pay_from_user_wallet = true;
     public $pay_from_agent_wallet = true;
