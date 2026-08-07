@@ -60,7 +60,7 @@ class PublicAccountView extends Component
     private function loadAgentBranding()
     {
         if (!empty($this->account->creator)) {
-            $agent = User::find($this->account->creator);
+            $agent =$this->account->parentAgent;
 
             if ($agent) {
                 // دریافت اطلاعات فروشگاه نماینده از جدول agent_stores
@@ -71,7 +71,7 @@ class PublicAccountView extends Component
                 $this->brandName = $agent->brand_name ?? config('app.name', 'سامانه VPN');
 
                 // پشتیبانی تلگرام
-                $this->supportId =$agentStore->support_id ?? null;
+                $this->supportId = $agentStore->support_id ?? null;
 
                 $this->brandLogo = $agent->brand_logo ?? null;
             }
