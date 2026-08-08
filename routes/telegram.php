@@ -13,6 +13,7 @@ use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use Morilog\Jalali\Jalalian;
 use App\Telegram\Conversations\CreateAccountConversation;
+use App\Telegram\Handlers\AgentWalletHandler;
 
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
@@ -310,6 +311,7 @@ $bot->onCallbackQueryData('dl_wg_qr:{id}', function (\SergiX44\Nutgram\Nutgram $
         $bot->sendMessage("⚠️ تصویر QR Code در مسیر سرور یافت نشد.", parse_mode: 'HTML');
     }
 });
+$bot->onCallbackQueryData('agent_wallet', AgentWalletHandler::class);
 
 // ==========================================
 // ۶. مسیرهای عمومی
