@@ -1,9 +1,11 @@
 <?php
+
 namespace App\Telegram\Handlers;
 
 use SergiX44\Nutgram\Nutgram;
 use App\Models\User;
 use App\Models\Financial;
+use App\Models\AgentBankAccount;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
@@ -21,23 +23,25 @@ class AgentWalletHandler
             return;
         }
 
-        // بستن حالت لودینگ دکمه شیشه‌ای
         $bot->answerCallbackQuery();
 
-        // دریافت موجودی
+        // ۱. دریافت موجودی فعلی
         $balance = number_format($user->balance);
 
-        // بررسی آخرین فیش معلق
+        // ۲. بررسی فیش معلق
         $pendingReceipt = Financial::where('for', $user->id)
                             ->where('type', 'plus')
                             ->where('approved', 0)
                             ->latest()
                             ->first();
 
-        // ساخت متن پیام
-        $text = $this->generateWalletText($user, $balance, $pendingReceipt);
+        // 🔴 ۳. دریافت داینامیک اطلاعات حساب بانکی منیجر/بالاسری
+        $bankAccount = $this->getManagerBankAccount($user);
 
-        // ساخت دکمه‌ها
+        // ۴. ساخت متن پیام
+        $text = $this->generateWalletText($user, $balance, $pendingReceipt, $bankAccount);
+
+        // ۵. ساخت دکمه‌ها
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
                 InlineKeyboardButton::make('➕ افزایش موجودی (ثبت فیش)', callback_data: 'agent_submit_receipt')
@@ -50,9 +54,28 @@ class AgentWalletHandler
     }
 
     /**
-     * یک متد کمکی (Helper) برای مرتب ماندن متن پیام
+     * دریافت شماره حساب بانکی منیجر (یا ادمین اصلی در صورت عدم وجود بالاسری)
      */
-    private function generateWalletText($user, $balance, $pendingReceipt): string
+    private function getManagerBankAccount(User $user): ?AgentBankAccount
+    {
+        // الف) اگر کاربر بالاسری (creator) دارد، حساب بانکی او را پیدا کن
+        if ($user->creator) {
+            $account = AgentBankAccount::where('user_id', $user->creator)->first();
+            if ($account) {
+                return $account;
+            }
+        }
+
+        // ب) اگر بالاسری نداشت یا بالاسری حساب ثبت نکرده بود، حساب اولین منیجر/ادمین سیستم را برگردان
+        $managerId = User::whereIn('role', ['admin', 'manager'])->value('id');
+
+        return AgentBankAccount::where('user_id', $managerId)->first() ?? AgentBankAccount::first();
+    }
+
+    /**
+     * تولید متن پیام موجودی به همراه اطلاعات حساب بانکی داینامیک
+     */
+    private function generateWalletText(User $user, string $balance, $pendingReceipt, ?AgentBankAccount $bankAccount): string
     {
         $text = "💰 <b>کیف پول کاربری شما</b>\n";
         $text .= "➖➖➖➖➖➖➖➖➖➖\n";
@@ -64,10 +87,25 @@ class AgentWalletHandler
         }
 
         $text .= "🏦 <b>اطلاعات حساب جهت واریز:</b>\n";
-        $text .= "💳 <b>شماره کارت:</b> <code>6104337000000000</code>\n";
-        $text .= "👤 <b>به نام:</b> نام و نام خانوادگی شما\n";
-        $text .= "🏛 <b>بانک:</b> ملت\n\n";
-        $text .= "💡 <i>جهت افزایش موجودی، ابتدا مبلغ مورد نظر را واریز کرده و سپس فیش آن را ثبت کنید.</i>";
+
+        if ($bankAccount) {
+            if ($bankAccount->bank_name) {
+                $text .= "🏛 <b>بانک:</b> {$bankAccount->bank_name}\n";
+            }
+            if ($bankAccount->account_name) {
+                $text .= "👤 <b>به نام:</b> {$bankAccount->account_name}\n";
+            }
+            if ($bankAccount->card_number) {
+                $text .= "💳 <b>شماره کارت:</b> <code>{$bankAccount->card_number}</code>\n";
+            }
+            if ($bankAccount->sheba_number) {
+                $text .= "🔢 <b>شماره شبا:</b> <code>{$bankAccount->sheba_number}</code>\n";
+            }
+        } else {
+            $text .= "⚠️ <i>اطلاعات حسابی برای واریز در سیستم ثبت نشده است. لطفاً با پشتیبانی تماس بگیرید.</i>\n";
+        }
+
+        $text .= "\n💡 <i>جهت افزایش موجودی، ابتدا مبلغ را به حساب بالا واریز کرده و سپس روی «➕ افزایش موجودی» کلیک کنید.</i>";
 
         return $text;
     }

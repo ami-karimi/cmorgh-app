@@ -14,6 +14,10 @@ use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use Morilog\Jalali\Jalalian;
 use App\Telegram\Conversations\CreateAccountConversation;
 use App\Telegram\Handlers\AgentWalletHandler;
+use App\Telegram\Conversations\AgentSubmitReceiptConversation;
+use App\Telegram\Handlers\AdminReceiptHandler;
+use App\Telegram\Conversations\AgentSearchAccountConversation;
+use App\Telegram\Handlers\AgentAccountActionHandler;
 
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
@@ -313,10 +317,29 @@ $bot->onCallbackQueryData('dl_wg_qr:{id}', function (\SergiX44\Nutgram\Nutgram $
 });
 $bot->onCallbackQueryData('agent_wallet', AgentWalletHandler::class);
 
+$bot->onCallbackQueryData('agent_submit_receipt', AgentSubmitReceiptConversation::class);
+
+$bot->onCallbackQueryData('admin_approve_receipt:{id}', [AdminReceiptHandler::class, 'approve']);
+$bot->onCallbackQueryData('admin_reject_receipt:{id}', [AdminReceiptHandler::class, 'reject']);
+
+
+$bot->onCallbackQueryData('agent_manage_acc', AgentSearchAccountConversation::class);
+
+// ==========================================
+// ⚙️ تغییر وضعیت (فعال/غیرفعال)
+// ==========================================
+$bot->onCallbackQueryData('agent_toggle_acc:{id}', [AgentAccountActionHandler::class, 'toggleStatus']);
+
+// ==========================================
+// 🔄 تمدید اکانت
+// ==========================================
+$bot->onCallbackQueryData('agent_renew_acc:{id}', \App\Telegram\Conversations\AgentRenewAccountConversation::class);
+
 // ==========================================
 // ۶. مسیرهای عمومی
 // ==========================================
 $bot->onCallbackQueryData('start_login', LoginConversation::class);
+
 
 $bot->onCallbackQueryData('no_account', function (Nutgram $bot) {
     $bot->answerCallbackQuery();

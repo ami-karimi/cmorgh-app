@@ -179,6 +179,64 @@ class BotMenuService
     /**
      * متد عمومی کمکی جهت ارسال یا ویرایش پیام بدون ارور
      */
+
+    public static function renderAccountCardAgent(Nutgram $bot, Accounts $account, bool $isEdit = true){
+        // وضعیت و ترافیک
+        $statusText = $account->is_enabled ? "🟢 فعال" : "🔴 مسدود / غیرفعال";
+        $onlineText = $account->is_online ? "⚡ آنلاین" : "💤 آفلاین";
+        $usageFormatted = method_exists($account, 'formatBytes') ? $account->formatBytes($account->usage) : round($account->usage / (1024*1024*1024), 2) . " GB";
+        $maxUsageFormatted = $account->max_usage == 0 ? "نامحدود" : (method_exists($account, 'formatBytes') ? $account->formatBytes($account->max_usage) : round($account->max_usage / (1024*1024*1024), 2) . " GB");
+
+        // تاریخ انقضا
+        $expireText = "شروع نشده / بدون انقضا";
+        if ($account->expire_date) {
+            $jalaliDate = Jalalian::forge($account->expire_date)->format('Y/m/d - H:i');
+            $daysLeft = (int) now()->diffInDays($account->expire_date, false);
+            $expireText = $daysLeft > 0 ? "{$jalaliDate} ({$daysLeft} روز مانده)" : "{$jalaliDate} (منقضی شده)";
+        }
+        $GroupText = "بدون گروه کاربری";
+        if ($account->group) {
+            $GroupText = $account->group->name;
+        }
+
+        // 🔴 لینک دسترسی آسان کاربر (لینک لاگین بدون پسورد به پنل کلاینت)
+        // آدرس زیر را دقیقاً با روت سایت خودتان تنظیم کنید
+        $easyAccessLink = $account->subscription_url;;
+
+        $text = "👤 <b>اطلاعات اکانت مشتری</b>\n";
+        $text .= "➖➖➖➖➖➖➖➖➖➖\n";
+        $text .= "👥 <b>گروه کاربری:</b> <code>{$GroupText}</code>\n";
+        $text .= "📝 <b>نام‌کاربری:</b> <code>{$account->username}</code>\n";
+        $text .= "🔑 <b>رمز عبور:</b> <code>{$account->password}</code>\n";
+        $text .= "📊 <b>وضعیت:</b> {$statusText} | {$onlineText}\n";
+        $text .= "📦 <b>سرویس:</b> {$account->service_group}\n";
+        $text .= "💾 <b>مصرف ترافیک:</b> {$usageFormatted} / {$maxUsageFormatted}\n";
+        $text .= "📅 <b>تاریخ انقضا:</b> {$expireText}\n\n";
+        $text .= "🔗 <b>لینک دسترسی آسان کاربر (پنل کاربری):</b>\n{$easyAccessLink}";
+
+        $toggleBtnText = $account->is_enabled ? "🔴 مسدودسازی" : "🟢 فعال‌سازی";
+
+        $keyboard = InlineKeyboardMarkup::make()
+            ->addRow(
+                InlineKeyboardButton::make($toggleBtnText, callback_data: "agent_toggle_acc:{$account->id}"),
+                InlineKeyboardButton::make('🔄 تمدید اکانت', callback_data: "agent_renew_acc:{$account->id}")
+            );
+
+        // 🔴 دکمه‌های مخصوص وایرگارد
+        if ($account->service_group === 'wireguard') {
+            $keyboard->addRow(
+                InlineKeyboardButton::make('📥 فایل کانفیگ', callback_data: "dl_wg_conf:{$account->id}"),
+                InlineKeyboardButton::make('📱 کد QR', callback_data: "dl_wg_qr:{$account->id}")
+            );
+        }
+
+        $keyboard->addRow(
+            InlineKeyboardButton::make('🔍 جستجوی دیگر', callback_data: 'agent_manage_acc'),
+            InlineKeyboardButton::make('🏠 منوی اصلی', callback_data: 'back_to_admin_menu')
+        );
+
+        self::sendOrEdit($bot, $text, $keyboard, $isEdit);
+    }
     public static function sendOrEdit(Nutgram $bot, string $text, InlineKeyboardMarkup $keyboard, bool $isEdit = false): void
     {
         try {
