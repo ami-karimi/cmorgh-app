@@ -126,7 +126,8 @@ class AccountProvisioningService
                     'phone'    => $userData['phone'] ?? null,
                     'password' => Hash::make($userData['password']),
                     'role'     => 'customer',
-                    'creator'  => auth()->id(),
+                    'creator'  => (isset($userData['custom_creator']) ? $userData['custom_creator'] : auth()->id()),
+
                 ]);
                 $existingUserId = $user->id;
             }

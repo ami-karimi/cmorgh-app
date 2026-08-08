@@ -252,6 +252,65 @@ function showReceiptToAdmin(Nutgram $bot, Financial $receipt) {
 }
 $bot->onCallbackQueryData('admin_create_acc', CreateAccountConversation::class);
 $bot->onCallbackQueryData('agent_create_acc', CreateAccountConversation::class);
+
+$bot->onCallbackQueryData('dl_wg_conf:{id}', function (\SergiX44\Nutgram\Nutgram $bot, $id) {
+    $account = \App\Models\Accounts::find($id);
+
+    if (!$account || $account->service_group !== 'wireguard') {
+        $bot->answerCallbackQuery(text: '❌ اکانت نامعتبر است یا وایرگارد نیست.', show_alert: true);
+        return;
+    }
+
+    $wgUser = \App\Models\WireGuardUsers::where('user_id', $account->id)->first();
+    if (!$wgUser) {
+        $bot->answerCallbackQuery(text: '❌ پروفایل وایرگارد این کاربر یافت نشد.', show_alert: true);
+        return;
+    }
+
+    $bot->answerCallbackQuery(text: '⏳ در حال ارسال فایل...');
+
+    $profileName = $wgUser->profile_name;
+    $confPath = public_path("configs/{$profileName}.conf");
+
+    if (file_exists($confPath)) {
+        $doc = \SergiX44\Nutgram\Telegram\Types\Internal\InputFile::make($confPath, filename: "{$profileName}.conf");
+        $bot->sendDocument($doc, caption: "📄 <b>فایل کانفیگ:</b> <code>{$profileName}.conf</code>", parse_mode: 'HTML');
+    } else {
+        $bot->sendMessage("⚠️ فایل کانفیگ در مسیر سرور یافت نشد.", parse_mode: 'HTML');
+    }
+});
+
+
+// ==========================================
+// دریافت عکس QR Code وایرگارد
+// ==========================================
+$bot->onCallbackQueryData('dl_wg_qr:{id}', function (\SergiX44\Nutgram\Nutgram $bot, $id) {
+    $account = \App\Models\Accounts::find($id);
+
+    if (!$account || $account->service_group !== 'wireguard') {
+        $bot->answerCallbackQuery(text: '❌ اکانت نامعتبر است یا وایرگارد نیست.', show_alert: true);
+        return;
+    }
+
+    $wgUser = \App\Models\WireGuardUsers::where('user_id', $account->id)->first();
+    if (!$wgUser) {
+        $bot->answerCallbackQuery(text: '❌ پروفایل وایرگارد این کاربر یافت نشد.', show_alert: true);
+        return;
+    }
+
+    $bot->answerCallbackQuery(text: '⏳ در حال ارسال QR Code...');
+
+    $profileName = $wgUser->profile_name;
+    $qrPath = public_path("configs/{$profileName}.png");
+
+    if (file_exists($qrPath)) {
+        $photo = \SergiX44\Nutgram\Telegram\Types\Internal\InputFile::make($qrPath);
+        $bot->sendPhoto($photo, caption: "📱 <b>اسکن جهت اتصال سریع</b>\nکاربر: <code>{$account->username}</code>", parse_mode: 'HTML');
+    } else {
+        $bot->sendMessage("⚠️ تصویر QR Code در مسیر سرور یافت نشد.", parse_mode: 'HTML');
+    }
+});
+
 // ==========================================
 // ۶. مسیرهای عمومی
 // ==========================================

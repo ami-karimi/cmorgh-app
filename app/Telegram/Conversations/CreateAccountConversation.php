@@ -10,26 +10,26 @@ use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Group;
 use App\Models\Nas;
+use App\Models\Accounts;
+use App\Telegram\Services\BotMenuService;
 use App\Services\AccountProvisioningService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
 class CreateAccountConversation extends Conversation
 {
-    // متغیرهای ذخیره‌سازی اطلاعات در طول مکالمه
     public $creatorId;
-    public $customerId; // 'me' یا آیدی مشتری
-    public $serviceGroup;
+    public $customerId; // 'me' یا 'new'
+    public $serviceGroup; // 'wireguard' یا 'l2tp_cisco'
     public $groupId;
     public $username;
     public $password;
 
-    // متغیرهای موقت برای فرم مشتری جدید
     public $newCustomerName;
     public $newCustomerPhone;
 
     /**
-     * مرحله ۱: شروع صدور - انتخاب مشتری
+     * مرحله ۱: انتخاب مشتری
      */
     public function start(Nutgram $bot)
     {
@@ -43,24 +43,34 @@ class CreateAccountConversation extends Conversation
                 InlineKeyboardButton::make('➕ ایجاد مشتری جدید', callback_data: 'cust_new')
             )
             ->addRow(
-                InlineKeyboardButton::make('❌ لغو عملیات', callback_data: 'cancel_creation')
+                InlineKeyboardButton::make('🏠 بازگشت به منوی اصلی', callback_data: 'back_to_admin_menu')
             );
 
-        $bot->sendMessage("➕ <b>مرحله ۱: انتخاب مشتری</b>\n\nاین اکانت قرار است به نام چه کسی ثبت شود؟", parse_mode: 'HTML', reply_markup: $keyboard);
+        $text = "➕ <b>مرحله ۱ از ۵: انتخاب مشتری</b>\n\nاین اکانت قرار است به نام چه کسی ثبت شود؟";
+
+        if ($bot->isCallbackQuery()) {
+            $bot->editMessageText($text, parse_mode: 'HTML', reply_markup: $keyboard);
+        } else {
+            $bot->sendMessage($text, parse_mode: 'HTML', reply_markup: $keyboard);
+        }
+
         $this->next('handleCustomerChoice');
     }
 
     /**
-     * هندلر دکمه‌های انتخاب مشتری
+     * پردازش مرحله ۱
      */
     public function handleCustomerChoice(Nutgram $bot)
     {
         if ($bot->isCallbackQuery()) {
             $data = $bot->callbackQuery()->data;
 
-            if ($data === 'cancel_creation') {
-                $bot->answerCallbackQuery('عملیات لغو شد.');
-                $bot->deleteMessage($bot->chatId(), $bot->messageId());
+            if ($data === 'back_to_admin_menu') {
+                $bot->answerCallbackQuery();
+                $user = User::find($this->creatorId);
+                if ($user) {
+                    BotMenuService::showMainMenu($bot, $user, isEdit: true);
+                }
                 $this->end();
                 return;
             }
@@ -75,7 +85,11 @@ class CreateAccountConversation extends Conversation
             if ($data === 'cust_new') {
                 $this->customerId = 'new';
                 $bot->answerCallbackQuery();
-                $bot->sendMessage("👤 لطفاً **نام کامل مشتری** جدید را تایپ و ارسال کنید:");
+
+                $keyboard = InlineKeyboardMarkup::make()
+                    ->addRow(InlineKeyboardButton::make('🔙 مرحله قبل', callback_data: 'step_back_to_start'));
+
+                $bot->editMessageText("👤 لطفاً **نام کامل مشتری** جدید را تایپ و ارسال کنید:", reply_markup: $keyboard);
                 $this->next('askCustomerPhone');
                 return;
             }
@@ -83,32 +97,52 @@ class CreateAccountConversation extends Conversation
     }
 
     /**
-     * هندلر دریافت نام و پرسش تلفن مشتری
+     * دریافت نام مشتری و پرسش شماره تلفن
      */
     public function askCustomerPhone(Nutgram $bot)
     {
+        if ($bot->isCallbackQuery()) {
+            if ($bot->callbackQuery()->data === 'step_back_to_start') {
+                $bot->answerCallbackQuery();
+                $this->start($bot);
+                return;
+            }
+        }
+
         $this->newCustomerName = $bot->message()?->text;
 
         $keyboard = InlineKeyboardMarkup::make()
-            ->addRow(InlineKeyboardButton::make('⏩ رد کردن (بدون شماره)', callback_data: 'skip_phone'));
+            ->addRow(InlineKeyboardButton::make('⏩ رد کردن (بدون شماره)', callback_data: 'skip_phone'))
+            ->addRow(InlineKeyboardButton::make('🔙 مرحله قبل', callback_data: 'step_back_to_cust_choice'));
 
         $bot->sendMessage("📱 لطفاً **شماره موبایل** مشتری را وارد کنید (یا رد کنید):", reply_markup: $keyboard);
         $this->next('askServiceGroupFromPhone');
     }
 
     /**
-     * هندلر دریافت تلفن
+     * پردازش شماره تلفن
      */
     public function askServiceGroupFromPhone(Nutgram $bot)
     {
-        if ($bot->isCallbackQuery() && $bot->callbackQuery()->data === 'skip_phone') {
-            $this->newCustomerPhone = null;
-            $bot->answerCallbackQuery();
+        if ($bot->isCallbackQuery()) {
+            $data = $bot->callbackQuery()->data;
+
+            if ($data === 'step_back_to_cust_choice') {
+                $bot->answerCallbackQuery();
+                $this->start($bot);
+                return;
+            }
+
+            if ($data === 'skip_phone') {
+                $this->newCustomerPhone = null;
+                $bot->answerCallbackQuery();
+                $this->askServiceGroup($bot);
+                return;
+            }
         } else {
             $this->newCustomerPhone = $bot->message()?->text;
+            $this->askServiceGroup($bot);
         }
-
-        $this->askServiceGroup($bot);
     }
 
     /**
@@ -121,107 +155,188 @@ class CreateAccountConversation extends Conversation
                 InlineKeyboardButton::make('🟣 وایرگارد (Wireguard)', callback_data: 'srv_wireguard'),
                 InlineKeyboardButton::make('🔵 سیسکو (L2TP/Cisco)', callback_data: 'srv_l2tp_cisco')
             )
+            ->addRow(
+                InlineKeyboardButton::make('🔙 مرحله قبل', callback_data: 'step_back_to_cust_choice')
+            );
 
-        $bot->sendMessage("📦 <b>مرحله ۲: انتخاب پروتکل اتصال</b>\n\nنوع سرویس این اکانت را انتخاب کنید:", parse_mode: 'HTML', reply_markup: $keyboard);
+        $text = "📦 <b>مرحله ۲ از ۵: انتخاب پروتکل اتصال</b>\n\nنوع سرویس این اکانت را انتخاب کنید:";
+
+        if ($bot->isCallbackQuery()) {
+            $bot->editMessageText($text, parse_mode: 'HTML', reply_markup: $keyboard);
+        } else {
+            $bot->sendMessage($text, parse_mode: 'HTML', reply_markup: $keyboard);
+        }
+
         $this->next('handleServiceChoice');
     }
 
     /**
-     * هندلر دریافت سرویس و نمایش پکیج‌ها
+     * پردازش سرویس و مرحله ۳: انتخاب پکیج
      */
     public function handleServiceChoice(Nutgram $bot)
     {
         if ($bot->isCallbackQuery()) {
             $data = $bot->callbackQuery()->data;
+
+            if ($data === 'step_back_to_cust_choice') {
+                $bot->answerCallbackQuery();
+                $this->start($bot);
+                return;
+            }
+
             $this->serviceGroup = str_replace('srv_', '', $data);
             $bot->answerCallbackQuery();
 
-            // دریافت لیست گروه‌ها (تعرفه‌ها)
-            $groups = Group::where('is_enabled', 1)->get();
+            $query = Group::where('is_enabled', 1);
+
+            if ($this->serviceGroup === 'wireguard') {
+                $query->where('name', 'like', '%وایرگارد%');
+            } else {
+                $query->where('name', 'not like', '%وایرگارد%');
+            }
+
+            $groups = $query->get();
+
+            if ($groups->isEmpty()) {
+                $keyboard = InlineKeyboardMarkup::make()
+                    ->addRow(InlineKeyboardButton::make('🔙 انتخاب سرویس دیگر', callback_data: 'step_back_to_service'));
+
+                $bot->editMessageText("⚠️ هیچ پکیجی برای این سرویس یافت نشد.", reply_markup: $keyboard);
+                return;
+            }
+
             $keyboard = InlineKeyboardMarkup::make();
+            $agent = User::find($this->creatorId);
 
             foreach ($groups as $group) {
+                $finalPrice = method_exists($group, 'getFinalPriceFor') ? $group->getFinalPriceFor($agent) : $group->price;
                 $keyboard->addRow(
-                    InlineKeyboardButton::make("{$group->name} (" . number_format($group->price) . " تومان)", callback_data: "grp_{$group->id}")
+                    InlineKeyboardButton::make("{$group->name} (" . number_format($finalPrice) . " تومان)", callback_data: "grp_{$group->id}")
                 );
             }
 
-            $bot->sendMessage("🛒 <b>مرحله ۳: انتخاب پکیج/تعرفه</b>\n\nلطفاً پکیج مورد نظر را انتخاب کنید:", parse_mode: 'HTML', reply_markup: $keyboard);
+            $keyboard->addRow(InlineKeyboardButton::make('🔙 مرحله قبل', callback_data: 'step_back_to_service'));
+
+            $bot->editMessageText("🛒 <b>مرحله ۳ از ۵: انتخاب پکیج/تعرفه</b>\n\nلطفاً پکیج مورد نظر را انتخاب کنید:", parse_mode: 'HTML', reply_markup: $keyboard);
             $this->next('handleGroupChoice');
         }
     }
 
     /**
-     * هندلر دریافت گروه و پرسش یوزرنیم
+     * پردازش پکیج و مرحله ۴: تعیین یوزرنیم
      */
     public function handleGroupChoice(Nutgram $bot)
     {
         if ($bot->isCallbackQuery()) {
             $data = $bot->callbackQuery()->data;
+
+            if ($data === 'step_back_to_service') {
+                $bot->answerCallbackQuery();
+                $this->askServiceGroup($bot);
+                return;
+            }
+
             $this->groupId = str_replace('grp_', '', $data);
             $bot->answerCallbackQuery();
 
             $keyboard = InlineKeyboardMarkup::make()
-                ->addRow(InlineKeyboardButton::make('🎲 تولید تصادفی', callback_data: 'rand_username'));
+                ->addRow(InlineKeyboardButton::make('🎲 تولید تصادفی', callback_data: 'rand_username'))
+                ->addRow(InlineKeyboardButton::make('🔙 مرحله قبل', callback_data: 'step_back_to_group'));
 
-            $bot->sendMessage("✍️ <b>مرحله ۴: تعیین نام‌کاربری</b>\n\nنام‌کاربری دلخواه (انگلیسی) را وارد کنید یا روی تولید تصادفی کلیک کنید:", parse_mode: 'HTML', reply_markup: $keyboard);
+            $bot->editMessageText("✍️ <b>مرحله ۴ از ۵: تعیین نام‌کاربری</b>\n\nنام‌کاربری دلخواه (انگلیسی) را وارد کنید یا روی تولید تصادفی کلیک کنید:", parse_mode: 'HTML', reply_markup: $keyboard);
             $this->next('handleUsernameChoice');
         }
     }
 
     /**
-     * هندلر دریافت یوزرنیم و پرسش پسورد
+     * پردازش یوزرنیم و مرحله ۵: تعیین پسورد
      */
     public function handleUsernameChoice(Nutgram $bot)
     {
-        if ($bot->isCallbackQuery() && $bot->callbackQuery()->data === 'rand_username') {
-            $this->username = strtolower(Str::random(6) . rand(10,99));
-            $bot->answerCallbackQuery();
+        if ($bot->isCallbackQuery()) {
+            $data = $bot->callbackQuery()->data;
+
+            if ($data === 'step_back_to_group') {
+                $bot->answerCallbackQuery();
+                // ساخت مجدد کال‌بک انتخاب سرویس برای نمایش پکیج‌ها
+                $fakeBot = clone $bot;
+                $fakeBot->callbackQuery()->data = 'srv_' . $this->serviceGroup;
+                $this->handleServiceChoice($fakeBot);
+                return;
+            }
+
+            if ($data === 'rand_username') {
+                $this->username = strtolower(Str::random(6) . rand(10, 99));
+                $bot->answerCallbackQuery();
+            }
         } else {
             $input = trim(strtolower($bot->message()?->text ?? ''));
-            // چک کردن تکراری نبودن
-            if (\App\Models\Accounts::where('username', $input)->exists()) {
-                $bot->sendMessage("⚠️ این نام‌کاربری قبلاً ثبت شده! یک نام دیگر وارد کنید:");
+            if (Accounts::where('username', $input)->exists()) {
+                $keyboard = InlineKeyboardMarkup::make()
+                    ->addRow(InlineKeyboardButton::make('🎲 تولید تصادفی', callback_data: 'rand_username'))
+                    ->addRow(InlineKeyboardButton::make('🔙 مرحله قبل', callback_data: 'step_back_to_group'));
+
+                $bot->sendMessage("⚠️ این نام‌کاربری قبلاً ثبت شده! یک نام دیگر وارد کنید:", reply_markup: $keyboard);
                 return;
             }
             $this->username = $input;
         }
 
         $keyboard = InlineKeyboardMarkup::make()
-            ->addRow(InlineKeyboardButton::make('🎲 تولید تصادفی', callback_data: 'rand_password'));
+            ->addRow(InlineKeyboardButton::make('🎲 تولید تصادفی', callback_data: 'rand_password'))
+            ->addRow(InlineKeyboardButton::make('🔙 مرحله قبل', callback_data: 'step_back_to_username'));
 
-        $bot->sendMessage("🔑 <b>مرحله ۵: تعیین رمز عبور</b>\n\nرمز عبور را وارد کنید (حداقل 4 کاراکتر) یا تصادفی بزنید:", parse_mode: 'HTML', reply_markup: $keyboard);
+        $bot->sendMessage("🔑 <b>مرحله ۵ از ۵: تعیین رمز عبور</b>\n\nرمز عبور را وارد کنید (حداقل 4 کاراکتر) یا تصادفی بزنید:", parse_mode: 'HTML', reply_markup: $keyboard);
         $this->next('showFinalConfirmation');
     }
 
     /**
-     * مرحله نهایی: پیش‌فاکتور و تایید
+     * نمایش پیش‌فاکتور نهایی
      */
     public function showFinalConfirmation(Nutgram $bot)
     {
-        if ($bot->isCallbackQuery() && $bot->callbackQuery()->data === 'rand_password') {
-            $this->password = (string) rand(100000, 999999);
-            $bot->answerCallbackQuery();
+        if ($bot->isCallbackQuery()) {
+            $data = $bot->callbackQuery()->data;
+
+            if ($data === 'step_back_to_username') {
+                $bot->answerCallbackQuery();
+                $fakeBot = clone $bot;
+                $fakeBot->callbackQuery()->data = 'grp_' . $this->groupId;
+                $this->handleGroupChoice($fakeBot);
+                return;
+            }
+
+            if ($data === 'rand_password') {
+                $this->password = (string) rand(100000, 999999);
+                $bot->answerCallbackQuery();
+            }
         } else {
             $this->password = trim($bot->message()?->text ?? '');
         }
 
         $group = Group::find($this->groupId);
+        $agent = User::find($this->creatorId);
+        $costPrice = method_exists($group, 'getFinalPriceFor') ? $group->getFinalPriceFor($agent) : $group->price;
         $customerName = $this->customerId === 'me' ? '🗂️ آرشیو خودم' : $this->newCustomerName;
 
         $text = "🧾 <b>پیش‌فاکتور صدور اکانت جدید</b>\n";
         $text .= "➖➖➖➖➖➖➖➖➖➖\n";
         $text .= "👤 <b>مشتری:</b> {$customerName}\n";
         $text .= "📦 <b>سرویس:</b> {$this->serviceGroup}\n";
-        $text .= "🛒 <b>پکیج:</b> {$group->name} (" . number_format($group->price) . "ت)\n";
+        $text .= "🛒 <b>پکیج:</b> {$group->name}\n";
         $text .= "📝 <b>نام‌کاربری:</b> <code>{$this->username}</code>\n";
-        $text .= "🔑 <b>رمز عبور:</b> <code>{$this->password}</code>\n\n";
-        $text .= "⚠️ <i>در صورت تایید، مبلغ پکیج از ولت شما کسر می‌شود.</i>";
+        $text .= "🔑 <b>رمز عبور:</b> <code>{$this->password}</code>\n";
+        $text .= "➖➖➖➖➖➖➖➖➖➖\n";
+        $text .= "💰 <b>هزینه کسر از ولت:</b> " . number_format($costPrice) . " تومان\n\n";
+        $text .= "⚠️ <i>در صورت تایید، مبلغ فوق از ولت شما کسر می‌شود.</i>";
 
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
-                InlineKeyboardButton::make('✅ تایید و صدور نهایی', callback_data: 'confirm_create'),
-                InlineKeyboardButton::make('❌ لغو', callback_data: 'cancel_creation')
+                InlineKeyboardButton::make('✅ تایید و صدور نهایی', callback_data: 'confirm_create')
+            )
+            ->addRow(
+                InlineKeyboardButton::make('🔙 اصلاح اطلاعات (مرحله قبل)', callback_data: 'step_back_to_password'),
+                InlineKeyboardButton::make('❌ لغو کامل', callback_data: 'back_to_admin_menu')
             );
 
         $bot->sendMessage($text, parse_mode: 'HTML', reply_markup: $keyboard);
@@ -229,23 +344,35 @@ class CreateAccountConversation extends Conversation
     }
 
     /**
-     * اجرای منطق ساخت اکانت (مشابه متد Save کنترلر)
+     * اجرا و صدور نهایی
      */
     public function executeCreation(Nutgram $bot)
     {
         if (!$bot->isCallbackQuery()) return;
 
         $data = $bot->callbackQuery()->data;
-        $bot->answerCallbackQuery();
 
-        if ($data === 'cancel_creation') {
-            $bot->editMessageText("❌ عملیات صدور اکانت لغو شد.");
+        if ($data === 'step_back_to_password') {
+            $bot->answerCallbackQuery();
+            $fakeBot = clone $bot;
+            $fakeBot->callbackQuery()->data = 'rand_username';
+            $this->handleUsernameChoice($fakeBot);
+            return;
+        }
+
+        if ($data === 'back_to_admin_menu') {
+            $bot->answerCallbackQuery('عملیات لغو شد.');
+            $user = User::find($this->creatorId);
+            if ($user) {
+                BotMenuService::showMainMenu($bot, $user, isEdit: true);
+            }
             $this->end();
             return;
         }
 
         if ($data === 'confirm_create') {
-            $bot->editMessageText("⏳ در حال ارتباط با سرور و ساخت اکانت...");
+            $bot->answerCallbackQuery();
+            $bot->sendMessage("⏳ در حال ارتباط با سرور و ساخت اکانت...");
 
             try {
                 DB::beginTransaction();
@@ -273,30 +400,20 @@ class CreateAccountConversation extends Conversation
                     ]);
                 }
 
-                // ۲. اورراید داده‌ها
                 $overrides = [
                     'username'      => $this->username,
                     'password'      => $this->password,
                     'service_group' => $this->serviceGroup,
                 ];
 
-                if ($this->serviceGroup === 'wireguard') {
-                    // گرفتن سرور پیش فرض وایرگارد
-                    $defaultWgServerId = Nas::where('type', 'wireguard')->value('id');
-                    $overrides['wg_server_id'] = $defaultWgServerId;
-                } elseif ($this->serviceGroup === 'v2ray') {
-                    $overrides['protocol_v2ray'] = 'vless'; // پیش فرض
-                }
-
                 $preparedData = $provisioningService->prepareAccountData($group, $targetUser, $this->newCustomerPhone, $overrides);
-
-                // ۳. صدور کامل اکانت (کسر ولت نماینده = true)
+                $preparedData['userData']['custom_creator'] = $agent->id;
                 $result = $provisioningService->createFullAccount(
                     $preparedData['userData'],
                     $preparedData['configData'],
                     $existingUserId,
-                    true,  // payFromAgentWallet
-                    false  // payFromUserWallet
+                    ($agent->role === 'manager' || $agent->admin) ? false : true,
+                    false
                 );
 
                 if (is_array($result) && isset($result['status']) && !$result['status']) {
@@ -305,7 +422,6 @@ class CreateAccountConversation extends Conversation
 
                 DB::commit();
 
-                // 🔴 نمایش موفقیت و اطلاعات
                 $successText = "🎉 <b>اکانت با موفقیت صادر و ثبت شد!</b>\n";
                 $successText .= "➖➖➖➖➖➖➖➖➖➖\n";
                 $successText .= "👤 <b>مشتری:</b> " . ($this->customerId === 'me' ? 'آرشیو من' : $this->newCustomerName) . "\n";
@@ -313,11 +429,49 @@ class CreateAccountConversation extends Conversation
                 $successText .= "📝 <b>نام‌کاربری:</b> <code>{$this->username}</code>\n";
                 $successText .= "🔑 <b>رمز عبور:</b> <code>{$this->password}</code>\n";
 
-                $bot->sendMessage($successText, parse_mode: 'HTML');
+
+                // ==========================================================
+                // 🔴 ارسال فایل .conf و QR Code اختصاصی برای سرویس وایرگارد
+                // ==========================================================
+                if ($this->serviceGroup === 'wireguard' && $result) {
+                    $wgUser = \App\Models\WireGuardUsers::where('user_id', $result->id)->first();
+
+                    if ($wgUser) {
+                        $profileName = $wgUser->profile_name; // مثلاً username123
+
+                        // ۱. مسیر دقیق فایل .conf در پوشه public/.configs
+                        $confPath = public_path("configs/{$profileName}.conf");
+
+                        // ۲. مسیر دقیق فایل عکس QR در پوشه public/.configs
+                        $qrPath = public_path("configs/{$profileName}.png");
+
+                        // 📤 ارسال فایل کانفیگ (.conf)
+                        if (file_exists($confPath)) {
+                            $doc = \SergiX44\Nutgram\Telegram\Types\Internal\InputFile::make($confPath, filename: "{$profileName}.conf");
+                            $bot->sendDocument($doc, caption: "📄 <b>فایل کانفیگ وایرگارد:</b> <code>{$profileName}.conf</code>", parse_mode: 'HTML');
+                        } else {
+                            $bot->sendMessage("⚠️ فایل کانفیگ (<code>{$profileName}.conf</code>) در مسیر سرور یافت نشد.", parse_mode: 'HTML');
+                        }
+
+                        // 📤 ارسال عکس QR Code
+                        if (file_exists($qrPath)) {
+                            $photo = \SergiX44\Nutgram\Telegram\Types\Internal\InputFile::make($qrPath);
+                            $bot->sendPhoto($photo, caption: "📱 <b>QR Code جهت اسکن سریع در اپلیکیشن WireGuard</b>", parse_mode: 'HTML');
+                        }
+                    }
+                }
+
+                $keyboard = InlineKeyboardMarkup::make()
+                    ->addRow(InlineKeyboardButton::make('🏠 بازگشت به منوی اصلی', callback_data: 'back_to_admin_menu'));
+
+                $bot->sendMessage($successText, parse_mode: 'HTML', reply_markup: $keyboard);
 
             } catch (\Exception $e) {
                 DB::rollBack();
-                $bot->sendMessage("❌ <b>خطا در صدور اکانت:</b>\n" . $e->getMessage(), parse_mode: 'HTML');
+                $keyboard = InlineKeyboardMarkup::make()
+                    ->addRow(InlineKeyboardButton::make('🏠 بازگشت به منوی اصلی', callback_data: 'back_to_admin_menu'));
+
+                $bot->sendMessage("❌ <b>خطا در صدور اکانت:</b>\n" . $e->getMessage(), parse_mode: 'HTML', reply_markup: $keyboard);
             }
 
             $this->end();

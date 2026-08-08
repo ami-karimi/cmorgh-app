@@ -150,8 +150,8 @@ class User extends Authenticatable
     protected function phone(): Attribute
     {
         return Attribute::make(
-            set: fn (string $value) => $this->normalizePhoneNumber($value),
-        );
+            set: fn (?string $value) => $value ? $this->normalizePhoneNumber($value) : null,
+    );
     }
 
 

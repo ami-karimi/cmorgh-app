@@ -90,21 +90,29 @@ class AdminSearchAccountConversation extends Conversation
         $text .= "📅 <b>تاریخ انقضا:</b> {$expireText}\n";
 
         // ساخت دکمه‌های مدیریت سریع
-        $toggleBtnText = $account->is_enabled ? "🔴 مسدودسازی اکانت" : "🟢 فعال‌سازی اکانت";
+        $toggleBtnText = $account->is_enabled ? "🔴 مسدودسازی" : "🟢 فعال‌سازی";
 
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
                 InlineKeyboardButton::make($toggleBtnText, callback_data: "admin_toggle_acc:{$account->id}"),
-                InlineKeyboardButton::make('🔄 شارژ مجدد (صفر کردن مصرف)', callback_data: "admin_recharge_acc:{$account->id}")
-            )
-            ->addRow(
-                InlineKeyboardButton::make('🔍 جستجوی اکانت دیگر', callback_data: 'admin_manage_acc'),
-                InlineKeyboardButton::make('🏠 منوی اصلی ادمین', callback_data: 'back_to_admin_menu')
+                InlineKeyboardButton::make('🔄 شارژ مجدد', callback_data: "admin_recharge_acc:{$account->id}")
             );
+
+        // 🔴 اضافه کردن دکمه‌های کانفیگ فقط اگر سرویس وایرگارد باشد
+        if ($account->service_group === 'wireguard') {
+            $keyboard->addRow(
+                InlineKeyboardButton::make('📥 دریافت فایل کانفیگ', callback_data: "dl_wg_conf:{$account->id}"),
+                InlineKeyboardButton::make('📱 دریافت QR Code', callback_data: "dl_wg_qr:{$account->id}")
+            );
+        }
+
+        $keyboard->addRow(
+            InlineKeyboardButton::make('🔍 جستجوی اکانت دیگر', callback_data: 'admin_manage_acc'),
+            InlineKeyboardButton::make('🏠 منوی اصلی ادمین', callback_data: 'back_to_admin_menu')
+        );
 
         $bot->sendMessage($text, parse_mode: 'HTML', reply_markup: $keyboard);
         $this->end();
     }
-
 
 }
