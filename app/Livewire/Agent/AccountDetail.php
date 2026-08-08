@@ -203,11 +203,24 @@ class AccountDetail extends Component
     public function changeWgServer()
     {
         $this->validate([
-            'newWgServerId' => 'required|exists:nas,id'
+            'newWgServerId' => 'required|exists:nas,id',
+            'selectedWgConfigId' => 'required|exists:wire_guard_users,id'
         ]);
 
-        $this->isChangeServerModalOpen = false;
-        session()->flash('message', 'انتقال کانفیگ به سرور جدید انجام شد.');
+        // پاس دادن هر سه پارامتر به سرویس
+        $result = VpnManagerService::changeWireguardServer(
+            $this->account,
+            $this->selectedWgConfigId,
+            $this->newWgServerId
+        );
+
+        if ($result['status']) {
+            session()->flash('message', $result['message']);
+            $this->isChangeServerModalOpen = false;
+            $this->reset(['selectedWgConfigId', 'newWgServerId']);
+        } else {
+            session()->flash('error', $result['message']);
+        }
     }
 
     public function getAccountBaseSpeed()

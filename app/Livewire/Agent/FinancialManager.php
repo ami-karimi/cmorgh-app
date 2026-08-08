@@ -169,4 +169,6 @@ class FinancialManager extends Component
             'balance' => $agent->balance, // از طریق متد getBalanceAttribute که قبلاً ساختیم
         ]);
     }
+
+
 }

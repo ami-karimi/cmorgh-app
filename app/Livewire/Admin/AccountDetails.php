@@ -330,23 +330,25 @@ class AccountDetails extends Component
         $this->isChangeServerModalOpen = true;
     }
 
+
+
+
     public function changeWgServer()
     {
-        $this->validate(['newWgServerId' => 'required|exists:nas,id']);
-        $wgUser = WireGuardUsers::findOrFail($this->configToMoveId);
         $account = Accounts::findOrFail($this->accountId);
-        $oldServer = Nas::find($wgUser->server_id);
-        if ($oldServer) (new WireguardService($oldServer))->removeClient($wgUser->public_key);$newServer = Nas::find($this->newWgServerId);$response = (new WireguardService($newServer))->createClient($account->username);
-        if ($response['status']) {$wgUser->update([
-            'profile_name' => $response['data']['config_file'],
-            'server_id' => $newServer->id,
-            'public_key' => $response['data']['client_public_key'],
-            'client_private_key' => $response['data']['client_private_key'],
-            'user_ip' => $response['data']['ip_address'],
-        ]);
-            session()->flash('message', 'انتقال سرور انجام شد.');
+
+        $result = VpnManagerService::changeWireguardServer(
+            $account,
+            $this->configToMoveId,
+            $this->newWgServerId
+        );
+
+        if ($result['status']) {
+            session()->flash('message', $result['message']);
+            $this->isChangeServerModalOpen = false;
+            $this->reset(['selectedWgConfigId', 'newWgServerId']);
         } else {
-            session()->flash('error', 'انتقال شکست خورد.');
+            session()->flash('error', $result['message']);
         }
         $this->isChangeServerModalOpen = false;
     }

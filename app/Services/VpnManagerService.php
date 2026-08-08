@@ -390,4 +390,103 @@ class VpnManagerService
         // ۵. تبدیل تاریخ انقضا به timestamp (میلی‌ثانیه) برای expiryTime
     }
 
+
+    /**
+     * تغییر سرور یک کانفیگ مشخص وایرگارد
+     *
+     * @param Accounts $account اکانت اصلی
+     * @param int $wgConfigId آیدی کانفیگ در جدول wire_guard_users
+     * @param int $newServerId آی‌دی سرور جدید
+     * @return array
+     */
+    public static function changeWireguardServer(Accounts $account, int $wgConfigId, int $newServerId): array
+    {
+        try {
+            if ($account->service_group !== 'wireguard') {
+                return ['status' => false, 'message' => 'این اکانت از نوع وایرگارد نیست.'];
+            }
+
+            $wgUser = WireGuardUsers::where('id', $wgConfigId)
+                ->where('user_id', $account->id)
+                ->first();
+
+            if (!$wgUser) {
+                return ['status' => false, 'message' => 'کانفیگ وایرگارد مورد نظر یافت نشد یا متعلق به این اکانت نیست.'];
+            }
+
+            $newServer = Nas::find($newServerId);
+            if (!$newServer || $newServer->type !== 'wireguard') {
+                return ['status' => false, 'message' => 'سرور جدید یافت نشد یا از نوع وایرگارد نیست.'];
+            }
+
+            if ($wgUser->server_id == $newServerId) {
+                return ['status' => false, 'message' => 'این کانفیگ در حال حاضر روی همین سرور قرار دارد.'];
+            }
+
+            $oldServer = Nas::find($wgUser->server_id);
+
+
+            if ($oldServer) {
+                try {
+                    $oldWgService = new WireguardService($oldServer);
+                    // 🔴 در اینجا باید متد حذف کلاینت خودتان را صدا بزنید
+                    // فرض کردیم متدی به نام removeClient دارید که نام فایل/Queue یا پابلیک‌کی را می‌گیرد
+                    if (method_exists($oldWgService, 'removeClient')) {
+                        $oldWgService->removeClient($wgUser->profile_name);
+                    }
+                } catch (\Exception $e) {
+                    Log::error("خطا در حذف پیر وایرگارد از سرور قدیم: " . $e->getMessage());
+                }
+            }
+
+            // ==========================================
+            // مرحله ۲: ساخت کانفیگ فرش و جدید روی سرور جدید
+            // ==========================================
+            $newWgService = new WireguardService($newServer);
+            $mikrotikSpeed = $account->group?->mikrotik_speed ?? '80M/10M';
+
+            // 🔴 استفاده از متد قدرتمند خودتان!
+            $createRes = $newWgService->createClient($account->username, $mikrotikSpeed);
+
+            if (!isset($createRes['status']) || !$createRes['status']) {
+                return [
+                    'status' => false,
+                    'message' => 'خطا در ایجاد کانفیگ روی سرور جدید: ' . ($createRes['message'] ?? 'نامشخص')
+                ];
+            }
+
+            $newData = $createRes['data'];
+
+            $wgUser->server_id = $newServer->id;
+            $wgUser->user_ip = $newData['ip_address'];
+            $wgUser->public_key = $newData['client_public_key'];
+            $wgUser->profile_name = $newData['config_file'];
+
+            if (isset($wgUser->private_key)) {
+                $wgUser->private_key = $newData['client_private_key'];
+            }
+
+            $wgUser->save();
+
+            // ==========================================
+            // مرحله ۴: ثبت لاگ
+            // ==========================================
+            $operatorName = auth()->check() ? (auth()->user()->name ?? auth()->user()->username) : 'سیستم';
+            $oldServerName = $oldServer->title ?? "سرور قبلی";
+            $newServerName = $newServer->title ?? "سرور جدید";
+
+            $logMsg = "سرور یکی از کانفیگ‌های وایرگارد اکانت {$account->username} توسط {$operatorName} از [{$oldServerName}] به [{$newServerName}] منتقل شد.";
+            ActivityLogger::log($account->id, $logMsg, 1, 1);
+
+            return [
+                'status' => true,
+                'message' => "انتقال با موفقیت انجام شد. مشتری باید QR کد/فایل جدید را دانلود کند."
+            ];
+
+        } catch (\Exception $e) {
+            Log::error("خطا در متد changeWireguardServer: " . $e->getMessage());
+            return ['status' => false, 'message' => 'خطای سیستمی: ' . $e->getMessage()];
+        }
+    }
+
 }

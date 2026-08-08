@@ -46,7 +46,7 @@ class GlobalSearch extends Component
             $accounts = Accounts::query()
                 ->where('username', 'like', $searchTerm)
                 ->orWhere('name', 'like', $searchTerm)
-                ->with('users') // برای نمایش صاحب اکانت
+                ->with('users')
                 ->take(5)
                 ->get();
         }
