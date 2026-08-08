@@ -414,8 +414,8 @@ class VpnManagerService
                 return ['status' => false, 'message' => 'کانفیگ وایرگارد مورد نظر یافت نشد یا متعلق به این اکانت نیست.'];
             }
 
-            $newServer = Nas::find($newServerId);
-            if (!$newServer || $newServer->type !== 'wireguard') {
+            $newServer = Nas::where('id',$newServerId)->where('is_enabled', 1)->supportsProtocol('wireguard');
+            if (!$newServer ) {
                 return ['status' => false, 'message' => 'سرور جدید یافت نشد یا از نوع وایرگارد نیست.'];
             }
 
