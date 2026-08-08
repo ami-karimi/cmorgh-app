@@ -472,8 +472,8 @@ class VpnManagerService
             // مرحله ۴: ثبت لاگ
             // ==========================================
             $operatorName = auth()->check() ? (auth()->user()->name ?? auth()->user()->username) : 'سیستم';
-            $oldServerName = $oldServer->title ?? "سرور قبلی";
-            $newServerName = $newServer->title ?? "سرور جدید";
+            $oldServerName = $oldServer->name ?? "سرور قبلی";
+            $newServerName = $newServer->name ?? "سرور جدید";
 
             $logMsg = "سرور یکی از کانفیگ‌های وایرگارد اکانت {$account->username} توسط {$operatorName} از [{$oldServerName}] به [{$newServerName}] منتقل شد.";
             ActivityLogger::log($account->id, $logMsg, 1, 1);
