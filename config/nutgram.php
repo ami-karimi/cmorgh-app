@@ -6,9 +6,11 @@ return [
 
     // if the webhook mode must validate the incoming IP range is from a telegram server
     'safe_mode' => env('APP_ENV', 'local') === 'production',
-    'api_url' => env('TELEGRAM_API_URL', 'https://apime.takfashomal.workers.dev'),
+
     // Extra or specific configurations
-    'config' => [],
+    'config' => [
+        'api_url' => env('TELEGRAM_API_URL', 'https://apime.takfashomal.workers.dev'),
+    ],
 
     // Set if the service provider should automatically load
     // handlers from /routes/telegram.php
