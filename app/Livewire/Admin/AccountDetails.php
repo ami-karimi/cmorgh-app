@@ -346,7 +346,7 @@ class AccountDetails extends Component
         if ($result['status']) {
             session()->flash('message', $result['message']);
             $this->isChangeServerModalOpen = false;
-            $this->reset(['selectedWgConfigId', 'newWgServerId']);
+            $this->reset(['configToMoveId', 'newWgServerId']);
         } else {
             session()->flash('error', $result['message']);
         }
