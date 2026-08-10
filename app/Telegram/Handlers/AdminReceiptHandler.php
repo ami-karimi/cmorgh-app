@@ -51,8 +51,34 @@ class AdminReceiptHandler
 
         $status = ($action === 'approve') ? 1 : 2;
         $receipt->update(['approved' => $status]);
+        $customer = User::find($receipt->for);
+        if ($status === 1) {
+            if ($customer) {
+                if ($customer->telegram_id) {
+                    try {
+                        $bot->sendMessage(
+                            "🎉 <b>فیش واریزی شما تایید شد!</b>\n\nمبلغ <b>" . number_format($receipt->price) . " تومان</b> به کیف پول شما اضافه گردید.",
+                            chat_id: $customer->telegram_id,
+                            parse_mode: 'HTML'
+                        );
+                    } catch (\Exception $e) {}
+                }
+            }
+            $bot->sendMessage('✅ فیش با موفقیت تایید شد و کیف پول کاربر شارژ گردید.');
+        } else {
+            if ($customer && $customer->telegram_id) {
+                try {
+                    $bot->sendMessage(
+                        "❌ <b>فیش واریزی شما رد شد!</b>\n\nمتاسفانه فیش واریزی شما به مبلغ " . number_format($receipt->price) . " تومان مورد تایید قرار نگرفت.",
+                        chat_id: $customer->telegram_id,
+                        parse_mode: 'HTML'
+                    );
+                } catch (\Exception $e) {}
+            }
+            $bot->sendMessage('❌ فیش رد شد.');
+        }
 
-        $bot->sendMessage(($status === 1) ? '✅ فیش با موفقیت تایید شد.' : '❌ فیش رد شد.');
+
         $this->checkNextReceipt($bot);
     }
 
@@ -84,7 +110,7 @@ class AdminReceiptHandler
                 InlineKeyboardButton::make('❌ رد فیش', callback_data: "admin_handle_receipt:{$receipt->id}:reject")
             )->addRow(InlineKeyboardButton::make('🏠 انصراف و بازگشت به منو', callback_data: 'back_to_admin_menu'));
 
-        $filePath = storage_path('app/public/' . $receipt->attachment);
+        $filePath = public_path('storage/attachments/' . $receipt->attachment);
 
         if (file_exists($filePath)) {
             $bot->sendPhoto(\SergiX44\Nutgram\Telegram\Types\Internal\InputFile::make($filePath), caption: $caption, parse_mode: 'HTML', reply_markup: $keyboard);

@@ -15,6 +15,7 @@ use App\Telegram\Handlers\AgentAccountActionHandler;
 use App\Telegram\Handlers\WireguardHandler;
 use App\Telegram\Handlers\AdminReceiptHandler;
 use App\Telegram\Conversations\RegisterConversation;
+use App\Telegram\Conversations\CustomerOrderServiceConversation;
 
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
@@ -24,17 +25,21 @@ use App\Telegram\Conversations\RegisterConversation;
 $bot->onText('🔐 ورود به حساب کاربری', LoginConversation::class);
 $bot->onText('📝 ساخت حساب کاربری', RegisterConversation::class);
 
-$bot->onText('⚙️ مدیریت سرویس ها', function (Nutgram $bot) {
-    $bot->sendMessage("⚙️ بخش <b>مدیریت سرویس‌ها</b> به زودی فعال می‌شود.", parse_mode: 'HTML');
-});
+use App\Telegram\Handlers\CustomerServiceHandler;
+
+$bot->onText('⚙️ مدیریت سرویس ها', [CustomerServiceHandler::class, 'listServices']);
+
+// بازگشت به لیست سرویس‌ها از روی دکمه شیشه‌ای
+$bot->onCallbackQueryData('cust_services_list', [CustomerServiceHandler::class, 'listServices']);
+
+// انتخاب یک سرویس خاص از لیست
+$bot->onCallbackQueryData('cust_show_service:{id}', [CustomerServiceHandler::class, 'showServiceDetail']);
 
 $bot->onText('🎁 دریافت اشتراک رایگان', function (Nutgram $bot) {
     $bot->sendMessage("🎁 بخش <b>دریافت اشتراک رایگان</b> به زودی فعال می‌شود.", parse_mode: 'HTML');
 });
-
-$bot->onText('💰 افزایش موجودی', function (Nutgram $bot) {
-    $bot->sendMessage("💰 جهت افزایش موجودی می‌توانید به پشتیبانی پیام دهید.", parse_mode: 'HTML');
-});
+$bot->onText('❌ انصراف از ثبت فیش', [\App\Telegram\Conversations\CustomerSubmitReceiptConversation::class, 'cancel']);
+$bot->onText('💰 افزایش موجودی', \App\Telegram\Conversations\CustomerSubmitReceiptConversation::class);
 
 $bot->onText('📞 ارتباط با پشتیبان', function (Nutgram $bot) {
     $bot->sendMessage("📞 <b>پشتیبانی:</b>\nلطفاً پیام خود را به آیدی @YourSupportID ارسال کنید.", parse_mode: 'HTML');
@@ -44,9 +49,10 @@ $bot->onText('🌐 ورود به پنل کاربری', function (Nutgram $bot) {
     $bot->sendMessage("🌐 <b>پنل کاربری:</b>\nجهت ورود به پنل وب‌سایت روی لینک زیر کلیک کنید:\nhttps://yourwebsite.com/login", parse_mode: 'HTML');
 });
 
-$bot->onText('🛍 سفارش سرویس جدید', function (Nutgram $bot) {
-    $bot->sendMessage("🛍 بخش <b>سفارش سرویس جدید</b> به زودی فعال می‌شود.", parse_mode: 'HTML');
-});
+$bot->onText('🛍 سفارش سرویس جدید', CustomerOrderServiceConversation::class);
+
+// کلیک روی پکیج مورد نظر برای خرید
+$bot->onCallbackQueryData('buy_group:{groupId}', [CustomerOrderServiceConversation::class, 'processPurchase']);
 
 $bot->onCommand('start', [GeneralMenuHandler::class, 'start']);
 $bot->onCallbackQueryData('back_to_admin_menu', [GeneralMenuHandler::class, 'backToMenu']);$bot->onCallbackQueryData('logout_account', [GeneralMenuHandler::class, 'logout']);
@@ -65,7 +71,8 @@ $bot->onCallbackQueryData('admin_recharge_acc:{id}', [AdminAccountActionHandler:
 // ==========================================
 $bot->onCallbackQueryData('admin_receipts', [AdminReceiptReviewHandler::class, 'startReview']);$bot->onCallbackQueryData('admin_handle_receipt:{id}:{action}', [AdminReceiptReviewHandler::class, 'handle']);
 // (نکته: دکمه‌های تایید سریع از روی کارت که قبلا ساختیم)
-$bot->onCallbackQueryData('admin_approve_receipt:{id}', [AdminReceiptHandler::class, 'approve']);$bot->onCallbackQueryData('admin_reject_receipt:{id}', [AdminReceiptHandler::class, 'reject']);
+$bot->onCallbackQueryData('admin_approve_receipt:{id}', [AdminReceiptHandler::class, 'approve']);
+$bot->onCallbackQueryData('admin_reject_receipt:{id}', [AdminReceiptHandler::class, 'reject']);
 
 // ==========================================
 // ۵. مدیریت نمایندگان (Agent)

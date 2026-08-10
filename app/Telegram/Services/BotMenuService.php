@@ -256,4 +256,62 @@ class BotMenuService
         $bot->sendMessage($text, parse_mode: 'HTML', reply_markup: $keyboard);
     }
 
+
+    /**
+     * رندر کارت اطلاعات اکانت برای مشتری (Customer)
+     */
+    public static function renderCustomerAccountCard(Nutgram $bot, Accounts $account, bool $isEdit = false): void
+    {
+        $statusText = $account->is_enabled ? "🟢 فعال" : "🔴 مسدود / غیرفعال";
+        $onlineText = $account->is_online ? "⚡ آنلاین" : "💤 آفلاین";
+
+        $usageFormatted = method_exists($account, 'formatBytes') ? $account->formatBytes($account->usage) : round($account->usage / (1024*1024*1024), 2) . " GB";
+        $maxUsageFormatted = $account->max_usage == 0 ? "نامحدود" : (method_exists($account, 'formatBytes') ? $account->formatBytes($account->max_usage) : round($account->max_usage / (1024*1024*1024), 2) . " GB");
+
+        $expireText = "شروع نشده / بدون انقضا";
+        if ($account->expire_date) {
+            $jalaliDate = \Morilog\Jalali\Jalalian::forge($account->expire_date)->format('Y/m/d - H:i');
+            $daysLeft = (int) now()->diffInDays($account->expire_date, false);
+            $expireText = $daysLeft > 0 ? "{$jalaliDate} ({$daysLeft} روز مانده)" : "{$jalaliDate} (منقضی شده)";
+        }
+
+        $easyAccessLink = $account->subscription_url ?? '';
+
+        $text = "🌐 <b>اطلاعات سرویس شما</b>\n";
+        $text .= "➖➖➖➖➖➖➖➖➖➖\n";
+        $text .= "📝 <b>نام‌کاربری:</b> <code>{$account->username}</code>\n";
+        $text .= "🔑 <b>رمز عبور:</b> <code>{$account->password}</code>\n";
+        $text .= "📊 <b>وضعیت:</b> {$statusText} | {$onlineText}\n";
+        $text .= "📦 <b>سرویس:</b> {$account->service_group}\n";
+        $text .= "💾 <b>مصرف ترافیک:</b> {$usageFormatted} / {$maxUsageFormatted}\n";
+        $text .= "📅 <b>تاریخ انقضا:</b> {$expireText}\n\n";
+
+        if ($easyAccessLink) {
+            $text .= "🔗 <b>لینک اتصال هوشمند / سابسکریپشن:</b>\n<code>{$easyAccessLink}</code>";
+        }
+
+        $keyboard = \SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup::make();
+
+        // دکمه تمدید سرویس
+        $keyboard->addRow(
+            \SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton::make('🔄 تمدید سرویس', callback_data: "cust_renew_acc:{$account->id}")
+        );
+
+        // دکمه‌های کانفیگ و QR کد برای سرویس‌های وایرگارد
+        if ($account->service_group === 'wireguard') {
+            $keyboard->addRow(
+                \SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton::make('📥 فایل کانفیگ', callback_data: "dl_wg_conf:{$account->id}"),
+                \SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton::make('📱 کد QR', callback_data: "dl_wg_qr:{$account->id}")
+            );
+        }
+
+        // 🔴 دکمه‌های بازگشت
+        $keyboard->addRow(
+            \SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton::make('🔙 بازگشت به لیست سرویس‌ها', callback_data: 'cust_services_list'),
+            \SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton::make('🏠 منوی اصلی', callback_data: 'back_to_admin_menu')
+        );
+
+        self::sendOrEdit($bot, $text, $keyboard, $isEdit);
+    }
+
 }

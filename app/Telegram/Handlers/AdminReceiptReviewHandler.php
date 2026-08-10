@@ -34,6 +34,32 @@ class AdminReceiptReviewHandler
         $status = ($action === 'approve') ? 1 : 2;
         $receipt->update(['approved' => $status]);
 
+        $customer = User::find($receipt->for);
+        if ($status === 1) {
+            if ($customer) {
+                if ($customer->telegram_id) {
+                    try {
+                        $bot->sendMessage(
+                            "🎉 <b>فیش واریزی شما تایید شد!</b>\n\nمبلغ <b>" . number_format($receipt->price) . " تومان</b> به کیف پول شما اضافه گردید.",
+                            chat_id: $customer->telegram_id,
+                            parse_mode: 'HTML'
+                        );
+                    } catch (\Exception $e) {}
+                }
+            }
+        } else {
+            if ($customer && $customer->telegram_id) {
+                try {
+                    $bot->sendMessage(
+                        "❌ <b>فیش واریزی شما رد شد!</b>\n\nمتاسفانه فیش واریزی شما به مبلغ " . number_format($receipt->price) . " تومان مورد تایید قرار نگرفت.",
+                        chat_id: $customer->telegram_id,
+                        parse_mode: 'HTML'
+                    );
+                } catch (\Exception $e) {}
+            }
+        }
+
+
         $bot->answerCallbackQuery(text: ($status === 1) ? '✅ فیش با موفقیت تایید شد.' : '❌ فیش رد شد.', show_alert: true);
         $this->checkNextReceipt($bot);
     }

@@ -97,9 +97,9 @@ class AgentSubmitReceiptConversation extends Conversation
             $fileId = $bestPhoto->file_id; // آیدی فایل در سرور تلگرام
 
             $file = $bot->getFile($fileId);
-            $filename = 'attachments/payments/' . time() . '_' . rand(1000, 9999) . '.jpg';
+            $filename = '/financial/' . time() . '_' . rand(1000, 9999) . '.jpg';
 
-            $fullPath = storage_path('app/public/' . $filename);
+            $fullPath = public_path('storage/attachments' . $filename);
 
             if (!file_exists(dirname($fullPath))) {
                 mkdir(dirname($fullPath), 0755, true);
