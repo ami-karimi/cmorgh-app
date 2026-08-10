@@ -234,7 +234,7 @@ class AuthController extends Controller
         }
         if(!$findUser->is_enabled){
             return response()->json(['status' => true, 'result' =>[
-                'login'=> true,
+                'login'=> false,
                 'message' => 'اکانت شما غیرفعال شده است لطفا جهت رفع مشکل با مدیریت تماس بگیرید',
             ]]);
         }
