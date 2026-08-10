@@ -8,43 +8,25 @@ use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use Morilog\Jalali\Jalalian;
 
-class AdminReceiptHandler
+class AdminReceiptReviewHandler
 {
     public function startReview(Nutgram $bot)
     {
-        if ($bot->isCallbackQuery()) {
-            try {
-                $bot->answerCallbackQuery();
-            } catch (\Exception $e) {}
-        }
-
         $receipt = Financial::where('approved', 0)->where('type', 'plus')->whereNotNull('attachment')->oldest()->first();
-
         if (!$receipt) {
-            // 🔴 ۲. پاسخ هوشمندانه بر اساس نوع دکمه
-            if ($bot->isCallbackQuery()) {
-                $bot->answerCallbackQuery(text: '🎉 هیچ فیش واریزی در انتظاری وجود ندارد!', show_alert: true);
-            } else {
-                $bot->sendMessage('🎉 هیچ فیش واریزی در انتظاری وجود ندارد!');
-            }
+            $bot->answerCallbackQuery(text: '🎉 هیچ فیش واریزی در انتظاری وجود ندارد!', show_alert: true);
             return;
         }
 
+        $bot->answerCallbackQuery();
         $this->showReceiptToAdmin($bot, $receipt);
     }
 
     public function handle(Nutgram $bot, $id, $action)
     {
-        // این متد همیشه از دکمه شیشه‌ای (تایید/رد زیر عکس فیش) صدا زده میشه
-        if ($bot->isCallbackQuery()) {
-            try {
-                $bot->answerCallbackQuery();
-            } catch (\Exception $e) {}
-        }
-
         $receipt = Financial::find($id);
         if (!$receipt || $receipt->approved != 0) {
-            $bot->sendMessage('❌ فیش یافت نشد یا قبلاً بررسی شده است.');
+            $bot->answerCallbackQuery(text: '❌ فیش یافت نشد یا قبلاً بررسی شده است.', show_alert: true);
             $this->checkNextReceipt($bot);
             return;
         }
@@ -52,7 +34,7 @@ class AdminReceiptHandler
         $status = ($action === 'approve') ? 1 : 2;
         $receipt->update(['approved' => $status]);
 
-        $bot->sendMessage(($status === 1) ? '✅ فیش با موفقیت تایید شد.' : '❌ فیش رد شد.');
+        $bot->answerCallbackQuery(text: ($status === 1) ? '✅ فیش با موفقیت تایید شد.' : '❌ فیش رد شد.', show_alert: true);
         $this->checkNextReceipt($bot);
     }
 
@@ -85,7 +67,6 @@ class AdminReceiptHandler
             )->addRow(InlineKeyboardButton::make('🏠 انصراف و بازگشت به منو', callback_data: 'back_to_admin_menu'));
 
         $filePath = storage_path('app/public/' . $receipt->attachment);
-
         if (file_exists($filePath)) {
             $bot->sendPhoto(\SergiX44\Nutgram\Telegram\Types\Internal\InputFile::make($filePath), caption: $caption, parse_mode: 'HTML', reply_markup: $keyboard);
         } else {

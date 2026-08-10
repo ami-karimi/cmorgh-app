@@ -16,14 +16,23 @@ class AgentWalletHandler
      */
     public function __invoke(Nutgram $bot)
     {
+        // 🔴 راه‌حل: چک کردن نوع درخواست (بستن لودینگ فقط در صورت شیشه‌ای بودن دکمه)
+        if ($bot->isCallbackQuery()) {
+            try {
+                $bot->answerCallbackQuery();
+            } catch (\Exception $e) {}
+        }
+
         $user = User::where('telegram_id', $bot->userId())->first();
 
         if (!$user) {
-            $bot->answerCallbackQuery(text: '❌ کاربر یافت نشد!', show_alert: true);
+            if ($bot->isCallbackQuery()) {
+                $bot->answerCallbackQuery(text: '❌ کاربر یافت نشد!', show_alert: true);
+            } else {
+                $bot->sendMessage('❌ کاربر یافت نشد!');
+            }
             return;
         }
-
-        $bot->answerCallbackQuery();
 
         // ۱. دریافت موجودی فعلی
         $balance = number_format($user->balance);
@@ -35,7 +44,7 @@ class AgentWalletHandler
                             ->latest()
                             ->first();
 
-        // 🔴 ۳. دریافت داینامیک اطلاعات حساب بانکی منیجر/بالاسری
+        // ۳. دریافت داینامیک اطلاعات حساب بانکی منیجر/بالاسری
         $bankAccount = $this->getManagerBankAccount($user);
 
         // ۴. ساخت متن پیام
@@ -47,10 +56,16 @@ class AgentWalletHandler
                 InlineKeyboardButton::make('➕ افزایش موجودی (ثبت فیش)', callback_data: 'agent_submit_receipt')
             )
             ->addRow(
-                InlineKeyboardButton::make('🔙 بازگشت به منوی اصلی', callback_data: 'back_to_admin_menu')
+                // دکمه بازگشت برای مواقعی که کاربر در منوهای تودرتو است به درد می‌خورد
+                InlineKeyboardButton::make('🏠 بازگشت به منوی اصلی', callback_data: 'back_to_admin_menu')
             );
 
-        $bot->editMessageText($text, parse_mode: 'HTML', reply_markup: $keyboard);
+        // 🔴 راه‌حل: ارسال پیام یا ویرایش آن بر اساس نوع کلیک کاربر
+        if ($bot->isCallbackQuery()) {
+            $bot->editMessageText($text, parse_mode: 'HTML', reply_markup: $keyboard);
+        } else {
+            $bot->sendMessage($text, parse_mode: 'HTML', reply_markup: $keyboard);
+        }
     }
 
     /**
@@ -58,7 +73,6 @@ class AgentWalletHandler
      */
     private function getManagerBankAccount(User $user): ?AgentBankAccount
     {
-        // الف) اگر کاربر بالاسری (creator) دارد، حساب بانکی او را پیدا کن
         if ($user->creator) {
             $account = AgentBankAccount::where('user_id', $user->creator)->first();
             if ($account) {
@@ -66,7 +80,6 @@ class AgentWalletHandler
             }
         }
 
-        // ب) اگر بالاسری نداشت یا بالاسری حساب ثبت نکرده بود، حساب اولین منیجر/ادمین سیستم را برگردان
         $managerId = User::whereIn('role', ['admin', 'manager'])->value('id');
 
         return AgentBankAccount::where('user_id', $managerId)->first() ?? AgentBankAccount::first();

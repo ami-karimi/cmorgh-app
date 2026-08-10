@@ -5,6 +5,8 @@ namespace App\Telegram\Services;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\ReplyKeyboardMarkup;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\KeyboardButton;
 use App\Models\User;
 use App\Models\Accounts;
 use Illuminate\Support\Facades\DB;
@@ -13,130 +15,93 @@ use Morilog\Jalali\Jalalian;
 class BotMenuService
 {
     /**
-     * نمایش هوشمند منوی اصلی بر اساس نقش کاربر (با قابلیت ارسال جدید یا ویرایش پیام قبلی)
+     * نمایش هوشمند منوی اصلی بر اساس نقش کاربر
      */
     public static function showMainMenu(Nutgram $bot, User $user, bool $isEdit = false): void
     {
-        $firstName = $bot->user()->first_name;
+        // اگر کاربر از دکمه شیشه‌ای (مثل بازگشت) استفاده کرده، پیام شیشه‌ای را پاک می‌کنیم
+        if ($isEdit && $bot->isCallbackQuery()) {
+            try {
+                $bot->deleteMessage($bot->chatId(), $bot->messageId());
+                $bot->answerCallbackQuery();
+            } catch (\Exception $e) {}
+        }
+
+        $firstName = $bot->user()->first_name ?? 'کاربر';
 
         if (in_array($user->role, ['admin', 'manager'])) {
-            self::showAdminMenu($bot, $firstName, $isEdit);
+            self::showAdminMenu($bot, $firstName);
             return;
         }
 
         if (in_array($user->role, ['agent', 'subagent'])) {
-            self::showAgentMenu($bot, $firstName, $isEdit);
+            self::showAgentMenu($bot, $firstName);
             return;
         }
 
         if ($user->role === 'customer') {
-            self::showCustomerMenu($bot, $user, $firstName, $isEdit);
+            self::showCustomerMenu($bot, $user, $firstName);
             return;
         }
     }
 
     /**
-     * ۱. منوی مدیریت
+     * ۱. منوی مدیریت (کیبورد ثابت)
      */
-    public static function showAdminMenu(Nutgram $bot, string $firstName, bool $isEdit = false): void
+    public static function showAdminMenu(Nutgram $bot, string $firstName): void
     {
-        $text = "سلام <b>{$firstName}</b> عزیز (مدیر سیستم) 👑\nبه پنل مدیریت کل خوش آمدید:";
+        $text = "سلام <b>{$firstName}</b> عزیز (مدیر سیستم) 👑\nبه پنل مدیریت کل خوش آمدید:\n\n👇 لطفاً از منوی پایین انتخاب کنید:";
 
-        $keyboard = InlineKeyboardMarkup::make()
+        $keyboard = ReplyKeyboardMarkup::make(resize_keyboard: true)
             ->addRow(
-                InlineKeyboardButton::make('🧾 رسیدهای در انتظار', callback_data: 'admin_receipts'),
-                InlineKeyboardButton::make('🛒 سفارشات در انتظار', callback_data: 'admin_orders')
+                KeyboardButton::make('🟢 آمار اکانت‌های آنلاین'),
+                KeyboardButton::make('🧾 بررسی فیش‌های واریزی')
             )
             ->addRow(
-                InlineKeyboardButton::make('🟢 آمار اکانت‌های آنلاین', callback_data: 'admin_online_count'),
-                InlineKeyboardButton::make('➕ صدور اکانت جدید', callback_data: 'admin_create_acc')
+                KeyboardButton::make('🔍 جستجو و مدیریت اکانت'),
+                KeyboardButton::make('➕ صدور اکانت جدید')
             )
             ->addRow(
-                InlineKeyboardButton::make('🔍 جستجو و مدیریت اکانت (شارژ/مسدود)', callback_data: 'admin_manage_acc')
+                KeyboardButton::make('🛒 سفارشات در انتظار')
             )
             ->addRow(
-                InlineKeyboardButton::make('🚪 خروج از حساب', callback_data: 'logout_account')
-            );
-
-        self::sendOrEdit($bot, $text, $keyboard, $isEdit);
-    }
-
-    /**
-     * ۲. منوی نمایندگان
-     */
-    public static function showAgentMenu(Nutgram $bot, string $firstName, bool $isEdit = false): void
-    {
-        $text = "سلام <b>{$firstName}</b> عزیز (نماینده) 💼\nبه پنل مدیریت نمایندگی خوش آمدید:";
-
-        $keyboard = InlineKeyboardMarkup::make()
-            ->addRow(
-                InlineKeyboardButton::make('👥 لیست مشتریان', callback_data: 'agent_customers'),
-                InlineKeyboardButton::make('🛒 سفارشات فروشگاه', callback_data: 'agent_orders')
-            )
-            ->addRow(
-                InlineKeyboardButton::make('🔍 مدیریت اکانت (تمدید/مسدود/اطلاعات)', callback_data: 'agent_manage_acc'),
-                InlineKeyboardButton::make('➕ ایجاد اکانت جدید', callback_data: 'agent_create_acc')
-            )
-            ->addRow(
-                InlineKeyboardButton::make('💰 موجودی ولت', callback_data: 'agent_wallet')
-            )
-            ->addRow(
-                InlineKeyboardButton::make('🚪 خروج از حساب', callback_data: 'logout_account')
-            );
-
-        self::sendOrEdit($bot, $text, $keyboard, $isEdit);
-    }
-
-    /**
-     * ۳. منوی مشتریان
-     */
-    public static function showCustomerMenu(Nutgram $bot, User $user, string $firstName, bool $isEdit = false): void
-    {
-        $brandName = 'پشتیبانی سرویس';
-        if ($user->creator) {
-            $agent = User::find($user->creator);
-            $agentStore = DB::table('agent_stores')->where('user_id', $agent?->id)->first();
-            $brandName = $agentStore->title ?? $agent?->brand_name ?? $agent?->name ?? 'سامانه VPN';
-        }
-
-        $text = "سلام <b>{$firstName}</b> عزیز 🌹\nبه پنل کاربری <b>«{$brandName}»</b> خوش آمدید:";
-
-        $keyboard = InlineKeyboardMarkup::make()
-            ->addRow(
-                InlineKeyboardButton::make('📋 لیست اکانت‌ها همراه با وضعیت', callback_data: 'cust_accounts'),
-                InlineKeyboardButton::make('🛍 سفارش سرویس جدید', callback_data: 'cust_order')
-            )
-            ->addRow(
-                InlineKeyboardButton::make('💳 موجودی ولت', callback_data: 'cust_wallet'),
-                InlineKeyboardButton::make('➕ افزایش موجودی حساب', callback_data: 'cust_add_balance')
-            )
-            ->addRow(
-                InlineKeyboardButton::make('🚪 خروج / تغییر حساب', callback_data: 'logout_account')
-            );
-
-        self::sendOrEdit($bot, $text, $keyboard, $isEdit);
-    }
-
-    /**
-     * ۴. منوی مهمان (ورود / بدون حساب)
-     */
-    public static function showGuestMenu(Nutgram $bot, string $firstName): void
-    {
-        $text = "سلام <b>{$firstName}</b> عزیز! 👋\nبه ربات ما خوش آمدید.\n\nآیا از قبل حساب کاربری دارید؟";
-
-        $keyboard = InlineKeyboardMarkup::make()
-            ->addRow(
-                InlineKeyboardButton::make('✅ بله، حساب دارم (ورود)', callback_data: 'start_login')
-            )
-            ->addRow(
-                InlineKeyboardButton::make('❌ خیر، حساب ندارم', callback_data: 'no_account')
+                KeyboardButton::make('🚪 خروج از حساب کاربری')
             );
 
         $bot->sendMessage($text, parse_mode: 'HTML', reply_markup: $keyboard);
     }
 
     /**
-     * ۵. رندر کارت اطلاعات اکانت برای ادمین
+     * ۲. منوی نمایندگان (کیبورد ثابت)
+     */
+    public static function showAgentMenu(Nutgram $bot, string $firstName): void
+    {
+        $text = "سلام <b>{$firstName}</b> عزیز (نماینده) 💼\nبه پنل مدیریت نمایندگی خوش آمدید:\n\n👇 لطفاً از منوی پایین انتخاب کنید:";
+
+        $keyboard = ReplyKeyboardMarkup::make(resize_keyboard: true)
+            ->addRow(
+                KeyboardButton::make('🔍 مدیریت و جستجوی اکانت'),
+                KeyboardButton::make('➕ ایجاد اکانت جدید')
+            )
+            ->addRow(
+                KeyboardButton::make('👥 لیست مشتریان'),
+                KeyboardButton::make('💰 موجودی ولت')
+            )
+            ->addRow(
+                KeyboardButton::make('🛒 سفارشات فروشگاه')
+            )
+            ->addRow(
+                KeyboardButton::make('🚪 خروج از حساب کاربری')
+            );
+
+        $bot->sendMessage($text, parse_mode: 'HTML', reply_markup: $keyboard);
+    }
+
+
+
+
+    /**
+     * ۵. رندر کارت اطلاعات اکانت برای ادمین (دکمه شیشه‌ای)
      */
     public static function renderAccountCard(Nutgram $bot, Accounts $account, bool $isEdit = true): void
     {
@@ -169,39 +134,32 @@ class BotMenuService
                 InlineKeyboardButton::make('🔄 شارژ مجدد', callback_data: "admin_recharge_acc:{$account->id}")
             )
             ->addRow(
-                InlineKeyboardButton::make('🔍 جستجوی اکانت دیگر', callback_data: 'admin_manage_acc'),
-                InlineKeyboardButton::make('🏠 منوی اصلی ادمین', callback_data: 'back_to_admin_menu')
+            // دکمه بازگشت حالا فقط یه دستور کال‌بک ساده میده که تو روت هندل میشه
+                InlineKeyboardButton::make('🏠 بازگشت به منوی اصلی', callback_data: 'back_to_admin_menu')
             );
 
         self::sendOrEdit($bot, $text, $keyboard, $isEdit);
     }
 
     /**
-     * متد عمومی کمکی جهت ارسال یا ویرایش پیام بدون ارور
+     * ۶. رندر کارت اطلاعات اکانت برای نماینده (دکمه شیشه‌ای)
      */
-
-    public static function renderAccountCardAgent(Nutgram $bot, Accounts $account, bool $isEdit = true){
-        // وضعیت و ترافیک
+    public static function renderAccountCardAgent(Nutgram $bot, Accounts $account, bool $isEdit = true)
+    {
         $statusText = $account->is_enabled ? "🟢 فعال" : "🔴 مسدود / غیرفعال";
         $onlineText = $account->is_online ? "⚡ آنلاین" : "💤 آفلاین";
         $usageFormatted = method_exists($account, 'formatBytes') ? $account->formatBytes($account->usage) : round($account->usage / (1024*1024*1024), 2) . " GB";
         $maxUsageFormatted = $account->max_usage == 0 ? "نامحدود" : (method_exists($account, 'formatBytes') ? $account->formatBytes($account->max_usage) : round($account->max_usage / (1024*1024*1024), 2) . " GB");
 
-        // تاریخ انقضا
         $expireText = "شروع نشده / بدون انقضا";
         if ($account->expire_date) {
             $jalaliDate = Jalalian::forge($account->expire_date)->format('Y/m/d - H:i');
             $daysLeft = (int) now()->diffInDays($account->expire_date, false);
             $expireText = $daysLeft > 0 ? "{$jalaliDate} ({$daysLeft} روز مانده)" : "{$jalaliDate} (منقضی شده)";
         }
-        $GroupText = "بدون گروه کاربری";
-        if ($account->group) {
-            $GroupText = $account->group->name;
-        }
 
-        // 🔴 لینک دسترسی آسان کاربر (لینک لاگین بدون پسورد به پنل کلاینت)
-        // آدرس زیر را دقیقاً با روت سایت خودتان تنظیم کنید
-        $easyAccessLink = $account->subscription_url;;
+        $GroupText = $account->group ? $account->group->name : "بدون گروه کاربری";
+        $easyAccessLink = $account->subscription_url;
 
         $text = "👤 <b>اطلاعات اکانت مشتری</b>\n";
         $text .= "➖➖➖➖➖➖➖➖➖➖\n";
@@ -222,7 +180,6 @@ class BotMenuService
                 InlineKeyboardButton::make('🔄 تمدید اکانت', callback_data: "agent_renew_acc:{$account->id}")
             );
 
-        // 🔴 دکمه‌های مخصوص وایرگارد
         if ($account->service_group === 'wireguard') {
             $keyboard->addRow(
                 InlineKeyboardButton::make('📥 فایل کانفیگ', callback_data: "dl_wg_conf:{$account->id}"),
@@ -231,12 +188,15 @@ class BotMenuService
         }
 
         $keyboard->addRow(
-            InlineKeyboardButton::make('🔍 جستجوی دیگر', callback_data: 'agent_manage_acc'),
-            InlineKeyboardButton::make('🏠 منوی اصلی', callback_data: 'back_to_admin_menu')
+            InlineKeyboardButton::make('🏠 بازگشت به منوی اصلی', callback_data: 'back_to_admin_menu')
         );
 
         self::sendOrEdit($bot, $text, $keyboard, $isEdit);
     }
+
+    /**
+     * متد عمومی کمکی جهت ارسال یا ویرایش پیام بدون ارور
+     */
     public static function sendOrEdit(Nutgram $bot, string $text, InlineKeyboardMarkup $keyboard, bool $isEdit = false): void
     {
         try {
@@ -246,8 +206,54 @@ class BotMenuService
                 $bot->sendMessage($text, parse_mode: 'HTML', reply_markup: $keyboard);
             }
         } catch (\Exception $e) {
-            // اگر ویرایش پیام با خطا مواجه شد، پیام جدید ارسال می‌شود
             $bot->sendMessage($text, parse_mode: 'HTML', reply_markup: $keyboard);
         }
     }
+
+
+    /**
+     * ۴. منوی مهمان (ورود / ثبت‌نام) کاملاً متنی
+     */
+    public static function showGuestMenu(Nutgram $bot, string $firstName): void
+    {
+        $text = "سلام <b>{$firstName}</b> عزیز! 👋\nبه ربات ما خوش آمدید.\n\nلطفاً یکی از گزینه‌های زیر را انتخاب کنید:";
+
+        $keyboard = ReplyKeyboardMarkup::make(resize_keyboard: true)
+            ->addRow(
+                KeyboardButton::make('🔐 ورود به حساب کاربری')
+            )
+            ->addRow(
+                KeyboardButton::make('📝 ساخت حساب کاربری')
+            );
+
+        $bot->sendMessage($text, parse_mode: 'HTML', reply_markup: $keyboard);
+    }
+
+    /**
+     * ۳. منوی مشتریان (مخصوص role customer)
+     */
+    public static function showCustomerMenu(Nutgram $bot, User $user, string $firstName): void
+    {
+        $text = "سلام <b>{$firstName}</b> عزیز 🌹\nبه پنل کاربری خود خوش آمدید:\n\n👇 لطفاً از منوی پایین انتخاب کنید:";
+
+        $keyboard = ReplyKeyboardMarkup::make(resize_keyboard: true)
+            ->addRow(
+                KeyboardButton::make('⚙️ مدیریت سرویس ها'),
+                KeyboardButton::make('🎁 دریافت اشتراک رایگان')
+            )
+            ->addRow(
+                KeyboardButton::make('💰 افزایش موجودی'),
+                KeyboardButton::make('📞 ارتباط با پشتیبان')
+            )
+            ->addRow(
+                KeyboardButton::make('🌐 ورود به پنل کاربری'),
+                KeyboardButton::make('🛍 سفارش سرویس جدید')
+            )
+            ->addRow(
+                KeyboardButton::make('🚪 خروج از حساب کاربری')
+            );
+
+        $bot->sendMessage($text, parse_mode: 'HTML', reply_markup: $keyboard);
+    }
+
 }
