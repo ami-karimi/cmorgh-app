@@ -38,7 +38,6 @@ $bot->onCallbackQueryData('cust_show_service:{id}', [CustomerServiceHandler::cla
 $bot->onText('🎁 دریافت اشتراک رایگان', function (Nutgram $bot) {
     $bot->sendMessage("🎁 بخش <b>دریافت اشتراک رایگان</b> به زودی فعال می‌شود.", parse_mode: 'HTML');
 });
-$bot->onText('❌ انصراف از ثبت فیش', [\App\Telegram\Conversations\CustomerSubmitReceiptConversation::class, 'cancel']);
 $bot->onText('💰 افزایش موجودی', \App\Telegram\Conversations\CustomerSubmitReceiptConversation::class);
 
 $bot->onText('📞 ارتباط با پشتیبان', function (Nutgram $bot) {
@@ -51,8 +50,7 @@ $bot->onText('🌐 ورود به پنل کاربری', function (Nutgram $bot) {
 
 $bot->onText('🛍 سفارش سرویس جدید', CustomerOrderServiceConversation::class);
 
-// کلیک روی پکیج مورد نظر برای خرید
-$bot->onCallbackQueryData('buy_group:{groupId}', [CustomerOrderServiceConversation::class, 'processPurchase']);
+
 
 $bot->onCommand('start', [GeneralMenuHandler::class, 'start']);
 $bot->onCallbackQueryData('back_to_admin_menu', [GeneralMenuHandler::class, 'backToMenu']);$bot->onCallbackQueryData('logout_account', [GeneralMenuHandler::class, 'logout']);

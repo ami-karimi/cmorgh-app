@@ -17,7 +17,11 @@ use Illuminate\Support\Facades\DB;
 class CustomerOrderServiceConversation extends Conversation
 {
     protected ?string $selectedType = null;
+    protected ?int $selectedGroupId = null; // ذخیره آیدی پکیج انتخاب شده برای مرحله تایید
 
+    /**
+     * مرحله ۱: شروع و انتخاب نوع پروتکل
+     */
     public function start(Nutgram $bot)
     {
         if ($bot->isCallbackQuery()) {
@@ -27,104 +31,202 @@ class CustomerOrderServiceConversation extends Conversation
         $keyboardCancel = ReplyKeyboardMarkup::make(resize_keyboard: true)
             ->addRow(KeyboardButton::make('❌ انصراف از خرید'));
 
-        $bot->sendMessage("🛍 <b>سفارش سرویس جدید</b>", parse_mode: 'HTML', reply_markup: $keyboardCancel);
+        $text = "🛍 <b>سفارش سرویس جدید</b>\n\nلطفاً پروتکل یا نوع سرویس مورد نظر خود را انتخاب کنید:";
 
-        // مرحله ۱: انتخاب نوع سرویس توسط کاربر
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
                 InlineKeyboardButton::make('🔒 WireGuard', callback_data: 'type:wireguard'),
                 InlineKeyboardButton::make('🌐 L2TP / Cisco', callback_data: 'type:l2tp_cisco')
+            )
+            ->addRow(
+                InlineKeyboardButton::make('🏠 انصراف و منوی اصلی', callback_data: 'cancel_order')
             );
 
-        $bot->sendMessage("لطفاً پروتکل یا نوع سرویس مورد نظر خود را انتخاب کنید:", parse_mode: 'HTML', reply_markup: $keyboard);
+        if ($bot->isCallbackQuery()) {
+            $bot->editMessageText($text, parse_mode: 'HTML', reply_markup: $keyboard);
+        } else {
+            $bot->sendMessage("🛍 <b>سفارش سرویس جدید</b>", parse_mode: 'HTML', reply_markup: $keyboardCancel);
+            $bot->sendMessage($text, parse_mode: 'HTML', reply_markup: $keyboard);
+        }
+
         $this->next('handleServiceTypeSelection');
     }
 
     /**
-     * مرحله ۲: دریافت نوع پروتکل و فیلتر گروه‌های فعال متناسب با آن
+     * مرحله ۲: دریافت نوع پروتکل و ساخت لیست پکیج‌ها
      */
     public function handleServiceTypeSelection(Nutgram $bot)
     {
-        $text = $bot->message()?->text;
-
-        if ($text === '❌ انصراف از خرید' || $text === '/start') {
+        if ($bot->message()?->text === '❌ انصراف از خرید' || $bot->message()?->text === '/start') {
             $this->cancel($bot);
-            return;
-        }
-
-        if ($bot->isMessage()) {
-            $bot->sendMessage("⚠️ لطفاً یکی از دکمه‌های شیشه‌ای نوع سرویس را انتخاب کنید.");
             return;
         }
 
         if ($bot->isCallbackQuery()) {
             try { $bot->answerCallbackQuery(); } catch (\Exception $e) {}
 
-            $data = $bot->callbackQuery()->data;
-            if (str_starts_with($data, 'type:')) {
+            $data = $bot->callbackQuery()?->data;
+
+            if ($data === 'cancel_order') {
+                $this->cancel($bot);
+                return;
+            }
+
+            if ($data && str_starts_with($data, 'type:')) {
                 $this->selectedType = str_replace('type:', '', $data);
 
-                // پایه‌ریزی کوئری برای مدل Group
-                $query = Group::where('is_enabled', true);
-
-                // فیلتر کردن بر اساس نام یا نوع سرویس انتخاب شده
-                if ($this->selectedType === 'wireguard') {
-                    $query->where(function($q) {
-                        $q->where('name', 'LIKE', '%wireguard%')
-                            ->orWhere('name', 'LIKE', '%وایرگارد%');
-                    });
-                } else {
-                    $query->where(function($q) {
-                        $q->where('name', 'LIKE', '%l2tp%')
-                            ->orWhere('name', 'LIKE', '%cisco%')
-                            ->orWhere('name', 'LIKE', '%سیسکو%');
-                    });
-                }
-
-                $groups = $query->get();
-
-                if ($groups->isEmpty()) {
-                    $bot->sendMessage("❌ در حال حاضر هیچ پکیج فعالی برای این پروتکل وجود ندارد.");
-                    $this->cancel($bot);
-                    return;
-                }
-
-                $inlineKeyboard = InlineKeyboardMarkup::make();
-                foreach ($groups as $group) {
-                    $price = number_format($group->price ?? 0);
-                    $name = $group->name ?? 'سرویس';
-
-                    $inlineKeyboard->addRow(
-                        InlineKeyboardButton::make("📦 {$name} - {$price} تومان", callback_data: "buy_group:{$group->id}")
-                    );
-                }
-
-                $bot->sendMessage("📦 <b>لیست پکیج‌های فعال ($this->selectedType):</b>\n\nلطفاً پکیج مورد نظر خود را انتخاب کنید:", parse_mode: 'HTML', reply_markup: $inlineKeyboard);
-                $this->next('handleGroupSelection');
+                // هدایت به متد کمکی برای نمایش پکیج‌ها
+                $this->showPackagesList($bot);
             }
         }
     }
 
     /**
-     * مرحله ۳: انتظار برای انتخاب پکیج
+     * متد کمکی: واکشی و نمایش لیست پکیج‌ها بر اساس پروتکل
+     */
+    private function showPackagesList(Nutgram $bot)
+    {
+        $query = Group::where('is_enabled', true);
+
+        if ($this->selectedType === 'wireguard') {
+            $query->where(function($q) {
+                $q->where('name', 'LIKE', '%wireguard%')
+                    ->orWhere('name', 'LIKE', '%وایرگارد%');
+            });
+        } else {
+            $query->where(function($q) {
+                $q->where('name', 'NOT LIKE', '%wireguard%')
+                    ->where('name', 'NOT LIKE', '%وایرگارد%');
+            });
+        }
+
+        $groups = $query->get();
+
+        if ($groups->isEmpty()) {
+            $emptyKeyboard = InlineKeyboardMarkup::make()
+                ->addRow(InlineKeyboardButton::make('🔙 بازگشت به انتخاب پروتکل', callback_data: 'back_to_protocols'))
+                ->addRow(InlineKeyboardButton::make('🏠 انصراف و منوی اصلی', callback_data: 'cancel_order'));
+
+            $bot->editMessageText("❌ <b>در حال حاضر هیچ پکیج فعالی برای این سرویس وجود ندارد.</b>", parse_mode: 'HTML', reply_markup: $emptyKeyboard);
+            $this->next('handleGroupSelection');
+            return;
+        }
+
+        $inlineKeyboard = InlineKeyboardMarkup::make();
+        foreach ($groups as $group) {
+            $price = number_format($group->price ?? 0);
+            $name = $group->name ?? 'سرویس';
+
+            $inlineKeyboard->addRow(
+                InlineKeyboardButton::make("📦 {$name} - {$price} تومان", callback_data: "buy_group:{$group->id}")
+            );
+        }
+
+        $inlineKeyboard->addRow(
+            InlineKeyboardButton::make('🔙 تغییر نوع سرویس (پروتکل)', callback_data: 'back_to_protocols')
+        );
+        $inlineKeyboard->addRow(
+            InlineKeyboardButton::make('🏠 انصراف و منوی اصلی', callback_data: 'cancel_order')
+        );
+
+        $bot->editMessageText("📦 <b>لیست پکیج‌های فعال:</b>\n\nلطفاً پکیج مورد نظر خود را انتخاب کنید:", parse_mode: 'HTML', reply_markup: $inlineKeyboard);
+        $this->next('handleGroupSelection');
+    }
+
+    /**
+     * مرحله ۳: دریافت کلیک روی پکیج و هدایت به مرحله تایید
      */
     public function handleGroupSelection(Nutgram $bot)
     {
-        $text = $bot->message()?->text;
-
-        if ($text === '❌ انصراف از خرید' || $text === '/start') {
+        if ($bot->message()?->text === '❌ انصراف از خرید' || $bot->message()?->text === '/start') {
             $this->cancel($bot);
             return;
         }
 
-        if ($bot->isMessage()) {
-            $bot->sendMessage("⚠️ لطفاً یکی از پکیج‌های لیست را انتخاب کنید.");
-            return;
+        if ($bot->isCallbackQuery()) {
+            $data = $bot->callbackQuery()?->data;
+
+            if ($data === 'back_to_protocols') {
+                $this->start($bot);
+                return;
+            }
+
+            if ($data === 'cancel_order') {
+                $this->cancel($bot);
+                return;
+            }
+
+            // کاربر روی پکیج کلیک کرده است -> هدایت به مرحله تایید
+            if ($data && str_starts_with($data, 'buy_group:')) {
+                $this->selectedGroupId = (int) str_replace('buy_group:', '', $data);
+                $this->askConfirmation($bot);
+                return;
+            }
         }
     }
 
     /**
-     * مرحله ۴: پردازش خرید نهایی
+     * مرحله ۴: نمایش فاکتور و درخواست تایید از کاربر
+     */
+    public function askConfirmation(Nutgram $bot)
+    {
+        $group = Group::find($this->selectedGroupId);
+
+        if (!$group || !$group->is_enabled) {
+            $bot->sendMessage("❌ پکیج مورد نظر نامعتبر یا غیرفعال است!");
+            $this->end();
+            return;
+        }
+
+        $price = number_format($group->price ?? 0);
+        $name = $group->name ?? 'سرویس';
+
+        $text = "🛒 <b>تایید نهایی سفارش</b>\n";
+        $text .= "➖➖➖➖➖➖➖➖➖➖\n";
+        $text .= "📦 <b>پکیج انتخابی:</b> {$name}\n";
+        $text .= "💵 <b>مبلغ پرداختی:</b> {$price} تومان\n\n";
+        $text .= "آیا از کسر موجودی و صدور این سرویس اطمینان دارید؟";
+
+        $keyboard = InlineKeyboardMarkup::make()
+            ->addRow(
+                InlineKeyboardButton::make('✅ بله، کسر از کیف پول و صدور', callback_data: 'confirm_buy')
+            )
+            ->addRow(
+                InlineKeyboardButton::make('🔙 انصراف و بازگشت به لیست پکیج‌ها', callback_data: 'back_to_packages')
+            );
+
+        $bot->editMessageText($text, parse_mode: 'HTML', reply_markup: $keyboard);
+        $this->next('handleConfirmation');
+    }
+
+    /**
+     * مرحله ۵: دریافت تایید نهایی کاربر
+     */
+    public function handleConfirmation(Nutgram $bot)
+    {
+        if ($bot->message()?->text === '❌ انصراف از خرید' || $bot->message()?->text === '/start') {
+            $this->cancel($bot);
+            return;
+        }
+
+        if ($bot->isCallbackQuery()) {
+            $data = $bot->callbackQuery()?->data;
+
+            if ($data === 'back_to_packages') {
+                $this->showPackagesList($bot);
+                return;
+            }
+
+            // کاربر خرید را تایید کرد -> پردازش نهایی
+            if ($data === 'confirm_buy') {
+                $this->processPurchase($bot, $this->selectedGroupId);
+                return;
+            }
+        }
+    }
+
+    /**
+     * مرحله ۶: بررسی موجودی و ساخت نهایی سرویس در سرور
      */
     public function processPurchase(Nutgram $bot, $groupId)
     {
@@ -144,16 +246,28 @@ class CustomerOrderServiceConversation extends Conversation
         $price = $group->price ?? 0;
 
         if ($user->balance < $price) {
-            $bot->sendMessage("❌ <b>موجودی کیف پول شما کافی نیست!</b>\n\n💰 موجودی فعلی: " . number_format($user->balance) . " تومان\n💵 مبلغ پکیج: " . number_format($price) . " تومان\n\nلطفاً ابتدا حساب خود را شارژ کنید.", parse_mode: 'HTML');
-            $this->cancel($bot);
+            $text = "❌ <b>موجودی کیف پول شما کافی نیست!</b>\n";
+            $text .= "➖➖➖➖➖➖➖➖➖➖\n";
+            $text .= "💰 <b>موجودی فعلی شما:</b> " . number_format($user->balance) . " تومان\n";
+            $text .= "💵 <b>قیمت پکیج انتخابی:</b> " . number_format($price) . " تومان\n\n";
+            $text .= "لطفاً برای تکمیل خرید، ابتدا حساب خود را شارژ کنید.";
+
+            $keyboard = InlineKeyboardMarkup::make()
+                ->addRow(
+                    InlineKeyboardButton::make('🔙 بازگشت به لیست پکیج‌ها', callback_data: 'back_to_packages'),
+                    InlineKeyboardButton::make('🏠 منوی اصلی', callback_data: 'cancel_order')
+                );
+
+            $bot->editMessageText($text, parse_mode: 'HTML', reply_markup: $keyboard);
+            $this->next('handleConfirmation');
             return;
         }
 
+        // ساخت اکانت
         try {
-            $bot->sendMessage("⏳ در حال کسر مبلغ از ولت و صدور اتوماتیک سرویس...");
+            $bot->editMessageText("⏳ <b>در حال کسر مبلغ از ولت و صدور اتوماتیک سرویس...</b>", parse_mode: 'HTML');
 
             DB::transaction(function () use ($user, $group, $price) {
-                $user->decrement('balance', $price);
 
                 $accService = new AccountProvisioningService();
                 $phone = $user->phone ?? '09' . rand(100000000, 999999999);
@@ -165,7 +279,7 @@ class CustomerOrderServiceConversation extends Conversation
                     $preparedData['configData'],
                     $user->id,
                     true,
-                    true
+                    false
                 );
 
                 if (is_array($create) && isset($create['status']) && $create['status'] === false) {
@@ -177,19 +291,31 @@ class CustomerOrderServiceConversation extends Conversation
                 }
             });
 
-            $bot->sendMessage("🎉 <b>خرید با موفقیت انجام شد!</b>\n\nسرویس شما صادر شد. جهت مشاهده جزئیات به بخش «⚙️ مدیریت سرویس ها» مراجعه کنید.", parse_mode: 'HTML');
+            $successKeyboard = InlineKeyboardMarkup::make()
+                ->addRow(InlineKeyboardButton::make('⚙️ مشاهده و مدیریت سرویس‌ها', callback_data: 'cust_services_list'))
+                ->addRow(InlineKeyboardButton::make('🏠 بازگشت به منوی اصلی', callback_data: 'cancel_order'));
+
+            $bot->editMessageText("🎉 <b>خرید با موفقیت انجام شد!</b>\n\nسرویس شما صادر شد. جهت دریافت لینک اتصال به بخش مدیریت سرویس‌ها مراجعه کنید.", parse_mode: 'HTML', reply_markup: $successKeyboard);
 
         } catch (\Exception $e) {
-            $bot->sendMessage("❌ <b>خطا در پردازش سفارش:</b>\n" . $e->getMessage(), parse_mode: 'HTML');
+            $failKeyboard = InlineKeyboardMarkup::make()
+                ->addRow(InlineKeyboardButton::make('🔙 بازگشت به لیست پکیج‌ها', callback_data: 'back_to_packages'));
+
+            $bot->editMessageText("❌ <b>خطا در صدور سرویس:</b>\n" . $e->getMessage(), parse_mode: 'HTML', reply_markup: $failKeyboard);
         }
 
-        BotMenuService::showCustomerMenu($bot, $user, $bot->user()->first_name ?? 'کاربر');
         $this->end();
     }
 
     private function cancel(Nutgram $bot)
     {
-        $bot->sendMessage('❌ عملیات خرید لغو شد.');
+        if ($bot->isCallbackQuery()) {
+            try { $bot->answerCallbackQuery(); } catch (\Exception $e) {}
+            $bot->sendMessage('❌ عملیات خرید لغو شد.');
+        } else {
+            $bot->sendMessage('❌ عملیات خرید لغو شد.');
+        }
+
         $user = User::where('telegram_id', $bot->userId())->first();
         BotMenuService::showCustomerMenu($bot, $user, $bot->user()->first_name ?? 'کاربر');
         $this->end();
