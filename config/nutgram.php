@@ -9,7 +9,7 @@ return [
 
     // Extra or specific configurations
     'config' => [
-        'api_url' => env('TELEGRAM_API_URL', 'https://apime.takfashomal.workers.dev'),
+        'api_url' => env('TELEGRAM_API_URL', 'https://tg-proxy-lime.vercel.app'),
     ],
 
     // Set if the service provider should automatically load
