@@ -104,9 +104,9 @@
                                 انقضا: {{ \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($acc->expire_date))->format('%Y/%m/%d') }}
                             </span>
                         </div>
-                        <button class="px-4 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-bold hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all">
+                        <a href="{{route('reseller.accounts.show',['id' => $acc->id ])}}" wire:navigate class="px-4 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-bold hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all">
                             تمدید سرویس
-                        </button>
+                        </a>
                     </div>
                 @empty
                     <div class="py-12 text-center text-zinc-400 text-sm">هیچ اکانتی در آستانه انقضا نیست.</div>
