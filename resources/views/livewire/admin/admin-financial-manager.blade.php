@@ -202,8 +202,8 @@
                 </div>
 
                 <div class="p-4 bg-[#09090b] flex justify-center">
-                    <a href="{{ Storage::disk('public')->url($selectedTrx->attachment) }}" target="_blank" title="مشاهده تصویر اصلی">
-                        <img src="{{ Storage::disk('public')->url($selectedTrx->attachment) }}" class="max-h-72 rounded-xl border border-zinc-800 object-contain hover:scale-105 transition duration-300">
+                    <a href="{{ url('storage/'.$selectedTrx->attachment)  }}" target="_blank" title="مشاهده تصویر اصلی">
+                        <img src="{{ url('storage/'.$selectedTrx->attachment)  }}" class="max-h-72 rounded-xl border border-zinc-800 object-contain hover:scale-105 transition duration-300">
                     </a>
                 </div>
 
