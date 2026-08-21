@@ -20,6 +20,7 @@ class AgentAccountActionHandler
         if (!$this->hasAccess($agent, $account)) {
             $bot->answerCallbackQuery(text: '❌ شما به این اکانت دسترسی ندارید.', show_alert: true);
             return;
+        }
 
 
         $success = \App\Services\VpnManagerService::toggleAccount($account);
