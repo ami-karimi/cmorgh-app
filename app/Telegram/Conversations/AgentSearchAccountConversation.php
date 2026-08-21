@@ -38,7 +38,7 @@ class AgentSearchAccountConversation extends Conversation
         // 🔴 بررسی وجود اکانت و مالکیت آن (نماینده فقط اکانت خودش را ببیند)
         // فرض بر این است که یوزری که اکانت بهش متصل است، توسط این نماینده ساخته شده
         // اگر ساختار دیتابیس شما متفاوت است، این شرط را متناسب با آن تغییر دهید
-        if (!$account || ($account->creatorUser && $account->creatorUser->creator !== $agent->id )) {
+        if (!$account || ($account->creatorUser && $account->creatorUser->parentAgent && $account->creatorUser->parentAgent->id !== $agent->id )) {
             $keyboard = InlineKeyboardMarkup::make()
                 ->addRow(
                     InlineKeyboardButton::make('🔄 جستجوی مجدد', callback_data: 'agent_manage_acc'),
