@@ -66,6 +66,20 @@ class User extends Authenticatable
         return $this->belongsTo(User::class, 'creator');
     }
 
+    public function getReferralCodeAttribute()
+    {
+        $salt = 852963;
+
+        return base_convert($this->id * $salt, 10, 36);
+    }
+
+    public function getReferralLinkAttribute()
+    {
+        $botUsername = 'vpnservicepro_bot';
+        return "https://t.me/{$botUsername}?start=ref_{$this->referral_code}";
+    }
+
+
     public function getGroupPrice($group)
     {
         $groupId = $group instanceof Group ? $group->id : $group;

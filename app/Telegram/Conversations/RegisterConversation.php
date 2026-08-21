@@ -14,41 +14,82 @@ class RegisterConversation extends Conversation
 {
     protected $name;
     protected $email;
+    public $agentId;
 
     public function start(Nutgram $bot)
     {
+
         $keyboard = ReplyKeyboardMarkup::make(resize_keyboard: true)
             ->addRow(KeyboardButton::make('❌ انصراف'));
 
-        $bot->sendMessage("📝 <b>ساخت حساب کاربری جدید</b>\n\nلطفاً <b>نام و نام خانوادگی</b> خود را ارسال کنید:", parse_mode: 'HTML', reply_markup: $keyboard);
+        if ($this->agentId > 0) {
+            $bot->sendMessage("📝 <b>ساخت حساب کاربری جدید</b>\n\n👤 لطفاً <b>نام و نام خانوادگی</b> خود را ارسال کنید:", parse_mode: 'HTML', reply_markup: $keyboard);
+            $this->next('getEmail');
+        }
+        else {
+            $bot->sendMessage($this->agentId."📝 <b>ساخت حساب کاربری جدید</b>\n\n🤝 لطفاً <b>کد معرف</b> خود را وارد کنید:\n\n<i>⚠️ نکته: ثبت‌نام در سیستم فقط با داشتن کد معرف امکان‌پذیر است.</i>", parse_mode: 'HTML', reply_markup: $keyboard);
+            $this->next('processReferralCode');
+        }
+    }
+
+    /**
+     * بررسی کد معرف (اگر کاربر با لینک نیامده باشد)
+     */
+    public function processReferralCode(Nutgram $bot)
+    {
+        $code = $bot->message()?->text;
+
+        if ($code === '❌ انصراف' || $code === '/start') {
+            $this->cancelRegistration($bot);
+            return;
+        }
+
+        // رمزگشایی کد معرف
+        $salt = 852963;
+        $decodedAgentId = (int) (base_convert($code, 36, 10) / $salt);
+
+        $agent = User::find($decodedAgentId);
+
+        if (!$agent) {
+            $bot->sendMessage("❌ <b>کد معرف نامعتبر است!</b>\nلطفاً کد صحیح را مجدداً ارسال کنید (یا دکمه انصراف را بزنید):", parse_mode: 'HTML');
+            return; // منتظر می‌ماند تا کد درست وارد شود
+        }
+
+        // ذخیره آیدی در کلاس
+        $this->agentId = $agent->id;
+
+        // عبور از مرحله کد معرف و درخواست نام
+        $bot->sendMessage("✅ کد معرف تایید شد.\n\n👤 حالا لطفاً <b>نام و نام خانوادگی</b> خود را ارسال کنید:", parse_mode: 'HTML');
         $this->next('getEmail');
     }
 
+    /**
+     * دریافت نام و درخواست ایمیل
+     */
     public function getEmail(Nutgram $bot)
     {
         $text = $bot->message()?->text;
 
         if ($text === '❌ انصراف' || $text === '/start') {
-            $bot->sendMessage('عملیات ثبت‌نام لغو شد.');
-            BotMenuService::showGuestMenu($bot, $bot->user()->first_name ?? 'کاربر');
-            $this->end();
+            $this->cancelRegistration($bot);
             return;
         }
 
         $this->name = $text;
 
-        $bot->sendMessage("📧 لطفاً <b>آدرس ایمیل</b> خود را ارسال کنید:\n(این ایمیل برای ورود به حساب استفاده خواهد شد)", parse_mode: 'HTML');
+        $bot->sendMessage("📧 لطفاً <b>آدرس ایمیل</b> خود را ارسال کنید:\n(این ایمیل برای ورود به پنل استفاده خواهد شد)", parse_mode: 'HTML');
         $this->next('getPassword');
     }
 
+    /**
+     * دریافت ایمیل و درخواست پسورد
+     */
     public function getPassword(Nutgram $bot)
     {
         $text = $bot->message()?->text;
 
         if ($text === '❌ انصراف' || $text === '/start') {
-            $bot->sendMessage('عملیات ثبت‌نام لغو شد.');
-            BotMenuService::showGuestMenu($bot, $bot->user()->first_name ?? 'کاربر');
-            $this->end();
+            $this->cancelRegistration($bot);
             return;
         }
 
@@ -60,38 +101,34 @@ class RegisterConversation extends Conversation
 
         // بررسی تکراری نبودن ایمیل
         if (User::where('email', $text)->exists()) {
-            $bot->sendMessage("⚠️ <b>این ایمیل قبلاً در سیستم ثبت شده است!</b>\nلطفاً ایمیل دیگری ارسال کنید یا وارد حساب خود شوید:", parse_mode: 'HTML');
+            $bot->sendMessage("⚠️ <b>این ایمیل قبلاً در سیستم ثبت شده است!</b>\nلطفاً ایمیل دیگری ارسال کنید یا برای لغو، انصراف را بزنید:", parse_mode: 'HTML');
             return;
         }
 
         $this->email = $text;
 
         $bot->sendMessage("🔑 بسیار عالی! حالا یک <b>کلمه عبور (پسورد)</b> برای حساب خود تعیین کنید:", parse_mode: 'HTML');
-        $this->next('registerUser');
+        $this->next('finalizeRegistration');
     }
 
-    public function registerUser(Nutgram $bot)
+    /**
+     * دریافت پسورد و ثبت نهایی کاربر
+     */
+    public function finalizeRegistration(Nutgram $bot)
     {
         $password = $bot->message()?->text;
 
         if ($password === '❌ انصراف' || $password === '/start') {
-            $bot->sendMessage('عملیات ثبت‌نام لغو شد.');
-            BotMenuService::showGuestMenu($bot, $bot->user()->first_name ?? 'کاربر');
-            $this->end();
+            $this->cancelRegistration($bot);
             return;
         }
 
         $bot->sendMessage("⏳ در حال ساخت حساب کاربری...");
 
-        $find_mail = User::where('email',$this->email)->first();
-        if($find_mail){
-            $bot->sendMessage("⚠️ <b>ایمیل از قبل موجود میباشد چنانچه ایمیل مربوط به شماست لطفا وارد حساب کاربری خود شوید یا ایمیل جدیدی وارد نمایید!</b>", parse_mode: 'HTML');
-            return;
-        }
-        // ساخت یوزر جدید با نقش customer
         $user = User::create([
             'name' => $this->name,
             'email' => $this->email,
+            'creator' => $this->agentId, // 🎯 ثبت با آیدی نماینده
             'password' => Hash::make($password),
             'role' => 'customer',
             'telegram_id' => $bot->userId(),
@@ -99,8 +136,17 @@ class RegisterConversation extends Conversation
 
         $bot->sendMessage("🎉 <b>تبریک!</b> حساب کاربری شما با موفقیت ایجاد شد.", parse_mode: 'HTML');
 
-        // هدایت مستقیم کاربر به منوی اصلی
         BotMenuService::showMainMenu($bot, $user);
+        $this->end();
+    }
+
+    /**
+     * لغو عملیات ثبت‌نام
+     */
+    protected function cancelRegistration(Nutgram $bot)
+    {
+        $bot->sendMessage('❌ عملیات ثبت‌نام لغو شد.');
+        BotMenuService::showGuestMenu($bot, $bot->user()->first_name ?? 'کاربر');
         $this->end();
     }
 }

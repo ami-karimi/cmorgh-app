@@ -17,6 +17,10 @@ class AdminReceiptHandler
                 $bot->answerCallbackQuery();
             } catch (\Exception $e) {}
         }
+        $user = \App\Models\User::where('telegram_id', $bot->userId())->whereIn('role',['manager','admin'])->first();
+        if(!$user){
+            return false;
+        }
 
         $receipt = Financial::where('approved', 0)->where('type', 'plus')->whereNotNull('attachment')->oldest()->first();
 
@@ -84,6 +88,10 @@ class AdminReceiptHandler
 
     private function checkNextReceipt(Nutgram $bot)
     {
+        $user = \App\Models\User::where('telegram_id', $bot->userId())->whereIn('role',['manager','admin'])->first();
+        if(!$user){
+            return false;
+        }
         $nextReceipt = Financial::where('approved', 0)->where('type', 'plus')->whereNotNull('attachment')->oldest()->first();
         if ($nextReceipt) {
             $this->showReceiptToAdmin($bot, $nextReceipt);

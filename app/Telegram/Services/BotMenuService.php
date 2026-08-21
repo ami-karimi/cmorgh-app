@@ -91,6 +91,7 @@ class BotMenuService
                 KeyboardButton::make('🛒 سفارشات فروشگاه')
             )
             ->addRow(
+                KeyboardButton::make('🔑 دریافت کد دعوت'),
                 KeyboardButton::make('🚪 خروج از حساب کاربری')
             );
 

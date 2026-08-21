@@ -16,6 +16,8 @@ use App\Telegram\Handlers\WireguardHandler;
 use App\Telegram\Handlers\AdminReceiptHandler;
 use App\Telegram\Conversations\RegisterConversation;
 use App\Telegram\Conversations\CustomerOrderServiceConversation;
+use App\Telegram\Conversations\CustomerRenewAccountConversation;
+use App\Telegram\Handlers\AgentHandler;
 
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
@@ -31,7 +33,7 @@ $bot->onText('⚙️ مدیریت سرویس ها', [CustomerServiceHandler::cla
 
 // بازگشت به لیست سرویس‌ها از روی دکمه شیشه‌ای
 $bot->onCallbackQueryData('cust_services_list', [CustomerServiceHandler::class, 'listServices']);
-
+$bot->onCallbackQueryData('cust_renew_acc:{id}', CustomerRenewAccountConversation::class);
 // انتخاب یک سرویس خاص از لیست
 $bot->onCallbackQueryData('cust_show_service:{id}', [CustomerServiceHandler::class, 'showServiceDetail']);
 
@@ -39,6 +41,7 @@ $bot->onText('🎁 دریافت اشتراک رایگان', function (Nutgram $b
     $bot->sendMessage("🎁 بخش <b>دریافت اشتراک رایگان</b> به زودی فعال می‌شود.", parse_mode: 'HTML');
 });
 $bot->onText('💰 افزایش موجودی', \App\Telegram\Conversations\CustomerSubmitReceiptConversation::class);
+$bot->onCallbackQueryData('start_deposit_flow', \App\Telegram\Conversations\CustomerSubmitReceiptConversation::class);
 
 $bot->onText('📞 ارتباط با پشتیبان', function (Nutgram $bot) {
     $bot->sendMessage("📞 <b>پشتیبانی:</b>\nلطفاً پیام خود را به آیدی @YourSupportID ارسال کنید.", parse_mode: 'HTML');
@@ -52,7 +55,7 @@ $bot->onText('🛍 سفارش سرویس جدید', CustomerOrderServiceConversa
 
 
 
-$bot->onCommand('start', [GeneralMenuHandler::class, 'start']);
+$bot->onCommand('start ?{payload}', [GeneralMenuHandler::class, 'start']);
 $bot->onCallbackQueryData('back_to_admin_menu', [GeneralMenuHandler::class, 'backToMenu']);$bot->onCallbackQueryData('logout_account', [GeneralMenuHandler::class, 'logout']);
 $bot->onCallbackQueryData('start_login', LoginConversation::class);$bot->onCallbackQueryData('no_account', [GeneralMenuHandler::class, 'noAccount']);
 
@@ -67,7 +70,8 @@ $bot->onCallbackQueryData('admin_recharge_acc:{id}', [AdminAccountActionHandler:
 // ==========================================
 // ۴. بررسی رسیدهای مالی (ادمین)
 // ==========================================
-$bot->onCallbackQueryData('admin_receipts', [AdminReceiptReviewHandler::class, 'startReview']);$bot->onCallbackQueryData('admin_handle_receipt:{id}:{action}', [AdminReceiptReviewHandler::class, 'handle']);
+$bot->onCallbackQueryData('admin_receipts', [AdminReceiptReviewHandler::class, 'startReview']);
+$bot->onCallbackQueryData('admin_handle_receipt:{id}:{action}', [AdminReceiptReviewHandler::class, 'handle']);
 // (نکته: دکمه‌های تایید سریع از روی کارت که قبلا ساختیم)
 $bot->onCallbackQueryData('admin_approve_receipt:{id}', [AdminReceiptHandler::class, 'approve']);
 $bot->onCallbackQueryData('admin_reject_receipt:{id}', [AdminReceiptHandler::class, 'reject']);
@@ -90,7 +94,8 @@ $bot->onText('🟢 آمار اکانت‌های آنلاین', [AdminAccountActi
 $bot->onText('🧾 بررسی فیش‌های واریزی', [\App\Telegram\Handlers\AdminReceiptHandler::class, 'startReview']);
 $bot->onText('🔍 جستجو و مدیریت اکانت', AdminSearchAccountConversation::class);
 $bot->onText('➕ صدور اکانت جدید', CreateAccountConversation::class);
-
+$bot->onText('🔑 دریافت کد دعوت', [AgentHandler::class, 'showReferralInfo']);
+$bot->onCallbackQueryData('agent_referral_info', [AgentHandler::class, 'showReferralInfo']);
 $bot->onText('🔍 مدیریت و جستجوی اکانت', AgentSearchAccountConversation::class);
 $bot->onText('➕ ایجاد اکانت جدید', CreateAccountConversation::class);
 $bot->onText('💰 موجودی ولت', AgentWalletHandler::class);

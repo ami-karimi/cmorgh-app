@@ -26,7 +26,7 @@ class AccountProvisioningService
         $vpnPassword = $overrides['password'] ?? Str::random(8);
 
         // تشخیص نوع سرویس (امکان override کردن)
-        $serviceGroup = $overrides['service_group'] ?? (str_contains(mb_strtolower($group->name), 'wireguard') ? 'wireguard' : 'l2tp_cisco');
+        $serviceGroup = $overrides['service_group'] ?? (str_contains(mb_strtolower($group->name), 'وایرگارد') ? 'wireguard' : 'l2tp_cisco');
 
         $finalWgServerId = null;
         if ($serviceGroup === 'wireguard') {

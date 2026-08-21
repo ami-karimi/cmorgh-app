@@ -12,16 +12,40 @@ use SergiX44\Nutgram\Telegram\Types\Keyboard\KeyboardButton;
 class GeneralMenuHandler
 {
     // 🔴 این متد برای زمانی است که کاربر دستور /start را می‌فرستد
-    public function start(Nutgram $bot)
+    public function start(Nutgram $bot, ?string $payload = null)
     {
-        $user = User::where('telegram_id', $bot->userId())->first();
+        $telegramId = $bot->userId();
+        $user = User::where('telegram_id', $telegramId)->first();
+
+        // ۱. اگر کاربر از قبل اکانت دارد (نمایش منوی اصلی)
         if ($user) {
             BotMenuService::showMainMenu($bot, $user);
-        } else {
-            BotMenuService::showGuestMenu($bot, $bot->user()->first_name ?? 'کاربر');
+            return;
         }
-    }
 
+        // ۲. اگر کاربر لینک اختصاصی ندارد (نمایش منوی مهمان جهت لاگین)
+        if (!$payload || !str_starts_with($payload, 'ref_')) {
+            BotMenuService::showGuestMenu($bot, $bot->user()->first_name ?? 'کاربر');
+            return;
+        }
+
+        // ۳. استخراج هش و پیدا کردن نماینده
+        $referralCode = str_replace('ref_', '', $payload);
+        $salt = 852963;
+        $agentId = (int) (base_convert($referralCode, 36, 10) / $salt);
+
+        $agent = User::find($agentId);
+
+        // اگر نماینده پیدا نشد
+        if (!$agent) {
+            $bot->sendMessage("❌ لینک دعوت نامعتبر است یا نماینده یافت نشد.");
+            BotMenuService::showGuestMenu($bot, $bot->user()->first_name ?? 'کاربر');
+            return;
+        }
+        $registerConv = new \App\Telegram\Conversations\RegisterConversation();
+        $registerConv->agentId = $agent->id; // مقداردهی مستقیم به متغیر کلاس
+        $registerConv($bot);
+    }
 
     public function getPassword(Nutgram $bot)
     {

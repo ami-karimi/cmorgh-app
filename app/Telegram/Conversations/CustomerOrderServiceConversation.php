@@ -99,7 +99,7 @@ class CustomerOrderServiceConversation extends Conversation
                     ->where('name', 'NOT LIKE', '%وایرگارد%');
             });
         }
-
+        $user = User::where('telegram_id', $bot->userId())->first();
         $groups = $query->get();
 
         if ($groups->isEmpty()) {
@@ -114,7 +114,7 @@ class CustomerOrderServiceConversation extends Conversation
 
         $inlineKeyboard = InlineKeyboardMarkup::make();
         foreach ($groups as $group) {
-            $price = number_format($group->price ?? 0);
+            $price = number_format($group->getSellingPriceFor($user->parentAgent) ?? 0);
             $name = $group->name ?? 'سرویس';
 
             $inlineKeyboard->addRow(
@@ -243,7 +243,7 @@ class CustomerOrderServiceConversation extends Conversation
             return;
         }
 
-        $price = $group->price ?? 0;
+        $price = $group->getSellingPriceFor($user->parentAgent) ?? 0;
 
         if ($user->balance < $price) {
             $text = "❌ <b>موجودی کیف پول شما کافی نیست!</b>\n";
@@ -279,16 +279,14 @@ class CustomerOrderServiceConversation extends Conversation
                     $preparedData['configData'],
                     $user->id,
                     true,
-                    false
+                    true
                 );
 
                 if (is_array($create) && isset($create['status']) && $create['status'] === false) {
                     throw new \Exception($create['message'] ?? 'خطا در ارتباط با سرور صدور اکانت.');
                 }
 
-                if (method_exists($user, 'vpnAccounts')) {
-                    $user->vpnAccounts()->attach($create->id);
-                }
+
             });
 
             $successKeyboard = InlineKeyboardMarkup::make()

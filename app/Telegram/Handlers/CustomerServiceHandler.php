@@ -29,7 +29,6 @@ class CustomerServiceHandler
             return;
         }
 
-        // 🔴 تغییر مهم: استفاده از ریلیشن vpnAccounts به جای کوئری مستقیم
         $accounts = $user->vpnAccounts;
 
         if ($accounts->isEmpty()) {
@@ -43,23 +42,66 @@ class CustomerServiceHandler
             return;
         }
 
-        $text = "⚙️ <b>مدیریت سرویس‌های شما</b>\n";
-        $text .= "➖➖➖➖➖➖➖➖➖➖\n";
-        $text .= "لطفاً برای مشاهده جزئیات و مدیریت، روی سرویس مورد نظر کلیک کنید:";
+        $text = "⚙️ <b>لیست و وضعیت سرویس‌های شما:</b>\n";
+        $text .= "➖➖➖➖➖➖➖➖➖➖\n\n";
 
         $keyboard = InlineKeyboardMarkup::make();
 
-        // ساخت یک دکمه مجزا برای هر سرویس
-        foreach ($accounts as $account) {
-            $statusIcon = $account->is_enabled ? '🟢' : '🔴';
-            $buttonText = "{$statusIcon} سرویس: {$account->username} (" . ($account->service_group ?? 'V2Ray') . ")";
+        // حلقه برای تولید متن گزارش هر اکانت و دکمه آن
+        foreach ($accounts as $index => $account) {
+            $rowNumber = $index + 1;
 
+            // ۱. تعیین پروتکل (تبدیل l2tp_cisco به L2TP)
+            $protocol = $account->service_group ?? 'نامشخص';
+            $protocol = str_ireplace(['l2tp_cisco', 'l2tp-cisco', 'l2tp/cisco'], 'L2TP', $protocol);
+
+            // ۲. محاسبه روزهای باقیمانده (با شرط اولین اتصال)
+            $isExpired = false;
+
+            if (!empty($account->expire_date)) {
+                $expireDate = \Carbon\Carbon::parse($account->expire_date);
+                if ($expireDate->isPast()) {
+                    $daysLeftText = "پایان یافته ❌";
+                    $isExpired = true;
+                } else {
+                    $daysLeftText = round(now()->diffInDays($expireDate)) . " روز";
+                }
+            } else {
+                // وقتی هنوز وصل نشده
+                $daysLeftText = "محاسبه پس از اولین اتصال ⏳";
+            }
+
+            // ۳. فراخوانی حجم‌ها دقیقاً از روی مدل Accounts شما
+            if (!$account->max_usage || $account->max_usage <= 0) {
+                $volumeText = "نامحدود ∞";
+            } else {
+                // استفاده از Attribute های مدل
+                $volumeText = "{$account->used_formatted} مصرفی | {$account->remaining_formatted} باقیمانده (کل: {$account->max_formatted})";
+            }
+
+            // ۴. وضعیت کلی سرویس
+            $isActive = $account->is_enabled && !$isExpired;
+            $statusIcon = $isActive ? '🟢' : '🔴';
+            $statusText = $isActive ? 'فعال و متصل' : 'غیرفعال / منقضی';
+
+            // ۵. اضافه کردن اطلاعات به متن اصلی
+            $text .= "{$statusIcon} <b>سرویس {$rowNumber}:</b> <code>{$account->username}</code>\n";
+            $text .= "🌐 <b>نوع سرویس:</b> {$protocol}\n";
+            $text .= "⏳ <b>اعتبار زمانی:</b> {$daysLeftText}\n";
+            $text .= "📊 <b>وضعیت حجم:</b> {$volumeText}\n";
+            $text .= "وضعیت اکانت: <i>{$statusText}</i>\n";
+            $text .= "〰️〰️〰️〰️〰️〰️〰️〰️〰️\n";
+
+            // ۶. اضافه کردن دکمه مدیریت برای این سرویس
+            $buttonText = "{$statusIcon} تنظیمات سرویس {$rowNumber} ({$protocol})";
             $keyboard->addRow(
                 InlineKeyboardButton::make($buttonText, callback_data: "cust_show_service:{$account->id}")
             );
         }
 
-        // دکمه بستن / بازگشت
+        $text .= "\n👇 <i>جهت دریافت لینک اتصال و تمدید، روی دکمه‌ی سرویس مورد نظر کلیک کنید:</i>";
+
+        // دکمه بازگشت
         $keyboard->addRow(
             InlineKeyboardButton::make('🏠 بازگشت به منوی اصلی', callback_data: 'back_to_admin_menu')
         );

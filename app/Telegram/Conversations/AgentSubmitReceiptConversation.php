@@ -133,10 +133,10 @@ class AgentSubmitReceiptConversation extends Conversation
 
             $adminKeyboard = InlineKeyboardMarkup::make()
                 ->addRow(
-                    InlineKeyboardButton::make('✅ تایید و افزایش موجودی', callback_data: "admin_approve_receipt:{$receipt->id}")
+                    InlineKeyboardButton::make('✅ تایید و افزایش موجودی', callback_data: "admin_handle_receipt:{$receipt->id}:approve")
                 )
                 ->addRow(
-                    InlineKeyboardButton::make('❌ رد فیش', callback_data: "admin_reject_receipt:{$receipt->id}")
+                    InlineKeyboardButton::make('❌ رد فیش', callback_data: "admin_handle_receipt:{$receipt->id}:reject")
                 );
 
             foreach ($admins as $admin) {
