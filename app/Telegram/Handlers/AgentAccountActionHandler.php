@@ -58,7 +58,7 @@ class AgentAccountActionHandler
     private function hasAccess(?User $agent, ?Accounts $account): bool
     {
         if (!$agent || !$account) return false;
-        if ($account->creatorUser && $account->creatorUser->creator == $agent->id) {
+        if (!$account || ($account->creatorUser && $account->creatorUser->parentAgent && $account->creatorUser->parentAgent->id !== $agent->id )) {
             return true;
         }
 
