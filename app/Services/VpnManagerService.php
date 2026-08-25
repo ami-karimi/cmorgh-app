@@ -148,17 +148,29 @@ class VpnManagerService
 
             $rolloverDays = min(3, $remainingDays);
             $rolloverMinutes = $rolloverDays * 24 * 60;
+            $expType = $group->expire_type ?? 'days';
 
+            $expVal  = (int) ($group->expire_value ?? 30);
 
-            $baseMinutes = $group->exp_val_minute ?? 0;
-            if ($baseMinutes == 0 && isset($group->expire_type) && isset($group->expire_value)) {
-                $baseMinutes = match ($group->expire_type) {
-                    'minutes' => $group->expire_value,
-                    'hours'   => $group->expire_value * 60,
-                    'days'    => $group->expire_value * 24 * 60,
-                    'month'   => $group->expire_value * 30 * 24 * 60,
-                    'year'    => $group->expire_value * 365 * 24 * 60,
+            $baseMinutes = 0;
+            $baseMinutes =  match($expType) {
+                    'minutes' => $expVal,
+                    'hours'   => $expVal * 60,
+                    'days'    => $expVal * 24 * 60,
+                    'month'   => $expVal * 30 * 24 * 60,
+                    'year'    => $expVal * 365 * 24 * 60,
                     default   => 0,
+                };
+
+            $expireDate = null;
+            if ($group->first_login == 0) {
+                $expireDate = match($expType) {
+                    'minutes' => now()->addMinutes($expVal),
+                    'hours'   => now()->addHours($expVal),
+                    'days'    => now()->addDays($expVal),
+                    'month'   => now()->addMonths($expVal),
+                    'year'    => now()->addYears($expVal),
+                    default   => now()->addDays(30),
                 };
             }
 
@@ -177,7 +189,7 @@ class VpnManagerService
             }
 
             if ($group->first_login == 0) {
-                $account->expire_date = ($account->exp_val_minute > 0) ? now()->addMinutes($account->exp_val_minute) : null;
+                $account->expire_date = $expireDate;
             } else {
                 $account->expire_date = null;
             }
