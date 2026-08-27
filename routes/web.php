@@ -18,7 +18,7 @@ Route::middleware('guest')->group(function () {
 use Illuminate\Support\Facades\File;
 
 Route::get('/download-wg/{profile}', function ($profile) {
-    $path = public_path('configs/' . $profile . '.conf');
+    $path = public_path('configs/' . $proFfile . '.conf');
 
     if (!File::exists($path)) {
         abort(404, 'فایل کانفیگ یافت نشد.');

@@ -1,598 +1,553 @@
-<div class="space-y-8 animate-fade-in">
+<div class="space-y-8 animate-fade-in pb-12 font-sans">
 
-
+    <!-- Announcements Notification Banner -->
     @if($announcements->count() > 0)
         <div class="space-y-3">
             @foreach($announcements as $ann)
-                <div class="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 flex items-start gap-4">
-                    <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 rounded-2xl p-4 flex items-start gap-4">
+                    <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <div>
-                        <h4 class="text-sm font-bold text-blue-400">{{ $ann->title }}</h4>
-                        <p class="text-xs text-blue-300 mt-1">{{ $ann->content }}</p>
+                        <h4 class="text-sm font-black text-blue-900 dark:text-blue-100">{{ $ann->title }}</h4>
+                        <p class="text-xs text-blue-800/80 dark:text-blue-200/80 mt-1 leading-relaxed">{{ $ann->content }}</p>
                     </div>
                 </div>
             @endforeach
         </div>
     @endif
 
-
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
-            <div>
-                <h1 class="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">خوش آمدید، {{ auth()->user()->name }} 👋</h1>
-
-                <div class="mt-3 flex items-center gap-2 text-xs font-bold bg-zinc-50 dark:bg-zinc-900/50 w-max px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                    <span class="text-zinc-500">وضعیت اتصال:</span>
-                    @if($hasOutage)
-                        <span class="text-rose-500 animate-pulse">قطعی در شبکه</span>
-                    @elseif($hasDegraded)
-                        <span class="text-amber-500 animate-pulse">اختلال جزئی</span>
-                    @else
-                        <span class="text-emerald-500">پایدار و نرمال</span>
-                    @endif
-                </div>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <div class="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <span class="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 block">موجودی اعتبار شما</span>
-                        <span class="text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono-digit">
-                    {{ number_format($balance) }} <span class="text-xs font-sans">تومان</span>
-                </span>
-                    </div>
-                    <button wire:click="$set('isRechargeModalOpen', true)" class="h-[74px] px-5 rounded-2xl bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-black font-bold text-sm transition-all shadow-lg flex flex-col items-center justify-center gap-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        <span class="text-[10px]">شارژ حساب</span>
-                    </button>
-                </div>
-
-            </div>
-        </div>
-
-
-
-
-    @if (session()->has('success_recharge'))
-        <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-bold flex items-center gap-2">
-            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-            {{ session('success_recharge') }}
+<!-- Alert Messages (Session) -->
+    @if (session()->has('success_recharge') || session()->has('success'))
+        <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/50 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-sm font-bold flex items-center gap-3">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+            {{ session('success_recharge') ?? session('success') }}
         </div>
     @endif
 
-        <div class="space-y-4 font-sans relative">
-            <h2 class="text-sm font-black text-zinc-400 uppercase tracking-wider flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-orange-500"></span>
-                سرویس‌های فعال شما
-            </h2>
+<!-- Welcome Hero & Wallet Card -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+        <!-- Hero Section -->
+        <div class="lg:col-span-2 bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800/80 rounded-[2rem] p-6 sm:p-8 flex flex-col justify-center shadow-sm relative overflow-hidden">
+            <h1 class="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white tracking-tight">سلام، {{ auth()->user()->name }} 👋</h1>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-2 font-medium">همه‌چیز آماده است. وضعیت اتصال شبکه را بررسی کنید.</p>
 
-            @if (session()->has('success'))
-                <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-bold flex items-center gap-2 mb-4">
-                    <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if($accounts->count() === 0)
-                <div class="bg-white dark:bg-[#111827] border border-dashed border-zinc-300 dark:border-zinc-800 rounded-3xl p-10 text-center">
-                    <div class="w-12 h-12 bg-zinc-100 dark:bg-zinc-900 text-zinc-400 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 12H4m8-8v16"></path></svg>
-                    </div>
-                    <h3 class="text-sm font-bold text-zinc-900 dark:text-white">هیچ سرویس فعالی ندارید</h3>
-                    <p class="text-xs text-zinc-500 mt-1">به محض تایید سفارش یا خرید، مشخصات سرویس شما در اینجا نمایش داده می‌شود.</p>
-                </div>
-            @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($accounts as $acc)
-                        @php
-                            $totalUsageBytes = $acc->usage ?? (($acc->download_usage ?? 0) + ($acc->upload_usage ?? 0));
-                            $maxGb = $acc->max_usage > 0 ? round($acc->max_usage / 1073741824, 2) : 0;
-                            $usedGb = round($totalUsageBytes / 1073741824, 2);
-                            $remGb = $maxGb > 0 ? max(0, round($maxGb - $usedGb, 2)) : null;
-                            $percent = $maxGb > 0 ? min(100, round(($usedGb / $maxGb) * 100)) : 0;
-
-                            $daysLeft = null;
-                            $isExpired = false;
-                            if ($acc->expire_date) {
-                                $expireCarbon = \Carbon\Carbon::parse($acc->expire_date);
-                                $daysLeft = (int) now()->diffInDays($expireCarbon, false);
-                                if ($expireCarbon->isPast()) {
-                                    $isExpired = true;
-                                }
-                            }
-
-                            $isLowVolume = $maxGb > 0 && ($percent >= 85 || ($remGb !== null && $remGb <= 1 && $maxGb > 1));
-                            $isLowDays = $daysLeft !== null && $daysLeft <= 4 && !$isExpired;
-                            $needsRecharge = $isLowVolume || $isLowDays || $isExpired || !$acc->is_enabled;
-
-                            $progressColor = $percent >= 90 ? 'bg-rose-500 shadow-rose-500/50' : ($percent >= 75 ? 'bg-amber-500 shadow-amber-500/50' : 'bg-emerald-500 shadow-emerald-500/50');
-                        @endphp
-
-                        <div class="bg-white dark:bg-[#111827] border {{ $acc->is_enabled && !$isExpired ? 'border-zinc-200 dark:border-zinc-800' : 'border-rose-300 dark:border-rose-900/40 bg-rose-50/20 dark:bg-rose-950/10' }} rounded-[2rem] p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between">
-
-                            <div>
-                                <div class="flex items-start justify-between mb-4 gap-2">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                <span class="text-[10px] font-black {{ $acc->service_group === 'wireguard' ? 'text-purple-400 bg-purple-500/10 border-purple-500/20' : 'text-orange-500 bg-orange-500/10 border-orange-500/20' }} px-3 py-1 rounded-xl uppercase tracking-wider border">
-                                    {{ $acc->service_group }}
-                                </span>
-
-                                        @if($acc->service_group === 'wireguard')
-                                            <span class="text-[10px] font-bold text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-lg font-mono">
-                                        WG Peer
-                                    </span>
-                                        @endif
-
-                                        @php
-                                            $speedLimit = $acc->mikrotik_speed;
-                                            if (empty($speedLimit) && $acc->group_id) {
-                                                $accGroup = \App\Models\Group::find($acc->group_id);
-                                                $speedLimit = $accGroup ? $accGroup->mikrotik_speed : null;
-                                            }
-                                        @endphp
-
-                                        <span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded-lg border border-blue-200 dark:border-blue-500/20 flex items-center gap-1 mt-0.5">
-                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                    <span>سرعت:</span>
-                                    <span dir="ltr" class="font-mono">{{ $speedLimit ?: 'نامحدود ∞' }}</span>
-                                </span>
-                                    </div>
-
-                                    <div class="flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-900 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-800 shrink-0">
-                                        @if($acc->is_enabled && !$isExpired)
-                                            <span class="relative flex h-2 w-2">
-                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                    </span>
-                                            <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">فعال</span>
-                                        @else
-                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                                            <span class="text-[10px] font-bold text-rose-600 dark:text-rose-400">{{ $isExpired ? 'منقضی شده' : 'غیرفعال' }}</span>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-2 gap-3 mb-5">
-                                    <div class="bg-zinc-50 dark:bg-zinc-900/40 p-3 rounded-2xl border border-zinc-100 dark:border-zinc-800/80">
-                                        <span class="text-[10px] text-zinc-400 block mb-1 font-medium">نام کاربری</span>
-                                        <h3 class="text-sm font-black font-mono text-zinc-900 dark:text-white truncate" dir="ltr">@ {{ $acc->username }}</h3>
-                                    </div>
-
-                                    <div class="bg-zinc-50 dark:bg-zinc-900/40 p-3 rounded-2xl border border-zinc-100 dark:border-zinc-800/80 relative group">
-                                        <span class="text-[10px] text-zinc-400 block mb-1 font-medium">کلمه عبور</span>
-                                        <div class="flex items-center justify-between gap-1">
-
-                                            @if($acc->service_group === 'wireguard')
-                                                <h3 class="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 truncate mt-1">احراز با فایل کانفیگ</h3>
-                                            @else
-                                                <h3 class="text-sm font-black font-mono text-zinc-900 dark:text-white truncate" dir="ltr">{{ $acc->password }}</h3>
-                                                <button wire:click="openChangePasswordModal({{ $acc->id }})" class="shrink-0 p-1.5 bg-white dark:bg-[#111827] rounded-lg text-zinc-400 hover:text-orange-500 border border-zinc-200 dark:border-zinc-700 shadow-sm transition" title="تغییر رمز عبور">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                                </button>
-                                            @endif
-
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="space-y-2 mb-5 bg-zinc-50 dark:bg-zinc-900/40 p-3.5 rounded-2xl border border-zinc-100 dark:border-zinc-800/80">
-                                    <div class="flex justify-between items-baseline text-xs font-bold">
-                                        <span class="text-zinc-500 dark:text-zinc-400">مصرف شده: <strong class="text-zinc-800 dark:text-white font-mono" dir="ltr">{{ $usedGb }} GB</strong></span>
-                                        <span class="text-zinc-900 dark:text-zinc-200 font-mono" dir="ltr">
-                                    {{ $maxGb > 0 ? $maxGb . ' GB کل' : 'ترافیک نامحدود ∞' }}
-                                </span>
-                                    </div>
-
-                                    @if($maxGb > 0)
-                                        <div class="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden shadow-inner">
-                                            <div class="h-full {{ $progressColor }} rounded-full transition-all duration-500" style="width: {{ $percent }}%"></div>
-                                        </div>
-                                        <div class="flex justify-between items-center text-[10px] font-bold text-zinc-400">
-                                            <span>باقیمانده: <strong class="{{ $percent >= 85 ? 'text-rose-500' : 'text-emerald-500' }} font-mono" dir="ltr">{{ $remGb }} GB</strong></span>
-                                            <span class="font-mono">{{ $percent }}%</span>
-                                        </div>
-                                    @else
-                                        <div class="text-[11px] font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-xl text-center border border-emerald-500/20">
-                                            میزان حجم: نامحدود
-                                        </div>
-                                    @endif
-                                </div>
-
-                                <div class="flex items-center justify-between text-xs text-zinc-500 mb-5 bg-zinc-50 dark:bg-zinc-900/40 p-3.5 rounded-2xl border border-zinc-100 dark:border-zinc-800/80">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-zinc-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        @if($acc->expire_date)
-                                            <span>انقضا: <strong class="text-zinc-800 dark:text-zinc-200 font-mono" dir="ltr">{{ jdate($acc->expire_date)->format('Y/m/d') }}</strong></span>
-                                        @else
-                                            <span>انقضا: <strong class="text-amber-500 font-bold">بعد از اولین لاگین</strong></span>
-                                        @endif
-                                    </div>
-
-                                    @if($acc->expire_date && !$isExpired)
-                                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg {{ $daysLeft <= 4 ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-zinc-200/60 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400' }}">
-                                    {{ $daysLeft == 0 ? 'امروز' : $daysLeft . ' روز مانده' }}
-                                </span>
-                                    @elseif(!$acc->expire_date)
-                                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-500 border border-blue-500/20">
-                                    شروع از اولین اتصال
-                                </span>
-                                    @endif
-                                </div>
-
-                                @if($isLowDays)
-                                    <div class="mb-4 p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] font-bold text-amber-500 flex items-center gap-2">
-                                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                        <span>کمتر از ۴ روز تا پایان انقضای اکانت باقی مانده است!</span>
-                                    </div>
-                                @elseif($isLowVolume)
-                                    <div class="mb-4 p-2.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-[11px] font-bold text-rose-500 flex items-center gap-2">
-                                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                        <span>حجم ترافیک سرویس شما رو به اتمام است!</span>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <div class="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
-
-                                @if($acc->service_group === 'wireguard')
-                                    @php
-                                        $wgConfig = \App\Models\WireGuardUsers::where('user_id', $acc->id)->first();
-                                    @endphp
-
-                                    <div class="grid grid-cols-2 gap-2 mb-2">
-                                        @if($wgConfig)
-                                            <a href="{{ asset('configs/' . $wgConfig->profile_name . '.conf') }}" download
-                                               class="py-2.5 px-3 bg-purple-600/10 hover:bg-purple-600 text-purple-600 dark:text-purple-400 hover:text-white border border-purple-500/20 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                                دانلود کانفیگ
-                                            </a>
-
-                                            <a href="{{ asset('configs/' . $wgConfig->profile_name . '.png') }}" target="_blank"
-                                               class="py-2.5 px-3 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-zinc-200 dark:border-zinc-700">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                                                بارکد QR
-                                            </a>
-                                        @elseif($acc->subscription_url)
-                                            <a href="{{ $acc->subscription_url }}" target="_blank" class="col-span-2 py-2.5 px-3 bg-purple-600/10 hover:bg-purple-600 text-purple-600 dark:text-purple-400 hover:text-white border border-purple-500/20 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
-                                                دریافت لینک اتصال
-                                            </a>
-                                        @endif
-                                    </div>
-                                @else
-                                    @php
-                                        $multiLogin = $acc->multi_login ?? 1;
-                                        $onlineCount = $acc->online_count ?? 0;
-                                        $isOnline = $onlineCount > 0;
-                                    @endphp
-
-                                    <div class="grid grid-cols-2 gap-2 mb-2">
-                                        <div class="bg-zinc-50 dark:bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between">
-                                            <span class="text-[10px] text-zinc-500 font-bold">وضعیت اتصال:</span>
-                                            @if($isOnline)
-                                                <span class="flex items-center gap-1.5 text-[10px] font-black text-emerald-500">
-                        <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                        </span>
-                        آنلاین
-                    </span>
-                                            @else
-                                                <span class="flex items-center gap-1.5 text-[10px] font-black text-zinc-400">
-                        <span class="h-2 w-2 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
-                        آفلاین
-                    </span>
-                                            @endif
-                                        </div>
-
-                                        <div class="bg-zinc-50 dark:bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between">
-                                            <span class="text-[10px] text-zinc-500 font-bold">کاربر همزمان:</span>
-                                            <span class="text-[11px] font-mono font-black text-zinc-800 dark:text-zinc-200 flex items-center gap-1" dir="ltr">
-                    <span class="{{ $onlineCount >= $multiLogin ? 'text-rose-500' : 'text-emerald-500' }}">
-                        {{ $onlineCount }}
-                    </span>
-                    <span class="text-zinc-400">/</span>
-                    {{ $multiLogin }}
-                </span>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                @if($acc->subscription_url && $acc->service_group !== 'wireguard')
-                                    <button onclick="navigator.clipboard.writeText('{{ $acc->subscription_url }}'); alert('لینک اتصال با موفقیت کپی شد!');"
-                                            class="w-full py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-bold rounded-xl transition flex items-center justify-center gap-2 border border-zinc-200 dark:border-zinc-700">
-                                        <svg class="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                        کپی لینک اتصال (Subscription)
-                                    </button>
-                                @endif
-
-                               <button wire:click="openTutorialModal({{ $acc->id }})"
-                                            class="w-full py-2.5 px-4 bg-orange-500/10 hover:bg-orange-500 text-orange-500 hover:text-white border border-orange-500/20 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                                        <span>اطلاعات و آموزش اتصال</span>
-                               </button>
-
-                                <button wire:click="openAccRechargeModal({{ $acc->id }})"
-                                        class="w-full py-3 {{ $needsRecharge ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20 hover:from-orange-600 hover:to-amber-600' : 'bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-black' }} text-xs font-black rounded-xl transition flex items-center justify-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                    <span>شارژ و تمدید اکانت</span>
-                                    @if($isLowDays)
-                                        <span class="text-[9px] bg-black/20 dark:bg-white/20 px-2 py-0.5 rounded-md font-normal">({{ $daysLeft }} روز مانده)</span>
-                                    @endif
-                                </button>
-                            </div>
-
-
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-
-            @if($showTutorialModal && $selectedAccount)
-                <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-                    <div class="w-full max-w-2xl bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-
-                        <div class="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/50">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-orange-500"></span>
-                                <h3 class="text-sm font-black text-zinc-900 dark:text-white">
-                                    راهنمای اتصال اکانت: <span class="font-mono text-orange-500">{{ $selectedAccount->username }}</span>
-                                </h3>
-                            </div>
-                            <button wire:click="$set('showTutorialModal', false)" class="text-zinc-500 hover:text-rose-500 transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            </button>
-                        </div>
-
-                        <div class="p-5 overflow-y-auto space-y-6">
-
-                            <div class="bg-zinc-50 dark:bg-zinc-950 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs font-bold text-zinc-700 dark:text-zinc-300">🌐 آدرس سرور / لینک اتصال شما:</span>
-                                    <span class="text-[10px] px-2 py-0.5 rounded bg-orange-500/10 text-orange-500 font-bold uppercase">
-                            {{ $selectedAccount->service_group }}
-                        </span>
-                                </div>
-
-                                @if($serverAddress)
-                                    <div x-data="{ copied: false }" class="relative flex items-center">
-                                        <input type="text" readonly value="{{ $serverAddress }}"
-                                               class="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2.5 text-xs font-mono text-orange-500 outline-none pr-20">
-
-                                        <button @click="navigator.clipboard.writeText('{{ $serverAddress }}'); copied = true; setTimeout(() => copied = false, 2000)"
-                                                class="absolute left-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-[10px] font-bold transition">
-                                            <span x-text="copied ? 'کپی شد!' : 'کپی آدرس'"></span>
-                                        </button>
-                                    </div>
-                                @else
-                                    <p class="text-xs text-zinc-400">آدرس اختصاصی سرور برای این سرویس صادر نشده است.</p>
-                                @endif
-                            </div>
-
-                            @if($accountTutorials->count() > 0)
-                                <div class="space-y-4">
-                                    <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-wider">آموزش گام‌به‌گام اتصال:</h4>
-
-                                    @foreach($accountTutorials as $tutorial)
-                                        <div class="bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-3">
-                                            <h5 class="font-bold text-sm text-zinc-900 dark:text-white">{{ $tutorial->title }}</h5>
-                                            <div class="prose dark:prose-invert text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
-                                                {!! $tutorial->content !!}
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                <div class="text-center py-6 text-zinc-400 text-xs">
-                                    آموزش متنی خاصی برای این نوع سرویس ثبت نشده است.
-                                </div>
-                            @endif
-
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            @if($isChangePasswordModalOpen)
-                <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-                    <div class="w-full max-w-sm bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden">
-                        <div class="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/50">
-                            <h3 class="text-base font-black text-zinc-900 dark:text-white">تغییر رمز عبور</h3>
-                            <button wire:click="$set('isChangePasswordModalOpen', false)" class="text-zinc-500 hover:text-rose-500 transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            </button>
-                        </div>
-                        <div class="p-6 space-y-5">
-                            <div>
-                                <label class="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-2">رمز عبور جدید</label>
-                                <div class="relative">
-                                    <input wire:model="newPassword" type="text" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white font-mono focus:ring-2 focus:ring-orange-500 outline-none" dir="ltr" placeholder="رمز عبور...">
-                                    <button wire:click="generatePassword" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition text-[10px] font-bold">
-                                        پیشنهاد خودکار
-                                    </button>
-                                </div>
-                                @error('newPassword') <span class="text-rose-500 text-xs font-bold mt-1.5 block">{{ $message }}</span> @enderror
-                            </div>
-
-                            <button wire:click="changePassword" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm rounded-xl transition shadow-lg shadow-emerald-500/20">
-                                ذخیره رمز عبور
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            @endif
+            <div class="mt-6 flex items-center gap-2 text-xs font-bold bg-zinc-50 dark:bg-zinc-900/50 w-max px-3.5 py-2 rounded-xl border border-zinc-200/60 dark:border-zinc-800">
+                <span class="text-zinc-500">وضعیت شبکه:</span>
+                @if($hasOutage)
+                    <span class="text-rose-500 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> 🔴 قطعی در شبکه</span>
+                @elseif($hasDegraded)
+                    <span class="text-amber-500 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> 🟠 اختلال جزئی</span>
+                @else
+                    <span class="text-emerald-500 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> 🟢 اتصال پایدار</span>
+                @endif
+            </div>
         </div>
 
-    <div class="space-y-4">
-        <h2 class="text-sm font-black text-zinc-400 uppercase tracking-wider">تاریخچه تراکنش‌های مالی (اعتبار)</h2>
-
-        <div class="bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse">
-                    <thead>
-                    <tr class="bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 text-[10px] font-black uppercase tracking-wider">
-                        <th class="p-4">نوع تراکنش</th>
-                        <th class="p-4">توضیحات</th>
-                        <th class="p-4">مبلغ</th>
-                        <th class="p-4">تاریخ</th>
-                        <th class="p-4 text-center">وضعیت</th>
-                    </tr>
-                    </thead>
-                    <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800/80 text-sm">
-                    @forelse($transactions as $trx)
-                        @php
-                            $isPlus = in_array($trx->type, ['plus', 'plus_amn']);
-                        @endphp
-                        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900/30 transition">
-                            <td class="p-4">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold {{ $isPlus ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500' }}">
-                                        {{ $isPlus ? '+' : '-' }}
-                                    </div>
-                                    <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200">
-                                            {{ $isPlus ? 'شارژ / واریز' : 'کسر / برداشت' }}
-                                        </span>
-                                </div>
-                            </td>
-                            <td class="p-4 text-xs text-zinc-600 dark:text-zinc-400">
-                                {{ $trx->description ?? 'بدون توضیح' }}
-                            </td>
-                            <td class="p-4 font-mono-digit font-bold {{ $isPlus ? 'text-emerald-500' : 'text-rose-500' }}">
-                                {{ $isPlus ? '+' : '-' }}{{ number_format($trx->price) }} تومان
-                            </td>
-                            <td class="p-4 text-xs text-zinc-500 font-mono-digit">
-                                {{ jdate($trx->created_at)->format('Y/m/d H:i') }}
-                            </td>
-                            <td class="p-4 text-center">
-                                @if($trx->approved == 1)
-                                    <span class="inline-flex px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-500 text-[10px] font-bold">
-                                            تایید شده
-                                        </span>
-                                @elseif($trx->approved == 0)
-                                    <span class="inline-flex px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-500 text-[10px] font-bold animate-pulse">
-                                            در انتظار بررسی
-                                        </span>
-                                @else
-                                    <span class="inline-flex px-2.5 py-1 rounded-md bg-rose-500/10 text-rose-500 text-[10px] font-bold">
-                                            رد شده
-                                        </span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="p-8 text-center text-zinc-500 text-xs">تراکنش مالی ثبت نشده است.</td>
-                        </tr>
-                    @endforelse
-                    </tbody>
-                </table>
+        <!-- Wallet Card -->
+        <div class="bg-gradient-to-br from-zinc-900 to-zinc-800 dark:from-[#18181b] dark:to-[#09090b] border border-zinc-800 rounded-[2rem] p-6 sm:p-8 flex flex-col justify-between shadow-xl shadow-zinc-900/10">
+            <div>
+                <span class="text-xs font-bold text-zinc-400 block mb-1">موجودی کیف پول</span>
+                <div class="text-3xl font-black text-white font-mono-digit">
+                    {{ number_format($balance) }} <span class="text-sm font-sans font-bold text-zinc-500">تومان</span>
+                </div>
             </div>
+            <button wire:click="$set('isRechargeModalOpen', true)" class="w-full mt-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-black text-sm transition-all shadow-[0_8px_20px_-6px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>شارژ حساب</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Services Header -->
+    <div class="pt-4 flex items-center justify-between">
+        <h2 class="text-lg font-black text-zinc-900 dark:text-white tracking-tight">سرویس‌های من</h2>
+        <span class="text-xs font-bold text-zinc-600 dark:text-zinc-400 bg-white dark:bg-zinc-800 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700">
+            {{ $accounts->count() }} سرویس فعال
+        </span>
+    </div>
+
+    <!-- Services Grid -->
+    @if($accounts->count() === 0)
+    <!-- Empty State -->
+        <div class="bg-white dark:bg-[#111827] border border-dashed border-zinc-300 dark:border-zinc-800 rounded-[2rem] p-12 text-center flex flex-col items-center">
+            <div class="w-16 h-16 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-400 dark:text-zinc-600 rounded-2xl flex items-center justify-center mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M20 12H4m8-8v16"></path></svg>
+            </div>
+            <h3 class="text-lg font-black text-zinc-900 dark:text-white mb-2">هنوز سرویسی ندارید</h3>
+            <p class="text-sm font-medium text-zinc-500 max-w-sm mb-6">اولین سرویس خود را تهیه کنید و بلافاصله از اینترنت آزاد لذت ببرید.</p>
+            <a href="{{ route('store.index') }}" wire:navigate class="px-6 py-3 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold text-sm shadow-md transition-transform active:scale-95">خرید سرویس جدید</a>
+        </div>
+    @else
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach($accounts as $acc)
+            @php
+                $totalUsageBytes = $acc->usage ?? (($acc->download_usage ?? 0) + ($acc->upload_usage ?? 0));
+                $maxGb = $acc->max_usage > 0 ? round($acc->max_usage / 1073741824, 2) : 0;
+                $usedGb = round($totalUsageBytes / 1073741824, 2);
+                $remGb = $maxGb > 0 ? max(0, round($maxGb - $usedGb, 2)) : null;
+                $percent = $maxGb > 0 ? min(100, round(($usedGb / $maxGb) * 100)) : 0;
+
+                $daysLeft = null;
+                $isExpired = false;
+                if ($acc->expire_date) {
+                    $expireCarbon = \Carbon\Carbon::parse($acc->expire_date);
+                    $daysLeft = (int) now()->diffInDays($expireCarbon, false);
+                    if ($expireCarbon->isPast()) { $isExpired = true; }
+                }
+
+                $isLowVolume = $maxGb > 0 && ($percent >= 85 || ($remGb !== null && $remGb <= 1 && $maxGb > 1));
+                $isLowDays = $daysLeft !== null && $daysLeft <= 4 && !$isExpired;
+                $needsRecharge = $isLowVolume || $isLowDays || $isExpired || !$acc->is_enabled;
+
+                $progressColor = $percent >= 90 ? 'bg-rose-500' : ($percent >= 75 ? 'bg-amber-500' : 'bg-emerald-500');
+                $isWG = $acc->service_group === 'wireguard';
+            @endphp
+
+            <!-- Service Card -->
+                <div class="bg-white dark:bg-[#111827] border {{ $acc->is_enabled && !$isExpired ? 'border-zinc-200 dark:border-zinc-800' : 'border-rose-200 dark:border-rose-900/40' }} rounded-[2rem] p-5 sm:p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col relative">
+
+                    <!-- Smart Alerts (In-Card) -->
+                    @if($isExpired)
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-rose-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-md z-10 whitespace-nowrap">🔴 این سرویس منقضی شده است</div>
+                    @elseif($isLowDays)
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-md z-10 whitespace-nowrap">⚠️ فقط {{ $daysLeft }} روز باقی مانده</div>
+                    @elseif($isLowVolume)
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-rose-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-md z-10 whitespace-nowrap">⚠️ حجم سرویس رو به اتمام است</div>
+                @endif
+
+                <!-- Header -->
+                    <div class="flex items-start justify-between mb-5 mt-2">
+                        <div class="flex flex-col gap-2">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[10px] font-black {{ $isWG ? 'text-violet-700 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 border-violet-200 dark:border-violet-500/20' : 'text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20' }} px-2 py-0.5 rounded-lg border uppercase tracking-wider">
+                                    {{ $acc->service_group }}
+                                </span>
+                                @if($isWG)
+                                    <span class="text-[9px] font-bold text-zinc-500 bg-zinc-100 dark:bg-zinc-800/80 px-2 py-0.5 rounded-md uppercase">WG PEER</span>
+                                @endif
+                            </div>
+
+                            @php
+                                $speedLimit = $acc->mikrotik_speed;
+                                if (empty($speedLimit) && $acc->group_id) {
+                                    $accGroup = \App\Models\Group::find($acc->group_id);
+                                    $speedLimit = $accGroup ? $accGroup->mikrotik_speed : null;
+                                }
+                            @endphp
+                            <span class="text-[10px] font-bold text-zinc-500 flex items-center gap-1">
+                                ⚡ {{ $speedLimit ?: 'نامحدود ∞' }}
+                            </span>
+                        </div>
+
+                        <!-- Status Pill -->
+                        <div class="shrink-0">
+                            @if($acc->is_enabled && !$isExpired)
+                                <span class="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-full">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> فعال
+                                </span>
+                            @else
+                                <span class="flex items-center gap-1.5 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 text-[10px] font-bold px-2.5 py-1 rounded-full">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> {{ $isExpired ? 'منقضی' : 'غیرفعال' }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Credentials -->
+                    <div class="bg-zinc-50 dark:bg-zinc-800/40 rounded-2xl p-3.5 mb-5 border border-zinc-100 dark:border-zinc-800/80 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-zinc-500 font-medium">Username</span>
+                            <span class="text-sm font-black font-mono-digit text-zinc-900 dark:text-white" dir="ltr">{{ $acc->username }}</span>
+                        </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-zinc-200/50 dark:border-zinc-700/50">
+                            <span class="text-xs text-zinc-500 font-medium">Password</span>
+                            @if($isWG)
+                                <span class="text-[10px] font-bold text-zinc-400">احراز با فایل کانفیگ</span>
+                            @else
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-black font-mono-digit text-zinc-900 dark:text-white tracking-widest" dir="ltr">{{ $acc->password }}</span>
+                                    <button wire:click="openChangePasswordModal({{ $acc->id }})" class="p-1.5 rounded-lg text-zinc-400 hover:text-orange-500 bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 shadow-sm transition" title="تغییر رمز عبور">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                    </button>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Traffic Progress -->
+                    <div class="mb-5">
+                        <div class="flex justify-between items-end mb-2">
+                            <span class="text-xs font-bold text-zinc-700 dark:text-zinc-300 font-mono-digit" dir="ltr">{{ $usedGb }} GB</span>
+                            <span class="text-[10px] font-bold text-zinc-400">از {{ $maxGb > 0 ? $maxGb . ' GB' : 'نامحدود ∞' }}</span>
+                        </div>
+                        @if($maxGb > 0)
+                            <div class="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
+                                <div class="h-2 rounded-full {{ $progressColor }} transition-all duration-500" style="width: {{ $percent }}%"></div>
+                            </div>
+                            <div class="flex justify-between items-center text-[10px] mt-1.5 font-bold">
+                                <span class="text-zinc-500">{{ $remGb }} GB باقی‌مانده</span>
+                                <span class="text-zinc-400 font-mono-digit">{{ $percent }}%</span>
+                            </div>
+                        @else
+                            <div class="w-full flex items-center justify-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 py-1.5 rounded-lg">
+                                ترافیک نامحدود ∞
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Expiration & Status Box -->
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <!-- Expiration -->
+                        <div class="bg-zinc-50 dark:bg-zinc-800/40 p-3 rounded-2xl border border-zinc-100 dark:border-zinc-800/80 flex flex-col justify-center">
+                            <span class="text-[10px] font-bold text-zinc-500 mb-1">انقضا</span>
+                            @if($acc->expire_date)
+                                <div class="text-[13px] font-black text-zinc-900 dark:text-white font-mono-digit mb-0.5" dir="ltr">{{ jdate($acc->expire_date)->format('Y/m/d') }}</div>
+                                @if(!$isExpired)
+                                    <span class="text-[10px] font-bold {{ $daysLeft <= 4 ? 'text-amber-500' : 'text-zinc-500' }}">{{ $daysLeft == 0 ? 'امروز' : $daysLeft . ' روز مانده' }}</span>
+                                @else
+                                    <span class="text-[10px] font-bold text-rose-500">منقضی شده</span>
+                                @endif
+                            @else
+                                <div class="text-[10px] font-bold text-blue-500 mt-1">شروع از اولین لاگین</div>
+                            @endif
+                        </div>
+
+                        <!-- Status / Online -->
+                        @if(!$isWG)
+                            @php
+                                $multiLogin = $acc->multi_login ?? 1;
+                                $onlineCount = $acc->online_count ?? 0;
+                                $isOnline = $onlineCount > 0;
+                            @endphp
+                            <div class="bg-zinc-50 dark:bg-zinc-800/40 p-3 rounded-2xl border border-zinc-100 dark:border-zinc-800/80 flex flex-col justify-center">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[10px] font-bold text-zinc-500">وضعیت</span>
+                                    <span class="text-[10px] font-black {{ $isOnline ? 'text-emerald-500' : 'text-zinc-400' }}">{{ $isOnline ? 'آنلاین' : 'آفلاین' }}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-bold text-zinc-500">کاربران</span>
+                                    <span class="text-[11px] font-mono-digit font-black flex items-center gap-0.5" dir="ltr">
+                                        <span class="{{ $onlineCount >= $multiLogin ? 'text-rose-500' : 'text-zinc-900 dark:text-white' }}">{{ $onlineCount }}</span>
+                                        <span class="text-zinc-400">/</span>
+                                        <span class="text-zinc-500">{{ $multiLogin }}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        @else
+                            <div class="bg-violet-50/50 dark:bg-violet-500/5 p-3 rounded-2xl border border-violet-100 dark:border-violet-500/10 flex items-center justify-center text-center">
+                                <span class="text-[10px] font-bold text-violet-600 dark:text-violet-400">پروتکل اختصاصی<br>WireGuard</span>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="mt-auto space-y-2">
+                        @if($isWG)
+                            @php $wgConfig = \App\Models\WireGuardUsers::where('user_id', $acc->id)->first(); @endphp
+                            @if($wgConfig)
+                                <div class="grid grid-cols-2 gap-2 mb-1">
+                                    <a href="{{ asset('configs/' . $wgConfig->profile_name . '.conf') }}" download class="py-2.5 bg-violet-100 dark:bg-violet-500/10 hover:bg-violet-200 dark:hover:bg-violet-500/20 text-violet-700 dark:text-violet-400 font-bold text-[11px] rounded-xl transition flex items-center justify-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                        دانلود کانفیگ
+                                    </a>
+                                    <a href="{{ asset('configs/' . $wgConfig->profile_name . '.png') }}" target="_blank" class="py-2.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold text-[11px] rounded-xl transition flex items-center justify-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                                        مشاهده QR
+                                    </a>
+                                </div>
+                            @elseif($acc->subscription_url)
+                                <a href="{{ $acc->subscription_url }}" target="_blank" class="w-full py-2.5 mb-1 bg-violet-100 dark:bg-violet-500/10 hover:bg-violet-200 dark:hover:bg-violet-500/20 text-violet-700 dark:text-violet-400 font-bold text-[11px] rounded-xl transition flex items-center justify-center gap-1.5">
+                                    دریافت لینک اتصال
+                                </a>
+                            @endif
+                        @else
+                            @if($acc->subscription_url)
+                                <div x-data="{ copied: false }" class="mb-1">
+                                    <button @click="navigator.clipboard.writeText('{{ $acc->subscription_url }}'); copied = true; setTimeout(() => copied = false, 2000)" class="w-full py-2.5 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold text-[11px] rounded-xl transition flex items-center justify-center gap-1.5">
+                                        <svg x-show="!copied" class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                        <svg x-show="copied" x-cloak class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                        <span x-text="copied ? '✓ لینک اتصال کپی شد' : 'کپی لینک اتصال'"></span>
+                                    </button>
+                                </div>
+                            @endif
+                        @endif
+
+                        <button wire:click="openTutorialModal({{ $acc->id }})" class="w-full py-2.5 bg-zinc-50 dark:bg-zinc-800/40 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200/50 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 font-bold text-[11px] rounded-xl transition flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            اطلاعات و آموزش اتصال
+                        </button>
+
+                        <button wire:click="openAccRechargeModal({{ $acc->id }})" class="w-full py-3 {{ $needsRecharge ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20' : 'bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-900 shadow-md' }} font-black text-[13px] rounded-xl transition-transform active:scale-95 flex items-center justify-center gap-1.5">
+                            @if($needsRecharge)
+                                ⚡ شارژ و تمدید سرویس
+                            @else
+                                شارژ و تمدید سرویس
+                            @endif
+                        </button>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
+
+<!-- Financial Transactions Section -->
+    <div class="pt-6">
+        <h2 class="text-lg font-black text-zinc-900 dark:text-white tracking-tight mb-4">تاریخچه تراکنش‌های مالی</h2>
+
+        <!-- Desktop Table -->
+        <div class="hidden md:block bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800/80 rounded-[2rem] shadow-sm overflow-hidden">
+            <table class="w-full text-right border-collapse">
+                <thead>
+                <tr class="bg-zinc-50 dark:bg-[#18181b] border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 text-[11px] font-black uppercase tracking-wider">
+                    <th class="p-5">نوع تراکنش</th>
+                    <th class="p-5">توضیحات</th>
+                    <th class="p-5">مبلغ</th>
+                    <th class="p-5">تاریخ</th>
+                    <th class="p-5 text-center">وضعیت</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800/60 text-sm">
+                @forelse($transactions as $trx)
+                    @php $isPlus = in_array($trx->type, ['plus', 'plus_amn']); @endphp
+                    <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900/30 transition-colors">
+                        <td class="p-5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black {{ $isPlus ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500' }}">
+                                    {{ $isPlus ? '+' : '-' }}
+                                </div>
+                                <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200">{{ $isPlus ? 'شارژ / واریز' : 'کسر / برداشت' }}</span>
+                            </div>
+                        </td>
+                        <td class="p-5 text-xs font-medium text-zinc-600 dark:text-zinc-400">{{ $trx->description ?? 'بدون توضیح' }}</td>
+                        <td class="p-5 text-sm font-mono-digit font-black {{ $isPlus ? 'text-emerald-500' : 'text-rose-500' }}">
+                            {{ $isPlus ? '+' : '-' }}{{ number_format($trx->price) }} <span class="text-[10px] font-sans font-bold">تومان</span>
+                        </td>
+                        <td class="p-5 text-xs text-zinc-500 font-mono-digit">{{ jdate($trx->created_at)->format('Y/m/d H:i') }}</td>
+                        <td class="p-5 text-center">
+                            @if($trx->approved == 1)
+                                <span class="inline-flex px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black border border-emerald-100 dark:border-emerald-500/20">تایید شده</span>
+                            @elseif($trx->approved == 0)
+                                <span class="inline-flex px-2.5 py-1 rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-black border border-amber-100 dark:border-amber-500/20">در انتظار</span>
+                            @else
+                                <span class="inline-flex px-2.5 py-1 rounded-md bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-black border border-rose-100 dark:border-rose-500/20">رد شده</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="5" class="p-8 text-center text-zinc-500 text-sm font-medium">تراکنش مالی ثبت نشده است.</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Transaction Cards -->
+        <div class="md:hidden space-y-3">
+            @forelse($transactions as $trx)
+                @php $isPlus = in_array($trx->type, ['plus', 'plus_amn']); @endphp
+                <div class="bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800/80 rounded-2xl p-4 shadow-sm flex flex-col gap-3">
+                    <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black {{ $isPlus ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500' }}">
+                                {{ $isPlus ? '+' : '-' }}
+                            </div>
+                            <span class="text-xs font-bold text-zinc-900 dark:text-zinc-100">{{ $isPlus ? 'شارژ حساب' : 'برداشت از حساب' }}</span>
+                        </div>
+                        <span class="text-sm font-mono-digit font-black {{ $isPlus ? 'text-emerald-500' : 'text-rose-500' }}">
+                            {{ $isPlus ? '+' : '-' }}{{ number_format($trx->price) }} <span class="text-[9px] font-sans">تومان</span>
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] text-zinc-500 truncate max-w-[140px]">{{ $trx->description ?? 'بدون توضیح' }}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] text-zinc-400 font-mono-digit">{{ jdate($trx->created_at)->format('Y/m/d') }}</span>
+                            @if($trx->approved == 1)
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            @elseif($trx->approved == 0)
+                                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                            @else
+                                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white dark:bg-[#111827] border border-dashed border-zinc-300 dark:border-zinc-800 rounded-2xl p-6 text-center text-zinc-500 text-xs">تراکنشی یافت نشد.</div>
+            @endforelse
         </div>
     </div>
 
 
-    @if($isRechargeModalOpen)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
-            <div class="w-full max-w-md bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden my-8">
+    <!-- ================= MODALS ================= -->
 
-                <div class="p-5 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/50">
-                    <h3 class="text-base font-black text-zinc-900 dark:text-white">درخواست افزایش موجودی</h3>
-                    <button wire:click="$set('isRechargeModalOpen', false)" class="text-zinc-500 hover:text-rose-500 transition">
+    <!-- 1. Tutorial Modal -->
+    @if($showTutorialModal && $selectedAccount)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/80 dark:bg-black/80 backdrop-blur-sm animate-fade-in">
+            <div class="w-full max-w-2xl bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800 rounded-[2rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+                <div class="p-5 border-b border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between bg-zinc-50 dark:bg-[#18181b]">
+                    <h3 class="text-sm font-black text-zinc-900 dark:text-white flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-orange-500"></span> راهنمای اتصال
+                    </h3>
+                    <button wire:click="$set('showTutorialModal', false)" class="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-rose-500 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
+                <div class="p-6 overflow-y-auto space-y-6">
+                    <!-- Config Address Box -->
+                    <div class="bg-zinc-50 dark:bg-[#18181b] p-4 sm:p-5 rounded-2xl border border-zinc-100 dark:border-zinc-800/80">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                            <span class="text-[11px] font-bold text-zinc-500">آدرس سرور / لینک اتصال شما برای نام کاربری: <span class="font-mono-digit text-orange-500">{{ $selectedAccount->username }}</span></span>
+                            <span class="text-[10px] w-max px-2 py-0.5 rounded bg-orange-500/10 text-orange-600 dark:text-orange-400 font-black uppercase">{{ $selectedAccount->service_group }}</span>
+                        </div>
+                        @if($serverAddress)
+                            <div x-data="{ copied: false }" class="relative flex items-center">
+                                <input type="text" readonly value="{{ $serverAddress }}" class="w-full bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3.5 text-xs font-mono-digit text-zinc-900 dark:text-white outline-none pr-[90px]" dir="ltr">
+                                <button @click="navigator.clipboard.writeText('{{ $serverAddress }}'); copied = true; setTimeout(() => copied = false, 2000)" class="absolute right-1.5 px-3 py-2 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-900 rounded-lg text-[10px] font-bold transition-colors">
+                                    <span x-text="copied ? '✓ کپی شد' : 'کپی آدرس'"></span>
+                                </button>
+                            </div>
+                        @else
+                            <p class="text-[11px] text-zinc-500 bg-white dark:bg-[#111827] border border-dashed border-zinc-300 dark:border-zinc-700 p-3 rounded-xl text-center">آدرس اختصاصی سرور برای این سرویس صادر نشده است.</p>
+                        @endif
+                    </div>
+                    <!-- Tutorials List -->
+                    @if($accountTutorials->count() > 0)
+                        <div class="space-y-4">
+                            <h4 class="text-[11px] font-black text-zinc-400 uppercase tracking-wider">مراحل اتصال:</h4>
+                            @foreach($accountTutorials as $tutorial)
+                                <div class="bg-zinc-50 dark:bg-[#18181b] p-5 rounded-2xl border border-zinc-100 dark:border-zinc-800/80 space-y-3">
+                                    <h5 class="font-bold text-sm text-zinc-900 dark:text-white">{{ $tutorial->title }}</h5>
+                                    <div class="prose dark:prose-invert text-[13px] text-zinc-600 dark:text-zinc-400 leading-loose">
+                                        {!! $tutorial->content !!}
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-8 text-zinc-400 text-[11px] font-medium border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">آموزش متنی خاصی برای این نوع سرویس ثبت نشده است.</div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
 
+<!-- 2. Change Password Modal -->
+    @if($isChangePasswordModalOpen)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/80 dark:bg-black/80 backdrop-blur-sm animate-fade-in">
+            <div class="w-full max-w-sm bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800 rounded-[2rem] shadow-2xl overflow-hidden relative">
+                <div class="p-5 border-b border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between bg-zinc-50 dark:bg-[#18181b]">
+                    <h3 class="text-sm font-black text-zinc-900 dark:text-white">تغییر رمز عبور</h3>
+                    <button wire:click="$set('isChangePasswordModalOpen', false)" class="p-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-rose-500 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div class="p-6 space-y-5">
+                    <div>
+                        <label class="block text-[11px] font-bold text-zinc-500 mb-2">رمز عبور جدید</label>
+                        <div class="relative group">
+                            <input wire:model="newPassword" type="text" class="w-full bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 rounded-xl pl-4 pr-[85px] py-3.5 text-sm text-zinc-900 dark:text-white font-mono-digit focus:ring-2 focus:ring-emerald-500/50 outline-none transition-all" dir="ltr" placeholder="رمز جدید...">
+                            <button wire:click="generatePassword" type="button" class="absolute right-1.5 top-1/2 -translate-y-1/2 px-2.5 py-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors text-[10px] font-bold">
+                                پیشنهاد خودکار
+                            </button>
+                        </div>
+                        @error('newPassword') <span class="text-rose-500 text-[10px] font-bold mt-1.5 block">{{ $message }}</span> @enderror
+                    </div>
+                    <button wire:click="changePassword" class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm rounded-xl transition-all shadow-[0_8px_20px_-6px_rgba(16,185,129,0.4)] active:scale-95">
+                        ذخیره رمز عبور
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+<!-- 3. Wallet Recharge Modal -->
+    @if($isRechargeModalOpen)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/80 dark:bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
+            <div class="w-full max-w-md bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800 rounded-[2rem] shadow-2xl overflow-hidden my-8">
+                <div class="p-5 border-b border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between bg-zinc-50 dark:bg-[#18181b]">
+                    <h3 class="text-sm font-black text-zinc-900 dark:text-white">درخواست افزایش موجودی</h3>
+                    <button wire:click="$set('isRechargeModalOpen', false)" class="p-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-rose-500 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
                 <form wire:submit.prevent="requestRecharge" class="p-6 space-y-5">
-
                     <div>
-                        <label class="block text-xs font-bold text-zinc-600 dark:text-zinc-400 mb-1.5">مبلغ واریزی (تومان) <span class="text-rose-500">*</span></label>
-                        <input wire:model="amount" type="number" placeholder="مثلاً: 50000" class="w-full bg-zinc-50 dark:bg-[#09090b] border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none font-mono-digit" dir="ltr">
-                        @error('amount') <span class="text-rose-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
+                        <label class="block text-[11px] font-bold text-zinc-500 mb-2">مبلغ واریزی (تومان) <span class="text-rose-500">*</span></label>
+                        <input wire:model="amount" type="number" placeholder="مثلاً: 50000" class="w-full bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3.5 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none font-mono-digit transition-all" dir="ltr">
+                        @error('amount') <span class="text-rose-500 text-[10px] mt-1.5 block font-bold">{{ $message }}</span> @enderror
                     </div>
-
                     <div>
-                        <label class="block text-xs font-bold text-zinc-600 dark:text-zinc-400 mb-1.5">تصویر فیش واریزی <span class="text-rose-500">*</span></label>
-                        <input wire:model="receipt" type="file" accept="image/*" class="w-full bg-zinc-50 dark:bg-[#09090b] border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-emerald-500/50 outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-zinc-200 dark:file:bg-zinc-800 file:text-zinc-900 dark:file:text-white hover:file:bg-zinc-300 cursor-pointer">
-                        <div wire:loading wire:target="receipt" class="text-[10px] text-amber-500 mt-2 font-bold animate-pulse">در حال آپلود فیش...</div>
-                        @error('receipt') <span class="text-rose-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
+                        <label class="block text-[11px] font-bold text-zinc-500 mb-2">تصویر فیش واریزی <span class="text-rose-500">*</span></label>
+                        <input wire:model="receipt" type="file" accept="image/*" class="w-full bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500/50 outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-zinc-200 dark:file:bg-zinc-700 file:text-zinc-900 dark:file:text-white hover:file:bg-zinc-300 dark:hover:file:bg-zinc-600 cursor-pointer transition-all">
+                        <div wire:loading wire:target="receipt" class="text-[10px] text-emerald-500 mt-2 font-bold flex items-center gap-1.5">
+                            <span class="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></span> در حال آپلود...
+                        </div>
+                        @error('receipt') <span class="text-rose-500 text-[10px] mt-1.5 block font-bold">{{ $message }}</span> @enderror
                     </div>
-
                     <div>
-                        <label class="block text-xs font-bold text-zinc-600 dark:text-zinc-400 mb-1.5">توضیحات (اختیاری)</label>
-                        <input wire:model="description" type="text" placeholder="شماره پیگیری یا توضیحات..." class="w-full bg-zinc-50 dark:bg-[#09090b] border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                        <label class="block text-[11px] font-bold text-zinc-500 mb-2">توضیحات (اختیاری)</label>
+                        <input wire:model="description" type="text" placeholder="شماره پیگیری..." class="w-full bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3.5 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none transition-all">
                     </div>
-
-                    <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+                    <button type="submit" class="w-full mt-2 py-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm transition-all shadow-[0_8px_20px_-6px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-2">
                         <svg wire:loading.remove wire:target="requestRecharge" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         <svg wire:loading wire:target="requestRecharge" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                         <span>ارسال درخواست شارژ</span>
                     </button>
-
                 </form>
             </div>
         </div>
     @endif
 
-
-
-        @if($isAccRechargeModalOpen)
-            <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-900/80 dark:bg-zinc-950/80 backdrop-blur-sm transition-all animate-fade-in" wire:key="user-acc-recharge-modal">
-                <div class="relative w-full max-w-md bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800 rounded-[2rem] shadow-2xl overflow-hidden">
-
-                    <div class="flex items-center justify-between px-6 py-5 border-b border-zinc-100 dark:border-zinc-800/80 bg-zinc-50 dark:bg-[#111827]">
-                        <h2 class="text-sm font-bold text-zinc-800 dark:text-white flex items-center gap-2">
-                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                            شارژ و تمدید سرویس
-                        </h2>
-                        <button type="button" wire:click="$set('isAccRechargeModalOpen', false)" class="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-white bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
+<!-- 4. Account Recharge (Renew) Modal -->
+    @if($isAccRechargeModalOpen)
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-900/80 dark:bg-black/80 backdrop-blur-sm animate-fade-in">
+            <div class="relative w-full max-w-md bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800 rounded-[2rem] shadow-2xl overflow-hidden">
+                <div class="flex items-center justify-between px-5 py-5 border-b border-zinc-200 dark:border-zinc-800/80 bg-zinc-50 dark:bg-[#18181b]">
+                    <h2 class="text-sm font-black text-zinc-900 dark:text-white flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-orange-500"></span> شارژ و تمدید سرویس
+                    </h2>
+                    <button type="button" wire:click="$set('isAccRechargeModalOpen', false)" class="p-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-rose-500 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div class="mb-5 p-3.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 text-[11px] font-bold leading-relaxed text-justify flex gap-2">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        هزینه انتخاب بسته جدید مستقیماً از موجودی کیف پول شما کسر شده و سرویس بلافاصله تمدید می‌گردد.
                     </div>
-
-                    <div class="p-6">
-                        <div class="mb-5 p-3.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 text-[11px] font-bold leading-relaxed text-justify">
-                            کاربر گرامی، با انتخاب بسته جدید، هزینه آن مستقیماً از موجودی کیف پول شما کسر شده و سرویس شما تمدید می‌گردد.
+                    <form wire:submit.prevent="confirmAccRecharge" class="space-y-6">
+                        <div>
+                            <label class="block text-[11px] font-bold text-zinc-500 mb-2">بسته مورد نظر را انتخاب کنید</label>
+                            <select wire:model="selectedGroupId" class="w-full bg-zinc-50 dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-sm rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-orange-500/50 transition-all cursor-pointer font-medium">
+                                @if(isset($availableGroups) && count($availableGroups) > 0)
+                                    @foreach($availableGroups as $group)
+                                        <option value="{{ $group->id }}">{{ $group->name }} ({{ number_format(auth()->user()->getGroupPrice($group)) }} تومان)</option>
+                                    @endforeach
+                                @else
+                                    <option value="">هیچ بسته‌ای یافت نشد</option>
+                                @endif
+                            </select>
+                            @error('wallet')
+                            <div class="mt-3 p-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 rounded-xl flex items-start gap-2">
+                                <svg class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="text-rose-700 dark:text-rose-400 text-[11px] font-bold leading-relaxed">{{ $message }}</span>
+                            </div>
+                            @enderror
                         </div>
-
-                        <form wire:submit.prevent="confirmAccRecharge" class="space-y-5">
-                            <div>
-                                <label class="block text-[11px] font-bold text-zinc-600 dark:text-zinc-400 mb-2">انتخاب پلن (بسته تمدید)</label>
-                                <select wire:model="selectedGroupId" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-white text-sm rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all cursor-pointer">
-                                    @if(isset($availableGroups) && count($availableGroups) > 0)
-                                        @foreach($availableGroups as $group)
-                                            <option value="{{ $group->id }}">{{ $group->name }} ({{ number_format(auth()->user()->getGroupPrice($group)) }} تومان)</option>
-                                        @endforeach
-                                    @else
-                                        <option value="">هیچ بسته‌ای یافت نشد</option>
-                                    @endif
-                                </select>
-
-                                @error('wallet')
-                                <div class="mt-3 p-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 rounded-xl flex items-start gap-2">
-                                    <svg class="w-4 h-4 text-rose-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <span class="text-rose-600 dark:text-rose-400 text-[11px] font-bold leading-relaxed">{{ $message }}</span>
-                                </div>
-                                @enderror
-                            </div>
-
-                            <div class="pt-4 flex items-center justify-end gap-3 border-t border-zinc-100 dark:border-zinc-800/80">
-                                <button type="button" wire:click="$set('isAccRechargeModalOpen', false)" class="px-5 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 font-bold text-xs rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
-                                    انصراف
-                                </button>
-                                <button type="submit" wire:loading.attr="disabled" class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/25 flex items-center gap-2 transition-all">
-                                    <svg wire:loading wire:target="confirmAccRecharge" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"></path></svg>
-                                    <span wire:loading.remove wire:target="confirmAccRecharge">پرداخت و تمدید سرویس</span>
-                                    <span wire:loading wire:target="confirmAccRecharge">در حال پردازش...</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                        <div class="pt-2 flex items-center gap-3">
+                            <button type="button" wire:click="$set('isAccRechargeModalOpen', false)" class="w-1/3 py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-sm rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
+                                انصراف
+                            </button>
+                            <button type="submit" wire:loading.attr="disabled" class="w-2/3 py-4 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm rounded-xl shadow-[0_8px_20px_-6px_rgba(249,115,22,0.4)] flex items-center justify-center gap-2 transition-all active:scale-95">
+                                <svg wire:loading wire:target="confirmAccRecharge" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"></path></svg>
+                                <span wire:loading.remove wire:target="confirmAccRecharge">پرداخت و تمدید</span>
+                                <span wire:loading wire:target="confirmAccRecharge">درحال پردازش...</span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-        @endif
+        </div>
+    @endif
 
 </div>
