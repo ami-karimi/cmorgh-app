@@ -51,7 +51,7 @@ class SystemCleaner
             'success' => true,
             'deleted_count' => $deletedCount,
             'deleted_size' => $deletedSize,
-            'deleted_size_human' => $this->formatBytes($deletedSize),
+            'deleted_size_human' => $this->formzatBytes($deletedSize),
         ];
     }
 

@@ -29,10 +29,10 @@ class VpnManagerService
             $newStatus = is_null($status) ? !$account->is_enabled : $status;
 
             $serverSuccess = match ($account->service_group) {
-                'wireguard'         => self::toggleWireguard($account, $newStatus),
-                'v2ray'             => self::toggleV2Ray($account, $newStatus),
-                'l2tp', 'openvpn'   => self::toggleRadius($account, $newStatus),
-                default             => true,
+                'wireguard' => self::toggleWireguard($account, $newStatus),
+                'v2ray' => self::toggleV2Ray($account, $newStatus),
+                'l2tp', 'openvpn' => self::toggleRadius($account, $newStatus),
+                default => true,
             };
 
             if (!$serverSuccess) {
@@ -118,14 +118,14 @@ class VpnManagerService
     private static function applyRechargeToServer(Accounts $account, Group $group)
     {
         match ($account->service_group) {
-            'wireguard'         => self::rechargeWireguard($account, $group),
-            'v2ray'             => self::rechargeV2Ray($account, $group),
+            'wireguard' => self::rechargeWireguard($account, $group),
+            'v2ray' => self::rechargeV2Ray($account, $group),
             'l2tp', 'l2tp_cisco', 'openvpn' => self::rechargeRadius($account, $group),
-            default             => null,
+            default => null,
         };
     }
 
-    public static function rechargeAccount(Accounts $account, Group $group, bool $payFromAgentWallet = false, ?int $executedByUserId = null,$payFromUserWallet = true)
+    public static function rechargeAccount(Accounts $account, Group $group, bool $payFromAgentWallet = false, ?int $executedByUserId = null, $payFromUserWallet = true)
     {
         try {
             DB::beginTransaction();
@@ -133,7 +133,7 @@ class VpnManagerService
             $executorId = $executedByUserId ?? auth()->id();
 
             if ($payFromAgentWallet && $account->creator > 0) {
-                $paymentResult = self::processCascadePayment($account, $group, $executorId,$payFromUserWallet);
+                $paymentResult = self::processCascadePayment($account, $group, $executorId, $payFromUserWallet);
                 if (!$paymentResult['status']) {
                     DB::rollBack();
                     return $paymentResult;
@@ -150,27 +150,27 @@ class VpnManagerService
             $rolloverMinutes = $rolloverDays * 24 * 60;
             $expType = $group->expire_type ?? 'days';
 
-            $expVal  = (int) ($group->expire_value ?? 30);
+            $expVal = (int)($group->expire_value ?? 30);
 
             $baseMinutes = 0;
-            $baseMinutes =  match($expType) {
-                    'minutes' => $expVal,
-                    'hours'   => $expVal * 60,
-                    'days'    => $expVal * 24 * 60,
-                    'month'   => $expVal * 30 * 24 * 60,
-                    'year'    => $expVal * 365 * 24 * 60,
-                    default   => 0,
-                };
+            $baseMinutes = match ($expType) {
+                'minutes' => $expVal,
+                'hours' => $expVal * 60,
+                'days' => $expVal * 24 * 60,
+                'month' => $expVal * 30 * 24 * 60,
+                'year' => $expVal * 365 * 24 * 60,
+                default => 0,
+            };
 
             $expireDate = null;
             if ($group->first_login == 0) {
-                $expireDate = match($expType) {
+                $expireDate = match ($expType) {
                     'minutes' => now()->addMinutes($expVal),
-                    'hours'   => now()->addHours($expVal),
-                    'days'    => now()->addDays($expVal),
-                    'month'   => now()->addMonths($expVal),
-                    'year'    => now()->addYears($expVal),
-                    default   => now()->addDays(30),
+                    'hours' => now()->addHours($expVal),
+                    'days' => now()->addDays($expVal),
+                    'month' => now()->addMonths($expVal),
+                    'year' => now()->addYears($expVal),
+                    default => now()->addDays(30),
                 };
             }
 
@@ -225,10 +225,11 @@ class VpnManagerService
 
     public static function processCascadePayment(
         Accounts $account,
-        Group $group,
-        int $executorId,
-        bool $payFromUserWallet = true
-    ): array {
+        Group    $group,
+        int      $executorId,
+        bool     $payFromUserWallet = true
+    ): array
+    {
 
         // -------------------------------------------------------------
         // ۰. بررسی کیف پول مشتری/کاربر (در صورتی که تیک زده شده باشد)
@@ -244,7 +245,7 @@ class VpnManagerService
                 ];
             }
 
-            $creatorUser =  User::find($customer->creator);
+            $creatorUser = User::find($customer->creator);
             $customerPrice = $group->price; // قیمت پیش‌فرض سیستم (اگر سازنده ادمین باشد)
 
             // اگر سازنده اکانت یک نماینده/مدیر فروش است (ادمین کل نیست)
@@ -266,7 +267,7 @@ class VpnManagerService
             }
 
             $customerToDeduct = [
-                'user'  => $customer,
+                'user' => $customer,
                 'price' => $customerPrice
             ];
         }
@@ -284,8 +285,8 @@ class VpnManagerService
                     $price = $group->getFinalPriceFor($currentAgent);
 
                     $agentsChain[] = [
-                        'agent'   => $currentAgent,
-                        'price'   => $price,
+                        'agent' => $currentAgent,
+                        'price' => $price,
                         'balance' => $currentAgent->balance
                     ];
                 }
@@ -314,14 +315,14 @@ class VpnManagerService
         // ۲. کسر موجودی از مشتری نهایی (با قیمت فروش نماینده یا قیمت سیستم)
         if ($customerToDeduct) {
             Financial::create([
-                'creator'     => $executorId,
-                'for'         => $customerToDeduct['user']->id,
-                'type'        => 'minus',
-                'price'       => $customerToDeduct['price'], // قیمت داینامیک مشتری
-                'approved'    => 1,
+                'creator' => $executorId,
+                'for' => $customerToDeduct['user']->id,
+                'type' => 'minus',
+                'price' => $customerToDeduct['price'], // قیمت داینامیک مشتری
+                'approved' => 1,
                 'description' => "تمدید/ایجاد اکانت {$account->username} با بسته {$group->name}",
-                'created_at'  => now(),
-                'updated_at'  => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
         }
 
@@ -335,14 +336,14 @@ class VpnManagerService
                 : "کسر پلکانی هزینه تمدید/ایجاد اکانت {$account->username} (مربوط به زیرمجموعه)";
 
             Financial::create([
-                'creator'     => $executorId,
-                'for'         => $agent->id,
-                'type'        => 'minus',
-                'price'       => $price,
-                'approved'    => 1,
+                'creator' => $executorId,
+                'for' => $agent->id,
+                'type' => 'minus',
+                'price' => $price,
+                'approved' => 1,
                 'description' => $description,
-                'created_at'  => now(),
-                'updated_at'  => now()
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
         }
 
@@ -426,8 +427,8 @@ class VpnManagerService
                 return ['status' => false, 'message' => 'کانفیگ وایرگارد مورد نظر یافت نشد یا متعلق به این اکانت نیست.'];
             }
 
-            $newServer = Nas::where('id',$newServerId)->where('is_enabled', 1)->supportsProtocol('wireguard')->first();
-            if (!$newServer ) {
+            $newServer = Nas::where('id', $newServerId)->where('is_enabled', 1)->supportsProtocol('wireguard')->first();
+            if (!$newServer) {
                 return ['status' => false, 'message' => 'سرور جدید یافت نشد یا از نوع وایرگارد نیست.'];
             }
 
@@ -499,6 +500,109 @@ class VpnManagerService
             Log::error("خطا در متد changeWireguardServer: " . $e->getMessage());
             return ['status' => false, 'message' => 'خطای سیستمی: ' . $e->getMessage()];
         }
+    }
+
+
+    /**
+     * حذف کامل یک اکانت (به همراه کانفیگ‌های وایرگارد از سرور و دیتابیس)
+     *
+     * @param Accounts $account
+     * @return array ['status' => bool, 'message' => string]
+     */
+    /**
+     * حذف کامل یک اکانت به همراه کاربر مرتبط (creator)
+     *
+     * @param Accounts $account
+     * @param bool $deleteUserAlso آیا کاربر مرتبط نیز حذف شود؟ (پیش‌فرض true)
+     * @return array ['status' => bool, 'message' => string]
+     */
+    /**
+     * حذف کامل یک اکانت به همراه کاربر مرتبط (در صورت درخواست)
+     *
+     * @param Accounts $account
+     * @param bool $deleteUserAlso آیا کاربر مرتبط نیز حذف شود؟ (پیش‌فرض true)
+     * @return array ['status' => bool, 'message' => string]
+     */
+    public static function deleteAccount(Accounts $account, bool $deleteUserAlso = true): array
+    {
+
+        $serverErrors = [];
+
+        if ($account->service_group === 'wireguard') {
+            $wgUsers = WireGuardUsers::where('user_id', $account->id)->get();
+
+            if ($wgUsers->isEmpty()) {
+                Log::info("اکانت {$account->username} وایرگارد است اما هیچ کانفیگی در جدول wireguard_users یافت نشد.");
+            }
+
+            foreach ($wgUsers as $wgUser) {
+                $server = Nas::find($wgUser->server_id);
+                if (!$server) {
+                    $serverErrors[] = "سرور با شناسه {$wgUser->server_id} برای کانفیگ {$wgUser->profile_name} یافت نشد.";
+                    continue;
+                }
+
+                try {
+                    $wgService = new WireguardService($server);
+                    $result = $wgService->removeClient($wgUser->public_key);
+
+                    if (!$result['status']) {
+                        $serverErrors[] = "حذف Peer از سرور {$server->name} برای کاربر {$wgUser->profile_name} ناموفق: " . ($result['message'] ?? 'خطای ناشناخته');
+                    }
+                } catch (\Exception $e) {
+                    $serverErrors[] = "خطا در ارتباط با سرور {$server->name} برای حذف Peer {$wgUser->profile_name}: " . $e->getMessage();
+                }
+            }
+
+            if (!empty($serverErrors)) {
+                $errorMsg = implode(' | ', $serverErrors);
+                Log::error("حذف اکانت {$account->username} از سرور با خطا مواجه شد: " . $errorMsg);
+                return ['status' => false, 'message' => "خطا در حذف از سرور: {$errorMsg}"];
+            }
+        } else {
+            Log::warning("حذف اکانت با پروتکل غیر وایرگارد ({$account->service_group}) فقط از دیتابیس انجام می‌شود.");
+        }
+
+
+        $user = User::find($account->creator);
+        $accountName = $account->username;
+
+        try {
+            DB::transaction(function () use ($account, $user, $deleteUserAlso) {
+                WireGuardUsers::where('user_id', $account->id)->delete();
+                $account->delete();
+
+                if ($deleteUserAlso && $user) {
+                    $otherAccounts = Accounts::where('creator', $user->id)->count();
+                    if ($otherAccounts > 0) {
+                        Log::warning("کاربر {$user->name} دارای {$otherAccounts} اکانت دیگر است و حذف نشد.");
+                        throw new \Exception("کاربر {$user->name} دارای اکانت‌های دیگر است و نمی‌توان حذف کرد.");
+                    }
+
+
+                    $user->delete();
+                }
+            });
+
+        } catch (\Exception $e) {
+            Log::error("خطا در حذف دیتابیس برای اکانت {$accountName}: " . $e->getMessage());
+            return ['status' => false, 'message' => 'خطا در حذف دیتابیس: ' . $e->getMessage()];
+        }
+
+        // ------------------------------------------------
+        // مرحله ۳: ثبت لاگ موفقیت
+        // ------------------------------------------------
+        $operatorName = auth()->check() ? (auth()->user()->name ?? auth()->user()->username) : 'سیستم';
+
+        if ($deleteUserAlso && $user) {
+            $logMsg = "کاربر {$user->name} به همراه اکانت {$accountName} حذف شد.";
+        } else {
+            $logMsg = "اکانت {$accountName} حذف شد (کاربر مرتبط حذف نشد).";
+        }
+
+        ActivityLogger::log($account->id, $logMsg . " توسط {$operatorName}", 1, 1);
+
+        return ['status' => true, 'message' => $logMsg];
     }
 
 }

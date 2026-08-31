@@ -21,7 +21,6 @@ class SystemMaintenance extends Component
     public $logsInfo = [];
     public $isCleaningLogs = false;
 
-    // حذف $expiredUsers به عنوان public property (اکنون از طریق render پاس داده می‌شود)
     public $isLoadingExpired = false;
     public $selectedUsers = [];
     public $perPage = 20;
@@ -31,6 +30,10 @@ class SystemMaintenance extends Component
     public $isRunningHealthCheck = false;
     public $healthIssues = [];
     public $jobStatus = null;
+
+    // متغیرهای مربوط به مودال تأیید پاکسازی کلی
+    public $showBulkConfirmModal = false;
+    public $bulkTotalCount = 0;
 
     public function mount()
     {
@@ -76,23 +79,44 @@ class SystemMaintenance extends Component
         $this->isCleaningLogs = false;
     }
 
-    // متد جدید که Paginator را با مدل‌های Eloquent برمی‌گرداند
-    public function getExpiredUsersProperty()
+    // متد برای باز کردن مودال تأیید پاکسازی کلی
+    public function openBulkDeleteConfirm()
     {
-        // این متد به عنوان یک computed property عمل می‌کند
-        // اما برای استفاده در view باید آن را در render صدا بزنیم
+        $cleaner = new SystemCleaner();
+        $query = $cleaner->getExpiredUsersQuery();
+        $this->bulkTotalCount = $query->count();
+
+        if ($this->bulkTotalCount == 0) {
+            session()->flash('maintenance_error', 'هیچ کاربر قابل پاکسازی‌ای وجود ندارد.');
+            return;
+        }
+
+        $this->showBulkConfirmModal = true;
     }
 
-    // متد برای بارگذاری کاربران منقضی با Pagination
-    public function loadExpiredUsers()
+    // متد اجرای پاکسازی کلی (همه کاربران)
+    public function bulkDeleteAll()
     {
-        // این متد فقط برای رفرش کردن صفحه استفاده می‌شود
-        // اما Paginator از طریق render دریافت می‌شود
-        $this->resetPage();
-        // هیچ کاری انجام نمی‌دهد، فقط صفحه را ریست می‌کند
+        $cleaner = new SystemCleaner();
+        $query = $cleaner->getExpiredUsersQuery();
+        $allUserIds = $query->pluck('id')->toArray();
+
+        if (empty($allUserIds)) {
+            session()->flash('maintenance_error', 'هیچ کاربر قابل پاکسازی‌ای وجود ندارد.');
+            $this->showBulkConfirmModal = false;
+            return;
+        }
+
+        // ارسال همه IDها به Job
+        DeleteExpiredUsersJob::dispatch($allUserIds, Auth::id());
+
+        $this->jobStatus = 'در حال پردازش...';
+        session()->flash('maintenance_message', 'عملیات پاکسازی کلی (' . count($allUserIds) . ' کاربر) به صف ارسال شد. نتیجه به زودی اعلام می‌شود.');
+        $this->selectedUsers = [];
+        $this->showBulkConfirmModal = false;
+        $this->loadStats();
     }
 
-    // متد برای دریافت Paginator با استفاده از WithPagination
     public function getExpiredUsersPaginator()
     {
         $cleaner = new SystemCleaner();
@@ -151,7 +175,6 @@ class SystemMaintenance extends Component
 
     public function render()
     {
-        // دریافت Paginator از سرویس
         $cleaner = new SystemCleaner();
         $expiredUsers = $cleaner->getExpiredUsersQuery()->paginate($this->perPage);
 

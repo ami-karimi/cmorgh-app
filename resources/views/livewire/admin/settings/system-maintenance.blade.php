@@ -155,6 +155,11 @@
                             <span wire:loading.remove>🔍 بررسی</span>
                             <span wire:loading>⏳</span>
                         </button>
+                        @if($stats['total'] > 0)
+                            <button wire:click="openBulkDeleteConfirm" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-rose-500/20 flex items-center gap-2">
+                                🗑️ پاکسازی کلی ({{ $stats['total'] }})
+                            </button>
+                        @endif
                     </div>
                 </div>
 
@@ -215,6 +220,28 @@
                 @else
                     <div class="py-8 text-center text-zinc-500 text-sm">✅ هیچ کاربر منقضی یا تمام‌شده‌ای یافت نشد.</div>
                 @endif
+
+
+                @if($showBulkConfirmModal)
+                    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+                            <h3 class="text-lg font-bold text-white mb-2">⚠️ تأیید پاکسازی کلی</h3>
+                            <p class="text-sm text-zinc-400 mb-4">
+                                آیا از حذف <span class="text-white font-bold">{{ $bulkTotalCount }}</span> کاربر منقضی اطمینان دارید؟
+                                <br>
+                                <span class="text-xs text-zinc-500">این عملیات غیرقابل بازگشت است و کاربران ابتدا از سرورهای خارجی حذف می‌شوند.</span>
+                            </p>
+                            <div class="flex items-center justify-end gap-3">
+                                <button wire:click="$set('showBulkConfirmModal', false)" class="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-bold rounded-xl transition">انصراف</button>
+                                <button wire:click="bulkDeleteAll" wire:loading.attr="disabled" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold rounded-xl transition shadow-lg flex items-center gap-2">
+                                    <span wire:loading.remove>🗑️ تأیید و حذف همه</span>
+                                    <span wire:loading>⏳ در حال پردازش...</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
 
             </div>
         </div>
