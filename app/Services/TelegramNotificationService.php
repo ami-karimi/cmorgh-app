@@ -8,6 +8,7 @@ use App\Models\Financial;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Configuration;
+use SergiX44\Nutgram\Telegram\Types\InputFile;
 
 class TelegramNotificationService
 {
@@ -84,7 +85,7 @@ class TelegramNotificationService
             try {
                 if ($attachmentPath && Storage::disk('public')->exists($attachmentPath)) {
                     // ارسال عکس
-                    $fullPath = Storage::disk('public')->path($attachmentPath);
+                    $fullPath = public_path('storage/'.$attachmentPath);
                     $this->bot->sendPhoto(
                         photo: $fullPath,
                         chat_id: $admin->telegram_id,
