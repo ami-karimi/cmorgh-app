@@ -158,12 +158,13 @@
                     </div>
                 </div>
 
+                {{-- بخش کاربران منقضی --}}
                 @if($expiredUsers && $expiredUsers->count() > 0)
                     <div class="mt-4 overflow-x-auto">
                         <table class="w-full text-right text-xs">
                             <thead class="bg-zinc-900/50 text-zinc-400 border-b border-zinc-800">
                             <tr>
-                                <th class="p-2"><input type="checkbox" wire:model="selectedUsers" value="{{ $expiredUsers->first()['id'] ?? '' }}" class="rounded border-zinc-700 bg-zinc-900 text-orange-500"></th>
+                                <th class="p-2"><input type="checkbox" wire:model="selectedUsers" value="{{ $expiredUsers->first()->id ?? '' }}" class="rounded border-zinc-700 bg-zinc-900 text-orange-500"></th>
                                 <th class="p-2">کاربر</th>
                                 <th class="p-2">سرویس</th>
                                 <th class="p-2">تاریخ انقضا</th>
@@ -172,14 +173,26 @@
                             </tr>
                             </thead>
                             <tbody class="divide-y divide-zinc-800/50">
-                            @foreach($expiredUsers as $user)
+                            @foreach($expiredUsers as $account)
+                                @php
+                                    $expireDate = $account->expire_date ? Carbon\Carbon::parse($account->expire_date) : null;
+                                    $daysSinceExpire = $expireDate ? $expireDate->diffInDays(now()) : 0;
+                                    $reason = [];
+                                    if ($expireDate && $expireDate->isPast()) {
+                                        $reason[] = 'منقضی شده ('.$daysSinceExpire.' روز)';
+                                    }
+                                    if ($account->max_usage > 0 && $account->download_usage >= $account->max_usage) {
+                                        $reason[] = 'حجم تمام شده';
+                                    }
+                                    $reasonText = implode(' - ', $reason);
+                                @endphp
                                 <tr class="hover:bg-zinc-900/30 transition">
-                                    <td class="p-2"><input type="checkbox" wire:model="selectedUsers" value="{{ $user['id'] }}" class="rounded border-zinc-700 bg-zinc-900 text-orange-500"></td>
-                                    <td class="p-2 font-mono text-white">{{ $user['username'] }}</td>
-                                    <td class="p-2 text-zinc-400">{{ $user['service_group'] }}</td>
-                                    <td class="p-2 text-zinc-400">{{ $user['expire_date'] ?? '-' }}</td>
-                                    <td class="p-2 font-mono {{ $user['days_since_expire'] > 15 ? 'text-rose-400' : 'text-zinc-400' }}">{{ $user['days_since_expire'] }}</td>
-                                    <td class="p-2 text-zinc-400 text-[10px]">{{ $user['reason'] }}</td>
+                                    <td class="p-2"><input type="checkbox" wire:model="selectedUsers" value="{{ $account->id }}" class="rounded border-zinc-700 bg-zinc-900 text-orange-500"></td>
+                                    <td class="p-2 font-mono text-white">{{ $account->username }}</td>
+                                    <td class="p-2 text-zinc-400">{{ $account->service_group }}</td>
+                                    <td class="p-2 text-zinc-400">{{ $expireDate ? $expireDate->toDateString() : '-' }}</td>
+                                    <td class="p-2 font-mono {{ $daysSinceExpire > 15 ? 'text-rose-400' : 'text-zinc-400' }}">{{ $daysSinceExpire }}</td>
+                                    <td class="p-2 text-zinc-400 text-[10px]">{{ $reasonText }}</td>
                                 </tr>
                             @endforeach
                             </tbody>
@@ -197,26 +210,12 @@
                             </div>
                         </div>
                     @endif
-
-                    <div class="mt-4 flex flex-wrap justify-end gap-3 border-t border-zinc-800 pt-4">
-                        <div class="flex items-center gap-2 text-xs text-zinc-500">
-                            <span>تعداد در هر صفحه:</span>
-                            <select wire:model.live="perPage" class="bg-zinc-800 border border-zinc-700 text-white rounded-lg px-2 py-1 text-xs">
-                                <option value="20">۲۰</option>
-                                <option value="50">۵۰</option>
-                                <option value="100">۱۰۰</option>
-                            </select>
-                        </div>
-                        <button wire:click="deleteSelectedUsers" wire:loading.attr="disabled" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-rose-500/20 flex items-center gap-2">
-                            <span wire:loading.remove>🗑 حذف انتخاب‌شده‌ها ({{ count($selectedUsers) }})</span>
-                            <span wire:loading>⏳</span>
-                        </button>
-                    </div>
                 @elseif($isLoadingExpired)
                     <div class="py-8 text-center text-zinc-500 text-sm">⏳ در حال بارگذاری...</div>
                 @else
                     <div class="py-8 text-center text-zinc-500 text-sm">✅ هیچ کاربر منقضی یا تمام‌شده‌ای یافت نشد.</div>
                 @endif
+
             </div>
         </div>
     @endif

@@ -1,38 +1,48 @@
 <?php
-// app/Livewire/Admin/Settings/SystemMaintenance.php
 
 namespace App\Livewire\Admin\Settings;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Services\System\SystemCleaner;
 use App\Services\System\SystemHealthFacade;
 use App\Models\SystemHealthIssue;
 use App\Models\SystemMaintenanceLog;
+use App\Jobs\DeleteExpiredUsersJob;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class SystemMaintenance extends Component
 {
-    public $activeSubTab = 'health'; // health, cleanup, logs
-    public $perPage = 50;
-    // پاکسازی لاگ‌ها
+    use WithPagination;
+
+    public $activeSubTab = 'health';
+
     public $logsInfo = [];
     public $isCleaningLogs = false;
 
-    // پاکسازی کاربران
-    public $expiredUsers = [];
+    // حذف $expiredUsers به عنوان public property (اکنون از طریق render پاس داده می‌شود)
     public $isLoadingExpired = false;
     public $selectedUsers = [];
+    public $perPage = 20;
+    public $stats = [];
 
-    // سلامت
     public $healthResults = [];
     public $isRunningHealthCheck = false;
     public $healthIssues = [];
+    public $jobStatus = null;
 
     public function mount()
     {
         $this->loadLogsInfo();
         $this->loadHealthIssues();
+        $this->loadStats();
+    }
+
+    public function loadStats()
+    {
+        $cleaner = new SystemCleaner();
+        $this->stats = $cleaner->getExpiredStats();
     }
 
     public function loadLogsInfo()
@@ -66,18 +76,27 @@ class SystemMaintenance extends Component
         $this->isCleaningLogs = false;
     }
 
+    // متد جدید که Paginator را با مدل‌های Eloquent برمی‌گرداند
+    public function getExpiredUsersProperty()
+    {
+        // این متد به عنوان یک computed property عمل می‌کند
+        // اما برای استفاده در view باید آن را در render صدا بزنیم
+    }
+
+    // متد برای بارگذاری کاربران منقضی با Pagination
     public function loadExpiredUsers()
     {
-        $this->isLoadingExpired = true;
-        try {
-            $cleaner = new SystemCleaner();
-            // استفاده از paginate برای بارگذاری تدریجی
-            $this->expiredUsers = $cleaner->findExpiredUsersPaginated(15, $this->perPage);
-        } catch (\Exception $e) {
-            Log::error('Load expired users error: ' . $e->getMessage());
-            session()->flash('maintenance_error', 'خطا در بارگذاری کاربران منقضی: ' . $e->getMessage());
-        }
-        $this->isLoadingExpired = false;
+        // این متد فقط برای رفرش کردن صفحه استفاده می‌شود
+        // اما Paginator از طریق render دریافت می‌شود
+        $this->resetPage();
+        // هیچ کاری انجام نمی‌دهد، فقط صفحه را ریست می‌کند
+    }
+
+    // متد برای دریافت Paginator با استفاده از WithPagination
+    public function getExpiredUsersPaginator()
+    {
+        $cleaner = new SystemCleaner();
+        return $cleaner->getExpiredUsersQuery()->paginate($this->perPage);
     }
 
     public function deleteSelectedUsers()
@@ -87,23 +106,12 @@ class SystemMaintenance extends Component
             return;
         }
 
-        // در اینجا عملیات حذف واقعی انجام می‌شود
-        // باید ابتدا از سرورهای خارجی حذف شود
+        DeleteExpiredUsersJob::dispatch($this->selectedUsers, Auth::id());
 
-        // ثبت لاگ
-        SystemMaintenanceLog::create([
-            'admin_id' => Auth::id(),
-            'action' => 'delete_expired_users',
-            'target' => implode(', ', $this->selectedUsers),
-            'status' => 'success',
-            'message' => count($this->selectedUsers) . ' کاربر منقضی حذف شدند.',
-            'started_at' => now(),
-            'finished_at' => now(),
-        ]);
-
-        session()->flash('maintenance_message', count($this->selectedUsers) . ' کاربر با موفقیت حذف شدند.');
+        $this->jobStatus = 'در حال پردازش...';
+        session()->flash('maintenance_message', 'عملیات حذف به صف ارسال شد. نتیجه به زودی اعلام می‌شود.');
         $this->selectedUsers = [];
-        $this->loadExpiredUsers();
+        $this->loadStats();
     }
 
     public function runHealthCheck()
@@ -143,6 +151,12 @@ class SystemMaintenance extends Component
 
     public function render()
     {
-        return view('livewire.admin.settings.system-maintenance');
+        // دریافت Paginator از سرویس
+        $cleaner = new SystemCleaner();
+        $expiredUsers = $cleaner->getExpiredUsersQuery()->paginate($this->perPage);
+
+        return view('livewire.admin.settings.system-maintenance', [
+            'expiredUsers' => $expiredUsers,
+        ]);
     }
 }

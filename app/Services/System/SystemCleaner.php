@@ -104,6 +104,22 @@ class SystemCleaner
         );
     }
 
+    public function getExpiredUsersQuery()
+    {
+        $threshold = now()->subDays(15);
+
+        return Accounts::where(function ($q) use ($threshold) {
+            $q->whereNotNull('expire_date')
+                ->where('expire_date', '<', $threshold)
+                ->orWhere(function ($sub) use ($threshold) {
+                    $sub->whereNotNull('max_usage')
+                        ->where('max_usage', '>', 0)
+                        ->whereRaw('download_usage >= max_usage')
+                        ->where('updated_at', '<', $threshold);
+                });
+        })->with('group');
+    }
+
     public function getExpiredStats(): array
     {
         $threshold = now()->subDays(15);
