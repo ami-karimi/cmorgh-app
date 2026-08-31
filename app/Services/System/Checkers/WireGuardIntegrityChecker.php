@@ -683,41 +683,105 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
             return ['status' => false, 'message' => "سرور با ID {$serverId} یافت نشد."];
         }
 
+        $errors = [];
+        $deleted = false;
+
         try {
-            // ۱. حذف از سرور
-            $wgService = new WireguardService($server);
-            $peers = $wgService->getAllPeers();
-            foreach ($peers as $peer) {
-                if (($peer['comment'] ?? '') === $username) {
-                    $wgService->removeClient($peer['public-key'] ?? '');
-                    break;
+            // ۱. پیدا کردن رکورد WireGuardUsers (اگر وجود داشته باشد)
+            $wgUser = WireGuardUsers::where('profile_name', $username)->first();
+
+            // ۲. حذف Queue مرتبط با این کاربر (حتی اگر رکورد وجود نداشته باشد، ممکن است Queue در سرور باشد)
+            try {
+                $wgService = new WireguardService($server);
+
+                // ابتدا Queue را حذف کن (بر اساس نام)
+                $queues = $wgService->api->bs_mkt_rest_api_get("/queue/simple");
+                if ($queues['ok'] && !empty($queues['data'])) {
+                    foreach ($queues['data'] as $queue) {
+                        if (($queue['name'] ?? '') === $username) {
+                            $wgService->api->bs_mkt_rest_api_del("/queue/simple/{$queue['.id']}");
+                            Log::info("Queue اورفان {$username} از سرور {$server->name} حذف شد.");
+                            break;
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                $errors[] = "خطا در حذف Queue: " . $e->getMessage();
+                Log::warning("خطا در حذف Queue برای {$username}: " . $e->getMessage());
+            }
+
+            if ($wgUser && !empty($wgUser->public_key)) {
+                try {
+                    $wgService = new WireguardService($server);
+                    $result = $wgService->removeClient($wgUser->public_key);
+                    if ($result['status']) {
+                        Log::info("Peer {$username} از سرور {$server->name} حذف شد.");
+                    } else {
+                        $errors[] = "حذف Peer از سرور ناموفق: " . ($result['message'] ?? 'خطای ناشناخته');
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = "خطا در ارتباط با سرور برای حذف Peer: " . $e->getMessage();
+                    Log::error("خطا در حذف Peer {$username}: " . $e->getMessage());
+                }
+            } else {
+                try {
+                    $wgService = new WireguardService($server);
+                    $peers = $wgService->getAllPeers();
+                    foreach ($peers as $peer) {
+                        if (($peer['comment'] ?? '') === $username) {
+                            $publicKey = $peer['public-key'] ?? '';
+                            if ($publicKey) {
+                                $wgService->removeClient($publicKey);
+                                Log::info("Peer {$username} از سرور {$server->name} با comment حذف شد.");
+                            }
+                            break;
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = "خطا در حذف Peer با comment: " . $e->getMessage();
                 }
             }
 
-            // ۲. حذف از wireguard_users (اگر وجود داشته باشد)
-            WireGuardUsers::where('profile_name', $username)->delete();
+            if ($wgUser) {
+                $wgUser->delete();
+                Log::info("رکورد WireGuardUsers برای {$username} حذف شد.");
+                $deleted = true;
+            }
 
-            // ۳. حذف از accounts (اگر وجود داشته باشد و شرط داشته باشد)
-            // فقط در صورتی که اکانت منقضی شده باشد یا بدون سرویس باشد
+            // ۵. حذف از accounts (فقط اگر منقضی شده یا بدون سرویس باشد)
             $account = Accounts::where('username', $username)->where('service_group', 'wireguard')->first();
             if ($account) {
-                // اگر اکانت منقضی شده یا بدون سرویس باشد، حذف شود
                 $isExpired = $account->expire_date && Carbon::parse($account->expire_date)->isPast();
-                if ($isExpired || !WireGuardUsers::where('user_id', $account->id)->exists()) {
+                $hasOtherConfig = WireGuardUsers::where('user_id', $account->id)->exists();
+
+                if ($isExpired || !$hasOtherConfig) {
                     $account->delete();
+                    Log::info("اکانت {$username} حذف شد.");
+                    $deleted = true;
+                } else {
+                    Log::info("اکانت {$username} به دلیل داشتن کانفیگ دیگر حذف نشد.");
                 }
             }
 
-            Log::info("Orphan {$username} حذف شد.");
-            $this->closeOpenIssues($username, auth()->id());
+            // ۶. بستن Issues مرتبط (در صورت موفقیت یا حتی اگر خطاهای جزئی وجود داشته باشد)
+            if ($deleted || empty($errors)) {
+                $this->closeOpenIssues($username, auth()->id());
+            }
+
+            if (!empty($errors)) {
+                return [
+                    'status' => $deleted,
+                    'message' => "Orphan با خطاهایی حذف شد: " . implode(' | ', $errors)
+                ];
+            }
 
             return ['status' => true, 'message' => "Orphan با موفقیت حذف شد."];
+
         } catch (\Exception $e) {
             Log::error("خطا در حذف Orphan {$username}: " . $e->getMessage());
             return ['status' => false, 'message' => "خطا: " . $e->getMessage()];
         }
     }
-
     /**
      * حذف همه Orphan‌ها
      */
