@@ -16,10 +16,18 @@ class TelegramNotificationService
     {
         $config = config('nutgram');
 
-        $this->bot = new Nutgram(
-            $config['token'],
-            $config['config'] ?? []
-        );
+        $configuration = new Configuration();
+
+        // If api_url is set in config
+        if (!empty($config['config']['api_url'])) {
+            $configuration->setApiUrl($config['config']['api_url']);
+        }
+
+        // Other configurations can be set as needed:
+        // $configuration->setSafeMode($config['safe_mode'] ?? false);
+        // etc.
+
+        $this->bot = new Nutgram($config['token'], $configuration);
     }
 
     /**
