@@ -17,14 +17,19 @@ class TelegramNotificationService
     {
         $config = config('nutgram');
 
-        // ساخت شیء Configuration با تنظیمات (مانند api_url)
-        $configuration = new Configuration($config['config'] ?? []);
+        $apiUrl = $config['config']['api_url'] ?? null;
+
+        $configuration = new Configuration($apiUrl);
 
         // در صورت نیاز تنظیمات دیگر
-        // $configuration->setSafeMode($config['safe_mode'] ?? false);
+        if (isset($config['safe_mode'])) {
+            $configuration->setSafeMode($config['safe_mode']);
+        }
+        if (isset($config['log_channel'])) {
+            $configuration->setLogChannel($config['log_channel']);
+        }
 
         $this->bot = new Nutgram($config['token'], $configuration);
-
     }
 
     /**
