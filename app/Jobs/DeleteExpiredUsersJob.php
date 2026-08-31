@@ -10,6 +10,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use App\Services\VpnManagerService;
 
 class DeleteExpiredUsersJob implements ShouldQueue
 {
@@ -34,15 +35,17 @@ class DeleteExpiredUsersJob implements ShouldQueue
                 $account = Accounts::find($userId);
                 if (!$account) continue;
 
-                // در اینجا باید حذف از سرورهای خارجی انجام شود
-                // $this->deleteFromExternalServers($account);
+                $result = VpnManagerService::deleteAccount($account, true);
 
-                $account->delete();
-                $deleted++;
-
+                if (!$result['status']) {
+                    $failed++;
+                    Log::error("حذف اکانت {$account->username} ناموفق: " . $result['message']);
+                } else {
+                    $deleted++;
+                }
             } catch (\Exception $e) {
                 $failed++;
-                Log::error("Failed to delete user {$userId}: " . $e->getMessage());
+                Log::error("خطا در حذف کاربر {$userId}: " . $e->getMessage());
             }
         }
 
