@@ -103,7 +103,7 @@ class TelegramNotificationService
                     );
                 }
             } catch (\Exception $e) {
-                Log::warning("خطا در ارسال نوتیف فیش به ادمین {$admin->id}: " . $e->getMessage());
+                Log::warning("خطا در ارسال نوتیف فیش به ادمین {$admin->id}: ".public_path('storage/'.$attachmentPath) . $e->getMessage());
             }
         }
     }
