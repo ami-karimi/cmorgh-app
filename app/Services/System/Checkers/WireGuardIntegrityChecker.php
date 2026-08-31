@@ -1,78 +1,212 @@
 <?php
-// app/Services/System/Checkers/WireGuardIntegrityChecker.php
 
 namespace App\Services\System\Checkers;
 
 use App\Services\System\SystemHealthChecker;
 use App\Models\Accounts;
 use App\Models\WireGuardUsers;
-use Illuminate\Support\Facades\Storage;
+use App\Models\Nas;
+use App\Services\WireguardService;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class WireGuardIntegrityChecker extends SystemHealthChecker
 {
+    protected  $servers;
+
     public function __construct()
     {
         parent::__construct('wireguard');
+        $this->servers = Nas::where('is_enabled', 1)
+            ->supportsProtocol('wireguard')
+            ->get();
     }
 
     protected function performCheck(): array
     {
         $issues = [];
 
-        // کاربران دیتابیس که WireGuard هستند
-        $wgAccounts = Accounts::where('service_group', 'wireguard')
-            ->where('is_enabled', 1)
-            ->pluck('id')
-            ->toArray();
+        // ۱. دریافت لیست کاربران دیتابیس (همراه اطلاعات سرور)
+        $dbUsers = WireGuardUsers::with('server')
+            ->whereHas('server', function($q) {
+                $q->where('is_enabled', 1) ->supportsProtocol('wireguard');
+            })
+            ->get();
 
-        // تعداد کانفیگ‌های موجود در دیتابیس
-        $wgConfigs = WireGuardUsers::whereIn('user_id', $wgAccounts)->get();
+        // گروه‌بندی بر اساس server_id
+        $dbUsersByServer = $dbUsers->groupBy('server_id');
 
-        // بررسی فایل‌های موجود در سرور (مسیر فرضی)
-        $serverConfigs = $this->getServerConfigFiles();
+        foreach ($this->servers as $server) {
+            $serverId = $server['id'];
+            $serverName = $server['name'];
 
-        // برای هر کانفیگ دیتابیس، بررسی کن فایل وجود دارد؟
-        foreach ($wgConfigs as $config) {
-            $filename = $config->profile_name . '.conf';
-            if (!in_array($filename, $serverConfigs)) {
+            // دریافت Peerهای موجود در سرور
+            $remotePeers = $this->getRemotePeers($server);
+
+            // دریافت نام‌های profile_name از دیتابیس برای این سرور
+            $dbProfileNames = $dbUsersByServer->has($serverId)
+                ? $dbUsersByServer[$serverId]->pluck('profile_name')->toArray()
+                : [];
+
+            // پیدا کردن Orphan Peers (در سرور وجود دارند، در دیتابیس نیستند)
+            $orphanPeers = array_diff($remotePeers, $dbProfileNames);
+            foreach ($orphanPeers as $profileName) {
                 $issues[] = [
-                    'username' => $config->profile_name,
-                    'issue_type' => 'missing',
-                    'severity' => 'critical',
-                    'details' => "فایل کانفیگ WireGuard برای کاربر {$config->profile_name} در سرور یافت نشد.",
+                    'username' => $profileName,
+                    'server_id' => $serverId,
+                    'issue_type' => 'orphan',
+                    'severity' => 'warning',
+                    'details' => "Peer {$profileName} در سرور {$serverName} وجود دارد اما در دیتابیس یافت نشد.",
+                    'action' => 'delete_orphan'
                 ];
             }
-        }
 
-        // بررسی فایل‌های اضافی (orphan)
-        $dbFilenames = $wgConfigs->pluck('profile_name')->map(function ($name) {
-            return $name . '.conf';
-        })->toArray();
-
-        $orphanFiles = array_diff($serverConfigs, $dbFilenames);
-        foreach ($orphanFiles as $file) {
-            $username = str_replace('.conf', '', $file);
-            $issues[] = [
-                'username' => $username,
-                'issue_type' => 'orphan',
-                'severity' => 'warning',
-                'details' => "فایل کانفیگ WireGuard برای کاربر {$username} در سرور وجود دارد اما در دیتابیس یافت نشد.",
-            ];
+            // پیدا کردن Missing Peers (در دیتابیس هستند، در سرور نیستند)
+            $missingPeers = array_diff($dbProfileNames, $remotePeers);
+            foreach ($missingPeers as $profileName) {
+                $issues[] = [
+                    'username' => $profileName,
+                    'server_id' => $serverId,
+                    'issue_type' => 'missing',
+                    'severity' => 'critical',
+                    'details' => "کاربر {$profileName} در دیتابیس وجود دارد اما در سرور {$serverName} یافت نشد.",
+                    'action' => 'recreate_peer'
+                ];
+            }
         }
 
         return $issues;
     }
 
-    protected function getServerConfigFiles(): array
+    /**
+     * دریافت لیست profile_name های موجود در سرور
+     */
+    protected function getRemotePeers( $server): array
     {
-        // مسیر واقعی فایل‌های WireGuard
-        $path = '/etc/wireguard/';
-        if (!is_dir($path)) {
+        try {
+            $wgService = new WireguardService($server);
+            $peers = $wgService->getAllPeers();
+
+            $profileNames = [];
+            foreach ($peers as $peer) {
+                // در MikroTik، profile_name معمولاً در comment ذخیره می‌شود
+                if (isset($peer['comment']) && !empty($peer['comment'])) {
+                    $profileNames[] = $peer['comment'];
+                } elseif (isset($peer['name']) && !empty($peer['name'])) {
+                    $profileNames[] = $peer['name'];
+                }
+            }
+
+            return $profileNames;
+
+        } catch (\Exception $e) {
+            Log::error("خطا در دریافت Peerهای سرور {$server['name']}: " . $e->getMessage());
             return [];
         }
-        $files = scandir($path);
-        return array_filter($files, function ($file) {
-            return pathinfo($file, PATHINFO_EXTENSION) === 'conf';
-        });
+    }
+
+    /**
+     * حذف یک Peer Orphan از سرور با profile_name
+     */
+    public function deleteOrphanPeer(int $serverId, string $profileName): array
+    {
+        $server = Nas::find($serverId);
+        if (!$server) {
+            return ['status' => false, 'message' => "سرور با ID {$serverId} یافت نشد."];
+        }
+
+        try {
+            $wgService = new WireguardService($server);
+
+            // ابتدا public_key را با profile_name پیدا می‌کنیم
+            $peers = $wgService->getAllPeers();
+            $publicKey = null;
+            foreach ($peers as $peer) {
+                $comment = $peer['comment'] ?? '';
+                if ($comment === $profileName) {
+                    $publicKey = $peer['public-key'] ?? null;
+                    break;
+                }
+            }
+
+            if (!$publicKey) {
+                return ['status' => false, 'message' => "Peer با نام {$profileName} در سرور یافت نشد."];
+            }
+
+            // حذف با public_key
+            $result = $wgService->removeClient($publicKey);
+
+            if ($result['status']) {
+                Log::info("Peer Orphan {$profileName} از سرور {$server->name} حذف شد.");
+                return ['status' => true, 'message' => "Peer با موفقیت حذف شد."];
+            } else {
+                return ['status' => false, 'message' => "خطا در حذف Peer: " . ($result['message'] ?? 'نامشخص')];
+            }
+        } catch (\Exception $e) {
+            Log::error("خطا در حذف Peer Orphan {$profileName}: " . $e->getMessage());
+            return ['status' => false, 'message' => "خطا: " . $e->getMessage()];
+        }
+    }
+
+    /**
+     * حذف تمام Orphan Peers از یک سرور خاص
+     */
+    public function deleteAllOrphans(int $serverId): array
+    {
+        $server = Nas::find($serverId);
+        if (!$server) {
+            return ['status' => false, 'message' => "سرور با ID {$serverId} یافت نشد."];
+        }
+
+        $issues = $this->getOpenIssues()
+            ->where('server_id', $serverId)
+            ->where('issue_type', 'orphan')
+            ->where('status', 'open');
+
+        $deleted = 0;
+        $failed = 0;
+        $errors = [];
+
+        foreach ($issues as $issue) {
+            $result = $this->deleteOrphanPeer($serverId, $issue->username);
+            if ($result['status']) {
+                $deleted++;
+                $issue->update(['status' => 'resolved', 'resolved_at' => now()]);
+            } else {
+                $failed++;
+                $errors[] = $issue->username . ': ' . $result['message'];
+            }
+        }
+
+        return [
+            'status' => true,
+            'message' => "{$deleted} Peer حذف شد، {$failed} Peer با خطا مواجه شد.",
+            'errors' => $errors
+        ];
+    }
+
+    /**
+     * حذف تمام Orphan Peers از تمام سرورها
+     */
+    public function deleteAllOrphansAllServers(): array
+    {
+        $totalDeleted = 0;
+        $totalFailed = 0;
+        $allErrors = [];
+
+        foreach ($this->servers as $server) {
+            $result = $this->deleteAllOrphans($server['id']);
+            $totalDeleted += $result['deleted'] ?? 0;
+            $totalFailed += $result['failed'] ?? 0;
+            if (!empty($result['errors'])) {
+                $allErrors = array_merge($allErrors, $result['errors']);
+            }
+        }
+
+        return [
+            'status' => true,
+            'message' => "{$totalDeleted} Peer از تمام سرورها حذف شد، {$totalFailed} Peer با خطا مواجه شد.",
+            'errors' => $allErrors
+        ];
     }
 }

@@ -243,6 +243,21 @@ class WireguardService
         ];
     }
 
+
+    public function getAllPeers(): array
+    {
+        if (!$this->connect()) {
+            return [];
+        }
+
+        $response = $this->api->bs_mkt_rest_api_get("/interface/wireguard/peers");
+        if ($response['ok'] && !empty($response['data'])) {
+            return $response['data'];
+        }
+
+        return [];
+    }
+
     // ==========================================
     // متدهای کمکی (Private Helpers)
     // ==========================================

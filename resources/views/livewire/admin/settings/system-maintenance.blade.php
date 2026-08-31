@@ -45,16 +45,41 @@
     {{-- Health Sub Tab --}}
     @if($activeSubTab === 'health')
         <div class="space-y-4">
+            @if (session()->has('maintenance_message'))
+                <div class="p-4 mb-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-bold flex items-start gap-3">
+                    <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span>{{ session('maintenance_message') }}</span>
+                </div>
+            @endif
+
+            @if (session()->has('maintenance_error'))
+                <div class="p-4 mb-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm font-bold flex items-start gap-3">
+                    <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span>{{ session('maintenance_error') }}</span>
+                </div>
+            @endif
+
             <div class="flex items-center justify-between">
                 <div>
                     <h4 class="text-sm font-bold text-white">بررسی مغایرت سرویس‌ها</h4>
                     <p class="text-xs text-zinc-400">مقایسه دیتابیس با سرورهای MikroTik, WireGuard, OpenVPN, V2Ray</p>
                 </div>
-                <button wire:click="runHealthCheck" wire:loading.attr="disabled" class="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-orange-500/20 flex items-center gap-2">
+                <button wire:click="runHealthCheck" wire:loading.attr="disabled"
+                        class="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-orange-500/20 flex items-center gap-2">
                     <span wire:loading.remove wire:target="runHealthCheck">🚀 شروع بررسی کامل</span>
                     <span wire:loading wire:target="runHealthCheck">⏳ در حال بررسی...</span>
                 </button>
+
             </div>
+
+            @if($healthIssues->where('service', 'wireguard')->where('issue_type', 'orphan')->where('status', 'open')->count() > 0)
+                <button wire:click="deleteAllWireguardOrphans"
+                        wire:loading.attr="disabled"
+                        class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-rose-500/20 flex items-center gap-2">
+                    <span wire:loading.remove>🗑️ حذف تمام Orphan‌های WireGuard</span>
+                    <span wire:loading>⏳</span>
+                </button>
+            @endif
 
             @if(!empty($healthResults))
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -108,7 +133,22 @@
                                     </td>
                                     <td class="p-3 text-zinc-400 max-w-xs truncate">{{ $issue->details }}</td>
                                     <td class="p-3">
-                                        <button wire:click="ignoreIssue({{ $issue->id }})" class="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-white text-[10px] rounded-lg transition">نادیده گرفتن</button>
+                                        @if($issue->issue_type === 'orphan' && $issue->service === 'wireguard')
+                                            <button wire:click="deleteWireguardOrphan({{ $issue->id }})"
+                                                    class="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white text-[10px] rounded-lg transition">
+                                                حذف Orphan
+                                            </button>
+                                        @elseif($issue->issue_type === 'missing' && $issue->service === 'wireguard')
+                                            <button wire:click="recreateWireguardPeer({{ $issue->id }})"
+                                                    class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] rounded-lg transition">
+                                                بازسازی
+                                            </button>
+                                        @else
+                                            <button wire:click="ignoreIssue({{ $issue->id }})"
+                                                    class="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-white text-[10px] rounded-lg transition">
+                                                نادیده گرفتن
+                                            </button>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach

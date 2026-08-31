@@ -11,6 +11,7 @@ use App\Models\SystemMaintenanceLog;
 use App\Jobs\DeleteExpiredUsersJob;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Services\System\Checkers\WireGuardIntegrityChecker;
 
 class SystemMaintenance extends Component
 {
@@ -101,6 +102,53 @@ class SystemMaintenance extends Component
         $this->showBulkConfirmModal = true;
     }
 
+
+    public function deleteWireguardOrphan($issueId)
+    {
+        $issue = SystemHealthIssue::find($issueId);
+        if (!$issue || $issue->service !== 'wireguard' || $issue->issue_type !== 'orphan') {
+            session()->flash('maintenance_error', 'Issue معتبر نیست.');
+            return;
+        }
+
+        $checker = new \App\Services\System\Checkers\WireGuardIntegrityChecker();
+        $result = $checker->deleteOrphanPeer($issue->server_id, $issue->username);
+
+        if ($result['status']) {
+            $issue->update([
+                'status' => 'resolved',
+                'resolved_at' => now(),
+                'resolved_by' => Auth::id()
+            ]);
+            session()->flash('maintenance_message', 'Peer Orphan با موفقیت حذف شد.');
+        } else {
+            session()->flash('maintenance_error', 'خطا در حذف: ' . $result['message']);
+        }
+        $this->loadHealthIssues();
+    }
+
+    public function deleteAllWireguardOrphans()
+    {
+        $checker = new \App\Services\System\Checkers\WireGuardIntegrityChecker();
+        $result = $checker->deleteAllOrphansAllServers();
+
+        if ($result['status']) {
+            session()->flash('maintenance_message', $result['message']);
+            // بستن تمام issues مربوطه
+            SystemHealthIssue::where('service', 'wireguard')
+                ->where('issue_type', 'orphan')
+                ->where('status', 'open')
+                ->update([
+                    'status' => 'resolved',
+                    'resolved_at' => now(),
+                    'resolved_by' => Auth::id()
+                ]);
+        } else {
+            session()->flash('maintenance_error', 'خطا در حذف Orphan‌ها: ' . $result['message']);
+        }
+        $this->loadHealthIssues();
+    }
+
     // متد اجرای پاکسازی کلی (همه کاربران)
     public function bulkDeleteAll()
     {
@@ -148,18 +196,26 @@ class SystemMaintenance extends Component
     public function runHealthCheck()
     {
         $this->isRunningHealthCheck = true;
+
         try {
-            $facade = new SystemHealthFacade();
+            $facade = new \App\Services\System\SystemHealthFacade();
             $this->healthResults = $facade->runFullCheck();
+
+            // بارگذاری مجدد issues
             $this->loadHealthIssues();
-            session()->flash('maintenance_message', 'بررسی سلامت سیستم با موفقیت انجام شد.');
+
+            // پیام موفقیت با جزئیات
+            $totalIssues = collect($this->healthResults)->sum('issues_count');
+            session()->flash('maintenance_message', "بررسی سلامت سیستم با موفقیت انجام شد. تعداد کل مغایرت‌ها: {$totalIssues}");
+
         } catch (\Exception $e) {
             Log::error('Health check error: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
             session()->flash('maintenance_error', 'خطا در بررسی سلامت: ' . $e->getMessage());
         }
+
         $this->isRunningHealthCheck = false;
     }
-
     public function loadHealthIssues()
     {
         $facade = new SystemHealthFacade();
