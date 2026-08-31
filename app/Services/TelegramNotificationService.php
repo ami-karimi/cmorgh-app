@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Financial;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use SergiX44\Nutgram\Configuration;
 
 class TelegramNotificationService
 {
@@ -15,17 +16,14 @@ class TelegramNotificationService
     public function __construct()
     {
         $config = config('nutgram');
-
         $configuration = new Configuration();
 
-        // If api_url is set in config
         if (!empty($config['config']['api_url'])) {
             $configuration->setApiUrl($config['config']['api_url']);
         }
 
-        // Other configurations can be set as needed:
+        // You can also set other options if needed:
         // $configuration->setSafeMode($config['safe_mode'] ?? false);
-        // etc.
 
         $this->bot = new Nutgram($config['token'], $configuration);
     }
