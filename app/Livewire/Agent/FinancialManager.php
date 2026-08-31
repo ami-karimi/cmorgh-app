@@ -12,6 +12,8 @@ use App\Models\User;
 use App\Models\AgentBankAccount;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\TelegramNotificationService;
+
 
 #[Title('مدیریت مالی | پنل نمایندگی')]
 #[Layout('layouts.agent')]
@@ -108,7 +110,7 @@ class FinancialManager extends Component
         $agent = Auth::user();
         $path = $this->myReceipt->store('attachments/payments', 'public');
 
-        Financial::create([
+        $receipt =  Financial::create([
             'creator' => $agent->id,
             'for' => $agent->id,
             'type' => 'plus',
@@ -117,6 +119,13 @@ class FinancialManager extends Component
             'attachment' => $path,
             'approved' => 0,
         ]);
+
+        try {
+            $notificationService = new TelegramNotificationService();
+            $notificationService->notifyNewReceipt($receipt);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('خطا در ارسال نوتیف تلگرام: ' . $e->getMessage());
+        }
 
         $this->reset(['myAmount', 'myReceipt', 'myDescription']);
         $this->dispatch('toast', [
