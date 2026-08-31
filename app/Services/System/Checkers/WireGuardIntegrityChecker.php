@@ -160,6 +160,7 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
         $dbAccounts = Accounts::where('service_group', 'wireguard')->get();
         foreach ($dbAccounts as $account) {
             $allUsers->put($account->username, [
+                'user_id' => $account->id,
                 'username' => $account->username,
                 'has_account' => true,
                 'account_data' => $account,
@@ -177,7 +178,7 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
         // =============================================
         $wgUsers = WireGuardUsers::with('server')->get();
         foreach ($wgUsers as $wg) {
-            $username = $wg->profile_name;
+            $username = ($wg->account ? $wg->account->username : $wg->profile_name);
             $publicKey = $wg->public_key;
             if ($allUsers->has($username)) {
                 $user = $allUsers->get($username);
@@ -216,7 +217,7 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
 
                 // ابتدا با public_key جستجو کن (در wireguard_users)
                 foreach ($allUsers as $username => $user) {
-                    if (isset($user['public_key']) && $user['public_key'] === $publicKey) {
+                    if (isset($user['peer_key']) && $user['peer_key'] === $publicKey) {
                         $foundUser = $user;
                         $foundUsername = $username;
                         break;
@@ -232,7 +233,6 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
                 }
 
                 if ($foundUser) {
-                    // به‌روزرسانی اطلاعات کاربر
                     $foundUser['has_peer'] = true;
                     $foundUser['peer_data'] = [
                         'server_id' => $server->id,
