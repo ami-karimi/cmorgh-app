@@ -156,39 +156,65 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {{-- Chart: Performance Overview --}}
-        <div class="lg:col-span-2 bg-[#111722] border border-[#202938] rounded-2xl p-6 shadow-sm flex flex-col h-full">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-base font-bold text-[#F8FAFC]">عملکرد فروش</h3>
+        {{-- Chart: Performance Overview --}}
+        <div class="lg:col-span-2 bg-[#111722] border border-[#202938] rounded-2xl p-6 shadow-sm flex flex-col h-full relative overflow-hidden">
+            <!-- یک هاله نور بسیار ملایم پس‌زمینه -->
+            <div class="absolute top-0 right-1/2 w-64 h-64 bg-[#6366F1]/5 rounded-full blur-[80px] pointer-events-none"></div>
+
+            <div class="flex items-center justify-between mb-6 relative z-10">
+                <h3 class="text-base font-bold text-[#F8FAFC]">مقایسه عملکرد فروش</h3>
                 <div class="flex items-center gap-2">
-                    <span class="px-3 py-1.5 rounded-lg bg-[#6366F1]/10 text-[#6366F1] text-[11px] font-bold">۷ روز گذشته</span>
+                    <span class="px-3 py-1.5 rounded-lg bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/20 text-[11px] font-bold">۳۰ روز اخیر</span>
                 </div>
             </div>
-            <div class="flex-1 w-full h-[220px] relative"
+            <div class="flex-1 w-full h-[240px] relative z-10"
                  x-data="{
                     initChart() {
                         const ctx = this.$refs.canvas.getContext('2d');
+
+                        // گرادیانت خط این ماه (رنگ نیلی اصلی)
+                        const gradientCurrent = ctx.createLinearGradient(0, 0, 0, 300);
+                        gradientCurrent.addColorStop(0, 'rgba(99, 102, 241, 0.3)');
+                        gradientCurrent.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+                        // گرادیانت خط ماه قبل (رنگ خاکستری ملایم)
+                        const gradientPrevious = ctx.createLinearGradient(0, 0, 0, 300);
+                        gradientPrevious.addColorStop(0, 'rgba(148, 163, 184, 0.1)');
+                        gradientPrevious.addColorStop(1, 'rgba(148, 163, 184, 0)');
+
                         new Chart(ctx, {
-                            type: 'bar',
+                            type: 'line',
                             data: {
                                 labels: @js($chartLabels),
                                 datasets: [
                                     {
-                                        label: 'مبلغ خرید (تومان)',
-                                        data: @js($chartSpentAmount),
-                                        backgroundColor: '#6366F1',
-                                        borderRadius: 4,
-                                        yAxisID: 'y'
-                                    },
-                                    {
-                                        label: 'تعداد اکانت صادر شده',
-                                        data: @js($chartAccountsCount),
-                                        type: 'line',
-                                        borderColor: '#10B981',
-                                        backgroundColor: '#10B981',
+                                        label: '۳۰ روز اخیر',
+                                        data: @js($currentMonthSales),
+                                        borderColor: '#6366F1',
+                                        backgroundColor: gradientCurrent,
                                         borderWidth: 2,
                                         pointBackgroundColor: '#111722',
+                                        pointBorderColor: '#6366F1',
                                         pointBorderWidth: 2,
-                                        yAxisID: 'y1'
+                                        pointRadius: 0, // مخفی بودن نقاط در حالت عادی برای تمیزی بیشتر
+                                        pointHoverRadius: 5,
+                                        fill: true,
+                                        tension: 0.4 // انحنای زیبای لاین
+                                    },
+                                    {
+                                        label: '۳۰ روز قبل‌تر',
+                                        data: @js($previousMonthSales),
+                                        borderColor: '#475569',
+                                        backgroundColor: gradientPrevious,
+                                        borderWidth: 2,
+                                        borderDash: [5, 5], // خط‌چین بودن ماه قبل برای تمایز
+                                        pointBackgroundColor: '#111722',
+                                        pointBorderColor: '#475569',
+                                        pointBorderWidth: 2,
+                                        pointRadius: 0,
+                                        pointHoverRadius: 4,
+                                        fill: true,
+                                        tension: 0.4
                                     }
                                 ]
                             },
@@ -201,31 +227,58 @@
                                 },
                                 plugins: {
                                     legend: {
-                                        labels: { color: '#94A3B8', font: { family: 'Vazirmatn' } }
+                                        position: 'top',
+                                        align: 'end',
+                                        labels: {
+                                            color: '#94A3B8',
+                                            font: { family: 'Vazirmatn', size: 11 },
+                                            usePointStyle: true,
+                                            boxWidth: 8
+                                        }
                                     },
                                     tooltip: {
+                                        backgroundColor: '#171E2B',
+                                        titleColor: '#F8FAFC',
+                                        bodyColor: '#94A3B8',
+                                        borderColor: '#202938',
+                                        borderWidth: 1,
                                         titleFont: { family: 'Vazirmatn' },
-                                        bodyFont: { family: 'Vazirmatn' }
+                                        bodyFont: { family: 'Vazirmatn' },
+                                        padding: 12,
+                                        boxPadding: 6,
+                                        callbacks: {
+                                            label: function(context) {
+                                                let label = context.dataset.label || '';
+                                                if (label) { label += ': '; }
+                                                if (context.parsed.y !== null) {
+                                                    // فرمت کردن عدد به شکل سه‌رقم سه‌رقم
+                                                    label += new Intl.NumberFormat('fa-IR').format(context.parsed.y) + ' تومان';
+                                                }
+                                                return label;
+                                            }
+                                        }
                                     }
                                 },
                                 scales: {
                                     x: {
-                                        grid: { color: '#202938', drawBorder: false },
-                                        ticks: { color: '#94A3B8', font: { family: 'Vazirmatn' } }
+                                        grid: { color: 'rgba(32, 41, 56, 0.4)', drawBorder: false },
+                                        ticks: {
+                                            color: '#64748B',
+                                            font: { family: 'Vazirmatn', size: 10 },
+                                            maxTicksLimit: 8 // جلوگیری از شلوغی محور X
+                                        }
                                     },
                                     y: {
-                                        type: 'linear',
-                                        display: true,
-                                        position: 'left',
-                                        grid: { color: '#202938', drawBorder: false },
-                                        ticks: { color: '#94A3B8', font: { family: 'JetBrains Mono' } }
-                                    },
-                                    y1: {
-                                        type: 'linear',
-                                        display: true,
-                                        position: 'right',
-                                        grid: { drawOnChartArea: false },
-                                        ticks: { color: '#10B981', font: { family: 'JetBrains Mono' }, stepSize: 1 }
+                                        beginAtZero: true,
+                                        grid: { color: 'rgba(32, 41, 56, 0.4)', drawBorder: false },
+                                        ticks: {
+                                            color: '#64748B',
+                                            font: { family: 'JetBrains Mono', size: 10 },
+                                            callback: function(value) {
+                                                if(value === 0) return '0';
+                                                return (value / 1000) + 'k'; // نمایش خواناتر (مثلاً 50k به جای 50000)
+                                            }
+                                        }
                                     }
                                 }
                             }

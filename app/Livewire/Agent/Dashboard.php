@@ -78,26 +78,31 @@ class Dashboard extends Component
 
         $services = ServiceStatus::all();
 
-        // --- بخش تولید داده‌های نمودار برای ۷ روز گذشته ---
+// --- بخش تولید داده‌های نمودار برای مقایسه ۳۰ روز اخیر و ۳۰ روز قبل ---
         $chartLabels = [];
-        $chartAccountsCount = [];
-        $chartSpentAmount = [];
+        $currentMonthSales = [];
+        $previousMonthSales = [];
 
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::today()->subDays($i);
-            // ثبت تاریخ شمسی (ماه و روز)
-            $chartLabels[] = \Morilog\Jalali\Jalalian::fromCarbon($date)->format('m/d');
+        // دریافت آمار ۳۰ روز (از ۲۹ روز پیش تا امروز)
+        for ($i = 29; $i >= 0; $i--) {
+            $currentDate = Carbon::today()->subDays($i);
+            $previousDate = Carbon::today()->subDays($i + 30); // دقیقاً ۳۰ روز قبل‌تر از روز متناظر
 
-            // تعداد اکانت‌های صادر شده در آن روز
-            $chartAccountsCount[] = Accounts::where('creator', $userId)
-                ->whereDate('created_at', $date)
-                ->count();
+            // برچسب محور X (مثلاً 06/15)
+            $chartLabels[] = \Morilog\Jalali\Jalalian::fromCarbon($currentDate)->format('m/d');
 
-            // مبلغ خرید شده در آن روز
-            $chartSpentAmount[] = Financial::where('for', $userId)
+            // مبلغ خرید شده در بازه فعلی (۳۰ روز اخیر)
+            $currentMonthSales[] = Financial::where('for', $userId)
                 ->where('type', 'minus')
                 ->where('approved', 1)
-                ->whereDate('created_at', $date)
+                ->whereDate('created_at', $currentDate)
+                ->sum('price');
+
+            // مبلغ خرید شده در بازه قبلی (۳۰ روز قبل‌تر)
+            $previousMonthSales[] = Financial::where('for', $userId)
+                ->where('type', 'minus')
+                ->where('approved', 1)
+                ->whereDate('created_at', $previousDate)
                 ->sum('price');
         }
 
@@ -112,9 +117,10 @@ class Dashboard extends Component
             'discountPercent' => $discountPercent,
             'announcements' => $announcements,
             'services' => $services,
+            // ارسال متغیرهای جدید به ویو
             'chartLabels' => $chartLabels,
-            'chartAccountsCount' => $chartAccountsCount,
-            'chartSpentAmount' => $chartSpentAmount,
+            'currentMonthSales' => $currentMonthSales,
+            'previousMonthSales' => $previousMonthSales,
         ]);
     }
 }
