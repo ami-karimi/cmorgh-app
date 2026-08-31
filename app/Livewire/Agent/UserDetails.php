@@ -18,48 +18,61 @@ class UserDetails extends Component
     use WithPagination;
 
     public User $customer;
-    public $creatorName; // برای ذخیره نام ایجاد کننده
+    public $creatorName;
 
-    // متغیرهای ویرایش پروفایل کاربر
+    // متغیرهای ویرایش پروفایل
     public $isEditModalOpen = false;
-    public $editName, $editPhone,$editEmail, $editPassword,$editRole;
+    public $editName, $editPhone, $editEmail, $editPassword, $editRole;
 
     // متغیرهای بخش مالی
-    public $newPrice, $newDescription,$newType = 'plus';
+    public $newPrice, $newDescription, $newType = 'plus';
     public $isTrxModalOpen = false;
+
+    // فیلترهای تراکنش
+    public $transactionFilter = 'all';
+    public $transactionSearch = '';
 
     public function mount($id)
     {
         $currentAgentId = Auth::id();
 
-        // پیدا کردن ID تمام زیرنمایندگان این شخص
-        $subAgentIds = User::where('creator', $currentAgentId)->pluck('id')->toArray();$allowedCreators = array_merge([$currentAgentId],$subAgentIds);
+        $subAgentIds = User::where('creator', $currentAgentId)->pluck('id')->toArray();
+        $allowedCreators = array_merge([$currentAgentId], $subAgentIds);
 
-        // دریافت کاربر با شرط امنیت دسترسی
-        $this->customer = User::with('vpnAccounts')
+        $this->customer = User::with('vpnAccounts.group')
             ->whereIn('creator', $allowedCreators)
             ->findOrFail($id);
 
-        // تشخیص نام ایجاد کننده (آیا خود نماینده ساخته یا زیرمجموعه‌اش؟)
-        if ($this->customer->creator == $currentAgentId) {$this->creatorName = 'شما (پروفایل شخصی نماینده)';
+        if ($this->customer->creator == $currentAgentId) {
+            $this->creatorName = 'شما (پروفایل شخصی نماینده)';
         } else {
-            $creatorUser = User::find($this->customer->creator);$this->creatorName = $creatorUser ? $creatorUser->name . ' (زیرنماینده)' : 'نامشخص';
+            $creatorUser = User::find($this->customer->creator);
+            $this->creatorName = $creatorUser ? $creatorUser->name . ' (زیرنماینده)' : 'نامشخص';
         }
     }
 
-    // باز کردن مودال ویرایش مشخصات
-    public function openEditModal()
+    public function updatedTransactionFilter()
     {
-        $this->editName =$this->customer->name;
-        $this->editPhone =$this->customer->phone;
-        $this->editEmail =$this->customer->email;
-        $this->editRole =$this->customer->role;
-        $this->editPassword = ''; // رمز عبور فقط در صورت وارد شدن تغییر می‌کند
-
-        $this->resetValidation();$this->isEditModalOpen = true;
+        $this->resetPage();
     }
 
-    // ذخیره تغییرات مشخصات کاربر
+    public function updatedTransactionSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function openEditModal()
+    {
+        $this->editName = $this->customer->name;
+        $this->editPhone = $this->customer->phone;
+        $this->editEmail = $this->customer->email;
+        $this->editRole = $this->customer->role;
+        $this->editPassword = '';
+
+        $this->resetValidation();
+        $this->isEditModalOpen = true;
+    }
+
     public function updateProfile()
     {
         $this->validate([
@@ -70,35 +83,34 @@ class UserDetails extends Component
             'editPassword' => 'nullable|min:6',
         ]);
 
-        $this->customer->name =$this->editName;
-        $this->customer->phone =$this->editPhone;
-        $this->customer->email =$this->editEmail;
-        $this->customer->role =$this->editRole;
+        $this->customer->name = $this->editName;
+        $this->customer->phone = $this->editPhone;
+        $this->customer->email = $this->editEmail;
+        $this->customer->role = $this->editRole;
 
         if (!empty($this->editPassword)) {
             $this->customer->password = Hash::make($this->editPassword);
         }
 
-        $this->customer->save();$this->isEditModalOpen = false;
+        $this->customer->save();
+        $this->isEditModalOpen = false;
         session()->flash('profile_msg', 'مشخصات کاربر با موفقیت بروزرسانی شد.');
     }
 
-    // تغییر وضعیت کاربر (فعال/مسدود)
     public function toggleUserStatus()
     {
-        $this->customer->is_active =$this->customer->is_active == 1 ? 0 : 1;
+        $this->customer->is_active = $this->customer->is_active == 1 ? 0 : 1;
         $this->customer->save();
         session()->flash('profile_msg', 'وضعیت دسترسی کاربر تغییر کرد.');
     }
 
-    // باز کردن مودال تراکنش
     public function openTrxModal()
     {
         $this->reset(['newPrice', 'newDescription', 'newType']);
-        $this->resetValidation();$this->isTrxModalOpen = true;
+        $this->resetValidation();
+        $this->isTrxModalOpen = true;
     }
 
-    // ثبت تراکنش
     public function addTransaction()
     {
         $this->validate([
@@ -106,6 +118,15 @@ class UserDetails extends Component
             'newType' => 'required|in:plus,minus',
             'newDescription' => 'required|string|max:255',
         ]);
+
+        // بررسی کسر بیش از موجودی
+        if ($this->newType === 'minus') {
+            $balance = $this->getBalance();
+            if ($this->newPrice > $balance) {
+                $this->addError('newPrice', 'مبلغ برداشت بیشتر از موجودی فعلی است.');
+                return;
+            }
+        }
 
         Financial::create([
             'creator' => Auth::id(),
@@ -120,11 +141,38 @@ class UserDetails extends Component
         session()->flash('trx_msg', 'تراکنش مالی با موفقیت ثبت شد.');
     }
 
+    private function getBalance()
+    {
+        $plus = Financial::where('for', $this->customer->id)
+            ->whereIn('type', ['plus', 'plus_amn'])
+            ->where('approved', 1)
+            ->sum('price');
+        $minus = Financial::where('for', $this->customer->id)
+            ->whereIn('type', ['minus', 'minus_amn'])
+            ->where('approved', 1)
+            ->sum('price');
+        return $plus - $minus;
+    }
+
     public function render()
     {
-        $plus = Financial::where('for', $this->customer->id)->whereIn('type', ['plus', 'plus_amn'])->where('approved', 1)->sum('price');$minus = Financial::where('for', $this->customer->id)->whereIn('type', ['minus', 'minus_amn'])->where('approved', 1)->sum('price');$balance = $plus -$minus;
+        $query = Financial::where('for', $this->customer->id);
 
-        $transactions = Financial::where('for',$this->customer->id)->latest()->paginate(5);
+        // فیلتر نوع
+        if ($this->transactionFilter === 'plus') {
+            $query->whereIn('type', ['plus', 'plus_amn']);
+        } elseif ($this->transactionFilter === 'minus') {
+            $query->whereIn('type', ['minus', 'minus_amn']);
+        }
+
+        // جستجو در شرح
+        if (!empty($this->transactionSearch)) {
+            $query->where('description', 'like', '%' . $this->transactionSearch . '%');
+        }
+
+        $transactions = $query->latest()->paginate(10);
+
+        $balance = $this->getBalance();
 
         return view('livewire.agent.user-details', [
             'balance' => $balance,

@@ -19,13 +19,56 @@ class CustomerManager extends Component
     public $search = '';
     public $perPage = 10;
 
+    // فیلترهای جدید
+    public $statusFilter = 'all';
+    public $serviceFilter = 'all';
+    public $sortBy = 'newest';
+
     // متغیرهای فرم ثبت/ویرایش مشتری
     public $isModalOpen = false;
     public $customerId = null;
     public $name, $phone, $email, $password;
     public $is_active = true;
+    public $confirmDeleteId = null;
+    public $showDeleteModal = false;
+
+    public function confirmDelete($id)
+    {
+        $this->confirmDeleteId = $id;
+        $this->showDeleteModal = true;
+    }
+
+    public function deleteCustomer()
+    {
+        $customer = User::where('creator', Auth::id())
+            ->where('role', 'customer')
+            ->findOrFail($this->confirmDeleteId);
+
+        // بررسی اینکه مشتری سرویس فعال نداشته باشد (اختیاری)
+        if ($customer->vpnAccounts()->where('is_enabled', 1)->count() > 0) {
+            session()->flash('error', 'این مشتری دارای سرویس فعال است و قابل حذف نمی‌باشد.');
+            $this->showDeleteModal = false;
+            return;
+        }
+
+        $customer->delete();
+        $this->showDeleteModal = false;
+        session()->flash('message', 'مشتری با موفقیت حذف شد.');
+    }
 
     public function updatedSearch() { $this->resetPage(); }
+    public function updatedStatusFilter() { $this->resetPage(); }
+    public function updatedServiceFilter() { $this->resetPage(); }
+    public function updatedSortBy() { $this->resetPage(); }
+
+    public function resetFilters()
+    {
+        $this->search = '';
+        $this->statusFilter = 'all';
+        $this->serviceFilter = 'all';
+        $this->sortBy = 'newest';
+        $this->resetPage();
+    }
 
     public function openModal()
     {
@@ -38,7 +81,6 @@ class CustomerManager extends Component
     public function edit($id)
     {
         $this->resetValidation();
-        // نماینده فقط می‌تواند مشتریان خودش را ویرایش کند
         $customer = User::where('creator', Auth::id())
             ->where('role', 'customer')
             ->findOrFail($id);
@@ -82,7 +124,7 @@ class CustomerManager extends Component
         }
 
         if (!$this->customerId) {
-            $data['creator'] = Auth::id(); // ثبت به نام نماینده لاگین شده
+            $data['creator'] = Auth::id();
         }
 
         User::updateOrCreate(['id' => $this->customerId], $data);
@@ -104,18 +146,55 @@ class CustomerManager extends Component
 
     public function render()
     {
-        // فیلتر مشتریان بر اساس نماینده لاگین شده و عبارت جستجو
         $query = User::with('vpnAccounts')
             ->where('creator', Auth::id())
-            ->where('role', 'customer')
-            ->latest('id');
+            ->where('role', 'customer');
 
+        // جستجو
         if ($this->search) {
             $query->where(function($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
                     ->orWhere('phone', 'like', '%' . $this->search . '%')
                     ->orWhere('email', 'like', '%' . $this->search . '%');
             });
+        }
+
+        // فیلتر وضعیت
+        if ($this->statusFilter === 'active') {
+            $query->where('is_active', 1);
+        } elseif ($this->statusFilter === 'blocked') {
+            $query->where('is_active', 0);
+        }
+
+        // فیلتر سرویس (با Subquery)
+        if ($this->serviceFilter === 'has') {
+            $query->whereHas('vpnAccounts', function($q) {
+                $q->where('is_enabled', 1);
+            });
+        } elseif ($this->serviceFilter === 'none') {
+            $query->whereDoesntHave('vpnAccounts');
+        }
+
+        // مرتب‌سازی
+        switch ($this->sortBy) {
+            case 'newest':
+                $query->latest('id');
+                break;
+            case 'oldest':
+                $query->oldest('id');
+                break;
+            case 'name':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'most_services':
+                $query->withCount('vpnAccounts')->orderBy('vpn_accounts_count', 'desc');
+                break;
+            case 'least_services':
+                $query->withCount('vpnAccounts')->orderBy('vpn_accounts_count', 'asc');
+                break;
+            default:
+                $query->latest('id');
+                break;
         }
 
         $customers = $query->paginate($this->perPage);
