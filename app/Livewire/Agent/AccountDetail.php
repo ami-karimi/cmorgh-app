@@ -263,7 +263,39 @@ class AccountDetail extends Component
             ? \App\Models\UserActivity::with('causer')->where('user_id', $this->account->id)->latest('id')->take(15)->get()
             : collect();
 
+        $isOnline = $this->account->is_online ?? false;
+
+        $isExpired = $this->account->expire_date && \Carbon\Carbon::parse($this->account->expire_date)->isPast();
+        $isFirstLogin = is_null($this->account->expire_date);
+
+        // متغیرهای حجم
+        $maxUsage = $this->account->max_usage ?? 0;
+        $usage = $this->account->usage ?? 0;
+
+        // تابع تبدیل بایت
+        $formatBytes = function($bytes) {
+            if ($bytes == 0) return '0 B';
+            $k = 1024;
+            $sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            $i = floor(log($bytes) / log($k));
+            return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
+        };
+
+        $maxUsageStr = ($maxUsage == 0) ? 'نامحدود' : $formatBytes($maxUsage);
+        $usageStr = $formatBytes($usage);
+        $remainingBytes = ($maxUsage == 0) ? 0 : max(0, $maxUsage - $usage);
+        $remainingStr = ($maxUsage == 0) ? 'نامحدود' : $formatBytes($remainingBytes);
+        $usagePercent = ($maxUsage > 0) ? min(100, round(($usage / $maxUsage) * 100)) : 0;
+
         $data = [
+            'isOnline' => $isOnline,
+            'isExpired' => $isExpired,
+            'isFirstLogin' => $isFirstLogin,
+            'maxUsageStr' => $maxUsageStr,
+            'maxUsage' => $maxUsage,
+            'usageStr' => $usageStr,
+            'remainingStr' => $remainingStr,
+            'usagePercent' => $usagePercent,
             'customer'            => $customer,
             'searchedCustomers'   => $searchedCustomers,
             'account'             => $this->account,
@@ -298,9 +330,20 @@ class AccountDetail extends Component
             $data['wgConfigs'] = WireGuardUsers::where('user_id', $this->account->id)->get();
             $data['allWgServers'] = Nas::where('is_enabled', 1)->supportsProtocol('wireguard')->get();
         } else {
-            $data['activeSessions'] = Radacct::where('username', $this->account->username)->whereNull('acctstoptime')->get();
-            $data['sessionHistory'] = Radacct::where('username', $this->account->username)->whereNotNull('acctstoptime')->latest('acctstarttime')->take(20)->get();
-            $data['todayConnections'] = Radacct::where('username', $this->account->username)->whereDate('acctstarttime', Carbon::today())->count();
+            $data['activeSessions'] = Radacct::where('username', $this->account->username)
+                ->whereNull('acctstoptime')
+                ->get();
+
+            $data['sessionHistory'] = Radacct::where('username', $this->account->username)
+                ->whereNotNull('acctstoptime')
+                ->latest('acctstarttime')
+                ->take(20)
+                ->get();
+
+            $data['todayConnections'] = Radacct::where('username', $this->account->username)
+                ->whereDate('acctstarttime', Carbon::today())
+                ->count();
+
             $data['totalConnections'] = Radacct::where('username', $this->account->username)->count();
 
             $lastSession = Radacct::where('username', $this->account->username)->latest('acctstarttime')->first();
