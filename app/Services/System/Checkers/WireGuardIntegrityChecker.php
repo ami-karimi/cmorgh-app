@@ -216,7 +216,7 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
 
                 // ابتدا با public_key جستجو کن (در wireguard_users)
                 foreach ($allUsers as $username => $user) {
-                    if (isset($user['peer_key']) && $user['peer_key'] === $publicKey) {
+                    if (isset($user['public_key']) && $user['public_key'] === $publicKey) {
                         $foundUser = $user;
                         $foundUsername = $username;
                         break;
