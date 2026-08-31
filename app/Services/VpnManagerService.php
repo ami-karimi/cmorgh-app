@@ -523,9 +523,18 @@ class VpnManagerService
      * @param bool $deleteUserAlso آیا کاربر مرتبط نیز حذف شود؟ (پیش‌فرض true)
      * @return array ['status' => bool, 'message' => string]
      */
+    /**
+     * حذف کامل یک اکانت به همراه کاربران متصل (مشتریان) در صورت عدم وجود اکانت دیگر
+     *
+     * @param Accounts $account
+     * @param bool $deleteUserAlso آیا کاربران متصل نیز حذف شوند؟ (پیش‌فرض true)
+     * @return array ['status' => bool, 'message' => string]
+     */
     public static function deleteAccount(Accounts $account, bool $deleteUserAlso = true): array
     {
-
+        // ------------------------------------------------
+        // مرحله ۱: بررسی و حذف از سرورهای خارجی (فقط WireGuard)
+        // ------------------------------------------------
         $serverErrors = [];
 
         if ($account->service_group === 'wireguard') {
@@ -564,40 +573,58 @@ class VpnManagerService
         }
 
 
-        $user = User::find($account->creator);
-        $accountName = $account->username;
+        $userIds = DB::table('user_accounts')
+            ->where('account_id', $account->id)
+            ->pluck('user_id')
+            ->toArray();
+
+        $users = User::whereIn('id', $userIds)->get();
+
 
         try {
-            DB::transaction(function () use ($account, $user, $deleteUserAlso) {
+            DB::transaction(function () use ($account, $users, $deleteUserAlso) {
                 WireGuardUsers::where('user_id', $account->id)->delete();
+
+                // ۳-۲. حذف خود اکانت
                 $account->delete();
 
-                if ($deleteUserAlso && $user) {
-                    $otherAccounts = Accounts::where('creator', $user->id)->count();
-                    if ($otherAccounts > 0) {
-                        Log::warning("کاربر {$user->name} دارای {$otherAccounts} اکانت دیگر است و حذف نشد.");
-                        throw new \Exception("کاربر {$user->name} دارای اکانت‌های دیگر است و نمی‌توان حذف کرد.");
+                // ۳-۳. حذف رکوردهای user_accounts (بعد از حذف اکانت)
+                DB::table('user_accounts')->where('account_id', $account->id)->delete();
+
+                // ۳-۴. حذف کاربران (اگر درخواست شده باشد)
+                if ($deleteUserAlso) {
+                    foreach ($users as $user) {
+                        // بررسی کنید که کاربر اکانت دیگری نداشته باشد
+                        $otherAccounts = DB::table('user_accounts')
+                            ->where('user_id', $user->id)
+                            ->count();
+
+                        if ($otherAccounts > 0) {
+                            Log::warning("کاربر {$user->name} (ID: {$user->id}) دارای {$otherAccounts} اکانت دیگر است و حذف نشد.");
+                            continue;
+                        }
+
+                        // حذف کاربر
+                        $user->delete();
+                        Log::info("کاربر {$user->name} (ID: {$user->id}) به دلیل عدم وجود اکانت دیگر حذف شد.");
                     }
-
-
-                    $user->delete();
                 }
             });
 
         } catch (\Exception $e) {
-            Log::error("خطا در حذف دیتابیس برای اکانت {$accountName}: " . $e->getMessage());
+            Log::error("خطا در حذف دیتابیس برای اکانت {$account->username}: " . $e->getMessage());
             return ['status' => false, 'message' => 'خطا در حذف دیتابیس: ' . $e->getMessage()];
         }
 
-        // ------------------------------------------------
-        // مرحله ۳: ثبت لاگ موفقیت
-        // ------------------------------------------------
-        $operatorName = auth()->check() ? (auth()->user()->name ?? auth()->user()->username) : 'سیستم';
 
-        if ($deleteUserAlso && $user) {
-            $logMsg = "کاربر {$user->name} به همراه اکانت {$accountName} حذف شد.";
-        } else {
-            $logMsg = "اکانت {$accountName} حذف شد (کاربر مرتبط حذف نشد).";
+        $operatorName = auth()->check() ? (auth()->user()->name ?? auth()->user()->username) : 'سیستم';
+        $logMsg = "اکانت {$account->username} حذف شد.";
+
+        if ($deleteUserAlso) {
+            $deletedUserNames = $users->pluck('name')->implode('، ');
+            if (!empty($deletedUserNames)) {
+                $logMsg .= " کاربران متصل ({$deletedUserNames}) نیز در صورت نداشتن اکانت دیگر حذف شدند.";
+            }
         }
 
         ActivityLogger::log($account->id, $logMsg . " توسط {$operatorName}", 1, 1);
