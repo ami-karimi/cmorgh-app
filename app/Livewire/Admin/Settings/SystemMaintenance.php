@@ -79,6 +79,13 @@ class SystemMaintenance extends Component
         $this->isCleaningLogs = false;
     }
 
+    public function loadExpiredUsers()
+    {
+        $this->resetPage(); // ریست صفحه‌بندی
+        $this->loadStats(); // به‌روزرسانی آمار
+        // داده‌ها از طریق render() دریافت می‌شوند
+    }
+
     // متد برای باز کردن مودال تأیید پاکسازی کلی
     public function openBulkDeleteConfirm()
     {
