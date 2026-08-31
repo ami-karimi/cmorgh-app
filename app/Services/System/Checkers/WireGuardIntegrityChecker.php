@@ -168,6 +168,7 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
                 'has_peer' => false,
                 'peer_data' => null,
                 'servers' => [],
+                'peer_key' => null,
             ]);
         }
 
@@ -177,10 +178,12 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
         $wgUsers = WireGuardUsers::with('server')->get();
         foreach ($wgUsers as $wg) {
             $username = $wg->profile_name;
+            $publicKey = $wg->public_key;
             if ($allUsers->has($username)) {
                 $user = $allUsers->get($username);
                 $user['has_config'] = true;
                 $user['config_data'] = $wg;
+                $user['peer_key'] = $publicKey;
                 $allUsers->put($username, $user);
             } else {
                 $allUsers->put($username, [
@@ -192,28 +195,58 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
                     'has_peer' => false,
                     'peer_data' => null,
                     'servers' => [],
+                    'peer_key' => $publicKey,
                 ]);
             }
         }
 
         // =============================================
-        // ۳. جمع‌آوری Peerها از سرورها
+        // ۳. جمع‌آوری Peerها از سرورها (با public_key)
         // =============================================
         foreach ($this->servers as $server) {
-            $remotePeers = $this->getRemotePeers($server);
-            foreach ($remotePeers as $peerName) {
-                if ($allUsers->has($peerName)) {
-                    $user = $allUsers->get($peerName);
-                    $user['has_peer'] = true;
-                    $user['peer_data'] = [
+            $remotePeers = $this->getRemotePeers($server); // آرایه‌ای از اطلاعات کامل Peer
+
+            foreach ($remotePeers as $peerInfo) {
+                $comment = $peerInfo['comment'];
+                $publicKey = $peerInfo['public_key'];
+
+                // تلاش برای پیدا کردن کاربر با public_key (دقیق‌ترین روش)
+                $foundUser = null;
+                $foundUsername = null;
+
+                // ابتدا با public_key جستجو کن (در wireguard_users)
+                foreach ($allUsers as $username => $user) {
+                    if (isset($user['peer_key']) && $user['peer_key'] === $publicKey) {
+                        $foundUser = $user;
+                        $foundUsername = $username;
+                        break;
+                    }
+                }
+
+                // اگر با public_key پیدا نشد، با comment (نام) جستجو کن
+                if (!$foundUser && !empty($comment)) {
+                    if ($allUsers->has($comment)) {
+                        $foundUser = $allUsers->get($comment);
+                        $foundUsername = $comment;
+                    }
+                }
+
+                if ($foundUser) {
+                    // به‌روزرسانی اطلاعات کاربر
+                    $foundUser['has_peer'] = true;
+                    $foundUser['peer_data'] = [
                         'server_id' => $server->id,
                         'server_name' => $server->name,
+                        'public_key' => $publicKey,
+                        'comment' => $comment,
                     ];
-                    $user['servers'][] = $server->id;
-                    $allUsers->put($peerName, $user);
+                    $foundUser['servers'][] = $server->id;
+                    $allUsers->put($foundUsername, $foundUser);
                 } else {
-                    $allUsers->put($peerName, [
-                        'username' => $peerName,
+                    // Peer جدیدی است که در دیتابیس وجود ندارد
+                    $newUsername = !empty($comment) ? $comment : 'unknown_' . substr($publicKey, 0, 8);
+                    $allUsers->put($newUsername, [
+                        'username' => $newUsername,
                         'has_account' => false,
                         'account_data' => null,
                         'has_config' => false,
@@ -222,8 +255,11 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
                         'peer_data' => [
                             'server_id' => $server->id,
                             'server_name' => $server->name,
+                            'public_key' => $publicKey,
+                            'comment' => $comment,
                         ],
                         'servers' => [$server->id],
+                        'peer_key' => $publicKey,
                     ]);
                 }
             }
@@ -241,14 +277,13 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
             $wgUser = $user['config_data'];
             $serverId = $user['peer_data']['server_id'] ?? ($wgUser->server_id ?? null);
 
-            // تعیین نوع Issue بر اساس ترکیب سه وضعیت
-            $issueType = $this->determineIssueType($hasAccount, $hasConfig, $hasPeer);
+            // **منطق جدید تشخیص Issue**
+            $issueType = $this->determineIssueTypeV2($hasAccount, $hasConfig, $hasPeer);
             if (!$issueType) {
                 // همه چیز سالم است
                 continue;
             }
 
-            // تنظیم جزئیات
             $details = $this->buildDetails($user);
             $severity = $this->getSeverity($issueType);
             $action = $this->getAction($issueType);
@@ -268,7 +303,137 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
             ];
         }
 
-        return $issues;
+        return $this->deduplicateIssues($issues);
+    }
+
+    // در WireGuardIntegrityChecker.php
+
+    /**
+     * حذف Issues تکراری و انتخاب مهم‌ترین Issue برای هر کاربر
+     *
+     * @param array $issues لیست Issues تولید شده
+     * @return array لیست Issues پالایش‌شده
+     */
+    protected function deduplicateIssues(array $issues): array
+    {
+        if (empty($issues)) {
+            return [];
+        }
+
+        // گروه‌بندی بر اساس username و server_id
+        $grouped = [];
+        foreach ($issues as $issue) {
+            $key = $issue['username'] . '|' . $issue['server_id'];
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [];
+            }
+            $grouped[$key][] = $issue;
+        }
+
+        $result = [];
+
+        foreach ($grouped as $group) {
+            // اگر فقط یک Issue وجود دارد، همان را انتخاب کن
+            if (count($group) === 1) {
+                $result[] = $group[0];
+                continue;
+            }
+
+            // انتخاب مهم‌ترین Issue بر اساس اولویت
+            $best = $this->selectBestIssue($group);
+            if ($best) {
+                $result[] = $best;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * انتخاب مهم‌ترین Issue از بین یک گروه
+     * اولویت: critical > warning > info
+     * در صورت برابری شدت، issue_type مهم‌تر را انتخاب کن
+     */
+    protected function selectBestIssue(array $issues): ?array
+    {
+        if (empty($issues)) {
+            return null;
+        }
+
+        // ترتیب اولویت severity
+        $severityOrder = ['critical' => 4, 'warning' => 3, 'info' => 2];
+
+        // ترتیب اولویت issue_type (مهم‌ترها اول)
+        $typeOrder = [
+            'missing_peer' => 10,
+            'orphan_full' => 9,
+            'status_mismatch' => 8,
+            'orphan_peer_config' => 7,
+            'orphan_peer_only' => 6,
+            'account_without_service' => 5,
+            'config_without_account' => 4,
+            'expired_account' => 3,
+            'speed_mismatch' => 2,
+            'healthy' => 1,
+        ];
+
+        $best = null;
+        $bestScore = -1;
+
+        foreach ($issues as $issue) {
+            $severityScore = $severityOrder[$issue['severity']] ?? 0;
+            $typeScore = $typeOrder[$issue['issue_type']] ?? 0;
+            $totalScore = ($severityScore * 100) + $typeScore;
+
+            if ($totalScore > $bestScore) {
+                $bestScore = $totalScore;
+                $best = $issue;
+            }
+        }
+
+        return $best;
+    }
+
+
+    protected function determineIssueTypeV2(bool $hasAccount, bool $hasConfig, bool $hasPeer): ?string
+    {
+        // حالت ۱: همه چیز دارد (سالم)
+        if ($hasAccount && $hasConfig && $hasPeer) {
+            return 'healthy';
+        }
+
+        // حالت ۲: اکانت دارد، کانفیگ دارد، Peer ندارد
+        if ($hasAccount && $hasConfig && !$hasPeer) {
+            return 'missing_peer';
+        }
+
+        // حالت ۳: اکانت دارد، کانفیگ ندارد، Peer دارد (مهم!)
+        if ($hasAccount && !$hasConfig && $hasPeer) {
+            return 'orphan_peer_config'; // باید کانفیگ ایجاد شود
+        }
+
+        // حالت ۴: اکانت دارد، کانفیگ ندارد، Peer ندارد
+        if ($hasAccount && !$hasConfig && !$hasPeer) {
+            return 'account_without_service'; // باید کانفیگ و Peer ایجاد شود
+        }
+
+        // حالت ۵: اکانت ندارد، کانفیگ دارد، Peer دارد
+        if (!$hasAccount && $hasConfig && $hasPeer) {
+            return 'orphan_full'; // اورفان کامل (حذف شود)
+        }
+
+        // حالت ۶: اکانت ندارد، کانفیگ دارد، Peer ندارد (نادر)
+        if (!$hasAccount && $hasConfig && !$hasPeer) {
+            return 'config_without_account'; // کانفیگ بدون اکانت
+        }
+
+        // حالت ۷: اکانت ندارد، کانفیگ ندارد، Peer دارد
+        if (!$hasAccount && !$hasConfig && $hasPeer) {
+            return 'orphan_peer_only'; // فقط Peer اضافی
+        }
+
+        // حالت ۸: هیچ چیزی ندارد (نادیده گرفته می‌شود)
+        return null;
     }
 
     /**
@@ -378,15 +543,21 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
             $wgService = new WireguardService($server);
             $peers = $wgService->getAllPeers();
 
-            $profileNames = [];
+            $peerData = [];
             foreach ($peers as $peer) {
-                if (isset($peer['comment']) && !empty($peer['comment'])) {
-                    $profileNames[] = $peer['comment'];
-                } elseif (isset($peer['name']) && !empty($peer['name'])) {
-                    $profileNames[] = $peer['name'];
+                $comment = $peer['comment'] ?? '';
+                $publicKey = $peer['public-key'] ?? '';
+                if (empty($comment) && empty($publicKey)) {
+                    continue;
                 }
+                $peerData[] = [
+                    'comment' => $comment,
+                    'public_key' => $publicKey,
+                    'allowed_address' => $peer['allowed-address'] ?? '',
+                    'disabled' => isset($peer['disabled']) && $peer['disabled'] === 'true',
+                ];
             }
-            return $profileNames;
+            return $peerData;
         } catch (\Exception $e) {
             Log::error("خطا در دریافت Peerهای سرور {$server->name}: " . $e->getMessage());
             return [];
