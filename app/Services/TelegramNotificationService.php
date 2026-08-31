@@ -86,8 +86,12 @@ class TelegramNotificationService
                 if ($attachmentPath && Storage::disk('public')->exists($attachmentPath)) {
                     // ارسال عکس
                     $fullPath = public_path('storage/'.$attachmentPath);
+                    if (!file_exists($fullPath)) {
+                        throw new \Exception("فایل وجود ندارد: {$fullPath}");
+                    }
+                    $photo = InputFile::make($fullPath);
                     $this->bot->sendPhoto(
-                        photo: $fullPath,
+                        photo: $photo,
                         chat_id: $admin->telegram_id,
                         caption: $caption,
                         parse_mode: 'HTML',
