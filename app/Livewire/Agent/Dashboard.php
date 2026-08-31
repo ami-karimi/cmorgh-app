@@ -24,7 +24,7 @@ class Dashboard extends Component
         $userId = Auth::id();
 
         $plus = Financial::where('for', $userId)
-            ->whereIn('type', ['plus', 'plus_amn'])
+            ->whereIn('type', ['plus'])
             ->where('approved', 1)
             ->sum('price');
 
@@ -61,7 +61,7 @@ class Dashboard extends Component
             ->get();
 
         $hiddenGroups = AgentHiddenGroups::
-            where('agent_id', $userId)
+        where('agent_id', $userId)
             ->pluck('group_id')
             ->toArray();
 
@@ -71,7 +71,6 @@ class Dashboard extends Component
 
         $discountPercent = auth()->user()->discount_percent ?? 0;
 
-
         $announcements = Announcement::where('is_active', 1)
             ->whereIn('target', ['all', 'agents'])
             ->latest()
@@ -79,6 +78,28 @@ class Dashboard extends Component
 
         $services = ServiceStatus::all();
 
+        // --- بخش تولید داده‌های نمودار برای ۷ روز گذشته ---
+        $chartLabels = [];
+        $chartAccountsCount = [];
+        $chartSpentAmount = [];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::today()->subDays($i);
+            // ثبت تاریخ شمسی (ماه و روز)
+            $chartLabels[] = \Morilog\Jalali\Jalalian::fromCarbon($date)->format('m/d');
+
+            // تعداد اکانت‌های صادر شده در آن روز
+            $chartAccountsCount[] = Accounts::where('creator', $userId)
+                ->whereDate('created_at', $date)
+                ->count();
+
+            // مبلغ خرید شده در آن روز
+            $chartSpentAmount[] = Financial::where('for', $userId)
+                ->where('type', 'minus')
+                ->where('approved', 1)
+                ->whereDate('created_at', $date)
+                ->sum('price');
+        }
 
         return view('livewire.agent.dashboard', [
             'totalCustomers' => $totalCustomers,
@@ -91,6 +112,9 @@ class Dashboard extends Component
             'discountPercent' => $discountPercent,
             'announcements' => $announcements,
             'services' => $services,
+            'chartLabels' => $chartLabels,
+            'chartAccountsCount' => $chartAccountsCount,
+            'chartSpentAmount' => $chartSpentAmount,
         ]);
     }
 }
