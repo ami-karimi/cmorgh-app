@@ -91,6 +91,36 @@ class MikrotikApiService
         return $out;
     }
 
+    public function getAllUsers(): array
+    {
+        $out = ['ok' => 0, 'error' => '', 'data' => []];
+
+        if (!$this->connected) {
+            $out['error'] = "Router is not connected";
+            return $out;
+        }
+
+        $res = $this->bs_mkt_rest_api_get('/ppp/secret');
+        if ($res['ok'] && !empty($res['data'])) {
+            $out['ok'] = 1;
+            $out['data'] = $res['data'];
+        } else {
+            $out['error'] = $res['error'] ?? 'Failed to get users';
+        }
+
+        return $out;
+    }
+
+    public function getAllUsernames(): array
+    {
+        $users = $this->getAllUsers();
+        if ($users['ok'] && !empty($users['data'])) {
+            return array_column($users['data'], 'name');
+        }
+        return [];
+    }
+
+
     public function identity()
     {
         $out = ['ok' => 0, 'identity' => 'not_set'];

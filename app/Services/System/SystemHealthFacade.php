@@ -14,7 +14,6 @@ class SystemHealthFacade
         $results = [];
 
         $checkers = [
-            'mikrotik' => MikrotikIntegrityChecker::class,
             'wireguard' => WireGuardIntegrityChecker::class,
         ];
 
