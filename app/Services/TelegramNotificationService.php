@@ -14,7 +14,12 @@ class TelegramNotificationService
 
     public function __construct()
     {
-        $this->bot = new Nutgram(config('nutgram.token'));
+        $config = config('nutgram');
+
+        $this->bot = new Nutgram(
+            $config['token'],
+            $config['config'] ?? []
+        );
     }
 
     /**
