@@ -681,6 +681,7 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
         $server = Nas::find($serverId);
         if (!$server) {
             WireGuardUsers::where('profile_name', $username)->delete();
+            $this->closeOpenIssues($username, auth()->id());
             return ['status' => false, 'message' => "سرور با ID {$serverId} یافت نشد."];
         }
 
