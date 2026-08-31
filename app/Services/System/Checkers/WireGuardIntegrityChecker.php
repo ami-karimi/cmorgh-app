@@ -9,6 +9,7 @@ use App\Models\Nas;
 use App\Services\WireguardService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Collection;
+use Carbon\Carbon;
 
 class WireGuardIntegrityChecker extends SystemHealthChecker
 {
@@ -25,138 +26,226 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
     protected function performCheck(): array
     {
         $issues = [];
+        $allUsers = collect();
 
-        // دریافت همه کاربران WireGuard با اکانت‌های مرتبط
-        $wgUsers = WireGuardUsers::with(['server', 'account'])
-            ->whereHas('server', function($q) {
-                $q->where('is_enabled', 1)->supportsProtocol('wireguard');
-            })
-            ->get();
+        // =============================================
+        // ۱. جمع‌آوری کاربران از Accounts (اکانت‌های WireGuard)
+        // =============================================
+        $dbAccounts = Accounts::where('service_group', 'wireguard')->get();
+        foreach ($dbAccounts as $account) {
+            $allUsers->put($account->username, [
+                'username' => $account->username,
+                'has_account' => true,
+                'account_data' => $account,
+                'has_config' => false,
+                'config_data' => null,
+                'has_peer' => false,
+                'peer_data' => null,
+                'servers' => [],
+            ]);
+        }
 
-        $dbUsersByServer = $wgUsers->groupBy('server_id');
+        // =============================================
+        // ۲. جمع‌آوری کاربران از WireGuardUsers
+        // =============================================
+        $wgUsers = WireGuardUsers::with('server')->get();
+        foreach ($wgUsers as $wg) {
+            $username = $wg->profile_name;
+            if ($allUsers->has($username)) {
+                $user = $allUsers->get($username);
+                $user['has_config'] = true;
+                $user['config_data'] = $wg;
+                $allUsers->put($username, $user);
+            } else {
+                $allUsers->put($username, [
+                    'username' => $username,
+                    'has_account' => false,
+                    'account_data' => null,
+                    'has_config' => true,
+                    'config_data' => $wg,
+                    'has_peer' => false,
+                    'peer_data' => null,
+                    'servers' => [],
+                ]);
+            }
+        }
 
+        // =============================================
+        // ۳. جمع‌آوری Peerها از سرورها
+        // =============================================
         foreach ($this->servers as $server) {
-            $serverId = $server->id;
-            $serverName = $server->name;
-
             $remotePeers = $this->getRemotePeers($server);
-
-            $dbProfileNames = $dbUsersByServer->has($serverId)
-                ? $dbUsersByServer[$serverId]->pluck('profile_name')->toArray()
-                : [];
-
-            // ۱. بررسی Orphan (Peer در سرور، اما در دیتابیس نیست)
-            $orphanPeers = array_diff($remotePeers, $dbProfileNames);
-            foreach ($orphanPeers as $profileName) {
-                $issues[] = [
-                    'username' => $profileName,
-                    'server_id' => $serverId,
-                    'issue_type' => 'orphan',
-                    'severity' => 'warning',
-                    'details' => "Peer {$profileName} در سرور {$serverName} وجود دارد اما در دیتابیس یافت نشد.",
-                    'action' => 'delete_orphan'
-                ];
-            }
-
-            // ۲. بررسی Missing و وضعیت اکانت‌ها برای هر Peer در دیتابیس
-            $serverWgUsers = $dbUsersByServer->get($serverId, collect());
-
-            foreach ($serverWgUsers as $wgUser) {
-                $profileName = $wgUser->profile_name;
-                $account = $wgUser->account;
-
-                // اگر Peer در سرور وجود نداشته باشد
-                if (!in_array($profileName, $remotePeers)) {
-                    // اگر اکانت فعال باشد => critical missing
-                    if ($account && $account->is_enabled) {
-                        $issues[] = [
-                            'username' => $profileName,
-                            'server_id' => $serverId,
-                            'issue_type' => 'missing',
-                            'severity' => 'critical',
-                            'details' => "اکانت {$profileName} فعال است اما Peer در سرور {$serverName} یافت نشد.",
-                            'action' => 'recreate_peer'
-                        ];
-                    } else {
-                        // اگر اکانت غیرفعال یا منقضی باشد => info
-                        $status = $account ? ($account->is_enabled ? 'فعال' : 'غیرفعال') : 'ناموجود';
-                        $issues[] = [
-                            'username' => $profileName,
-                            'server_id' => $serverId,
-                            'issue_type' => 'missing',
-                            'severity' => 'info',
-                            'details' => "Peer {$profileName} در سرور {$serverName} یافت نشد. وضعیت اکانت: {$status}.",
-                            'action' => 'recreate_peer'
-                        ];
-                    }
-                    continue;
-                }
-
-                // ۳. Peer وجود دارد، بررسی وضعیت اکانت
-                if (!$account) {
-                    // این حالت نباید رخ دهد چون WireGuardUsers به account متصل است، اما احتیاطاً
-                    $issues[] = [
-                        'username' => $profileName,
-                        'server_id' => $serverId,
-                        'issue_type' => 'orphan',
-                        'severity' => 'warning',
-                        'details' => "Peer {$profileName} در دیتابیس وجود دارد اما اکانت مرتبط یافت نشد.",
-                        'action' => 'delete_orphan'
+            foreach ($remotePeers as $peerName) {
+                if ($allUsers->has($peerName)) {
+                    $user = $allUsers->get($peerName);
+                    $user['has_peer'] = true;
+                    $user['peer_data'] = [
+                        'server_id' => $server->id,
+                        'server_name' => $server->name,
                     ];
-                    continue;
-                }
-
-                // ۳-۱. بررسی تطابق وضعیت فعال/غیرفعال
-                $isAccountEnabled = (bool) $account->is_enabled;
-                $isPeerEnabled = $this->getPeerStatus($server, $profileName);
-
-                if ($isPeerEnabled !== null && $isPeerEnabled !== $isAccountEnabled) {
-                    $issues[] = [
-                        'username' => $profileName,
-                        'server_id' => $serverId,
-                        'issue_type' => 'status_mismatch',
-                        'severity' => $isAccountEnabled ? 'critical' : 'warning',
-                        'details' => "وضعیت Peer با اکانت مطابقت ندارد. اکانت: " . ($isAccountEnabled ? 'فعال' : 'غیرفعال') . "، Peer: " . ($isPeerEnabled ? 'فعال' : 'غیرفعال'),
-                        'action' => 'sync_status'
-                    ];
-                }
-
-                // ۳-۲. بررسی انقضا (اگر اکانت منقضی شده باشد)
-                if ($account->expire_date && \Carbon\Carbon::parse($account->expire_date)->isPast()) {
-                    $days = \Carbon\Carbon::parse($account->expire_date)->diffInDays(now());
-                    $issues[] = [
-                        'username' => $profileName,
-                        'server_id' => $serverId,
-                        'issue_type' => 'expired',
-                        'severity' => 'warning',
-                        'details' => "اکانت {$profileName} از {$days} روز پیش منقضی شده است اما Peer در سرور باقی مانده است.",
-                        'action' => 'disable_peer'
-                    ];
-                }
-
-                // ۳-۳. بررسی تطابق محدودیت سرعت (config_limit)
-                $expectedSpeed = $account->group->mikrotik_speed ?? '80M/10M';
-                $actualSpeed = $wgUser->config_limit ?? '';
-
-                if ($actualSpeed !== $expectedSpeed) {
-                    $issues[] = [
-                        'username' => $profileName,
-                        'server_id' => $serverId,
-                        'issue_type' => 'speed_mismatch',
-                        'severity' => 'info',
-                        'details' => "محدودیت سرعت با گروه مطابقت ندارد. انتظار: {$expectedSpeed}، فعلی: {$actualSpeed}",
-                        'action' => 'sync_speed'
-                    ];
+                    $user['servers'][] = $server->id;
+                    $allUsers->put($peerName, $user);
+                } else {
+                    $allUsers->put($peerName, [
+                        'username' => $peerName,
+                        'has_account' => false,
+                        'account_data' => null,
+                        'has_config' => false,
+                        'config_data' => null,
+                        'has_peer' => true,
+                        'peer_data' => [
+                            'server_id' => $server->id,
+                            'server_name' => $server->name,
+                        ],
+                        'servers' => [$server->id],
+                    ]);
                 }
             }
+        }
+
+        // =============================================
+        // ۴. تحلیل وضعیت هر کاربر و تولید Issue
+        // =============================================
+        foreach ($allUsers as $user) {
+            $username = $user['username'];
+            $hasAccount = $user['has_account'];
+            $hasConfig = $user['has_config'];
+            $hasPeer = $user['has_peer'];
+            $account = $user['account_data'];
+            $wgUser = $user['config_data'];
+            $serverId = $user['peer_data']['server_id'] ?? ($wgUser->server_id ?? null);
+
+            // تعیین نوع Issue بر اساس ترکیب سه وضعیت
+            $issueType = $this->determineIssueType($hasAccount, $hasConfig, $hasPeer);
+            if (!$issueType) {
+                // همه چیز سالم است
+                continue;
+            }
+
+            // تنظیم جزئیات
+            $details = $this->buildDetails($user);
+            $severity = $this->getSeverity($issueType);
+            $action = $this->getAction($issueType);
+
+            $issues[] = [
+                'username' => $username,
+                'server_id' => $serverId ?? 0,
+                'issue_type' => $issueType,
+                'severity' => $severity,
+                'details' => $details,
+                'action' => $action,
+                'has_account' => $hasAccount,
+                'has_config' => $hasConfig,
+                'has_peer' => $hasPeer,
+                'account_status' => $account ? ($account->is_enabled ? 'فعال' : 'غیرفعال') : 'ندارد',
+                'is_expired' => $account && $account->expire_date && Carbon::parse($account->expire_date)->isPast(),
+            ];
         }
 
         return $issues;
     }
 
     /**
-     * دریافت لیست profile_name های موجود در سرور
+     * تعیین نوع Issue بر اساس ترکیب سه وضعیت
      */
+    protected function determineIssueType(bool $hasAccount, bool $hasConfig, bool $hasPeer): ?string
+    {
+        // حالت ۱: همه چیز دارد (سالم)
+        if ($hasAccount && $hasConfig && $hasPeer) {
+            return 'healthy'; // هیچ اقدامی نیاز نیست
+        }
+
+        // حالت ۲: اکانت دارد، کانفیگ دارد، Peer ندارد
+        if ($hasAccount && $hasConfig && !$hasPeer) {
+            return 'missing_peer';
+        }
+
+        // حالت ۳: اکانت دارد، کانفیگ ندارد، Peer دارد
+        if ($hasAccount && !$hasConfig && $hasPeer) {
+            return 'orphan_peer_config';
+        }
+
+        // حالت ۴: اکانت دارد، کانفیگ ندارد، Peer ندارد
+        if ($hasAccount && !$hasConfig && !$hasPeer) {
+            return 'account_without_service';
+        }
+
+        // حالت ۵: اکانت ندارد، کانفیگ دارد، Peer دارد
+        if (!$hasAccount && $hasConfig && $hasPeer) {
+            return 'orphan_full';
+        }
+
+        // حالت ۶: اکانت ندارد، کانفیگ دارد، Peer ندارد (نادر)
+        if (!$hasAccount && $hasConfig && !$hasPeer) {
+            return 'config_without_account';
+        }
+
+        // حالت ۷: اکانت ندارد، کانفیگ ندارد، Peer دارد
+        if (!$hasAccount && !$hasConfig && $hasPeer) {
+            return 'orphan_peer_only';
+        }
+
+        // حالت ۸: هیچ چیزی ندارد (نادیده گرفته می‌شود)
+        return null;
+    }
+
+    /**
+     * ساخت توضیحات برای Issue
+     */
+    protected function buildDetails(array $user): string
+    {
+        $parts = [];
+        $parts[] = $user['has_account'] ? '✅ اکانت دارد' : '❌ اکانت ندارد';
+        $parts[] = $user['has_config'] ? '✅ کانفیگ دارد' : '❌ کانفیگ ندارد';
+        $parts[] = $user['has_peer'] ? '✅ Peer دارد' : '❌ Peer ندارد';
+
+        if ($user['has_account'] && $user['account_data']) {
+            $account = $user['account_data'];
+            $status = $account->is_enabled ? 'فعال' : 'غیرفعال';
+            $parts[] = "وضعیت اکانت: {$status}";
+            if ($account->expire_date) {
+                $expire = Carbon::parse($account->expire_date);
+                $parts[] = $expire->isPast() ? '⛔ منقضی شده' : "📅 تا {$expire->toDateString()}";
+            }
+        }
+
+        if ($user['has_peer'] && isset($user['peer_data']['server_name'])) {
+            $parts[] = "سرور: {$user['peer_data']['server_name']}";
+        }
+
+        return implode(' | ', $parts);
+    }
+
+    protected function getSeverity(string $issueType): string
+    {
+        $map = [
+            'missing_peer' => 'critical',
+            'orphan_peer_config' => 'warning',
+            'account_without_service' => 'warning',
+            'orphan_full' => 'critical',
+            'config_without_account' => 'warning',
+            'orphan_peer_only' => 'warning',
+        ];
+        return $map[$issueType] ?? 'info';
+    }
+
+    protected function getAction(string $issueType): string
+    {
+        $map = [
+            'missing_peer' => 'recreate_peer',
+            'orphan_peer_config' => 'create_config',
+            'account_without_service' => 'create_config_and_peer',
+            'orphan_full' => 'create_account_or_delete',
+            'config_without_account' => 'create_account_or_delete',
+            'orphan_peer_only' => 'create_account_and_config',
+        ];
+        return $map[$issueType] ?? 'review';
+    }
+
+    // =====================================================
+    // متدهای کمکی
+    // =====================================================
+
     protected function getRemotePeers(Nas $server): array
     {
         try {
@@ -171,46 +260,21 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
                     $profileNames[] = $peer['name'];
                 }
             }
-
             return $profileNames;
-
         } catch (\Exception $e) {
             Log::error("خطا در دریافت Peerهای سرور {$server->name}: " . $e->getMessage());
             return [];
         }
     }
 
+    // =====================================================
+    // متدهای عملیاتی (۳ دکمه اصلی)
+    // =====================================================
+
     /**
-     * دریافت وضعیت فعال/غیرفعال یک Peer از سرور
+     * دکمه ۱: ایجاد کانفیگ و Peer برای اکانت (account_without_service)
      */
-    protected function getPeerStatus(Nas $server, string $profileName): ?bool
-    {
-        try {
-            $wgService = new WireguardService($server);
-            $peers = $wgService->getAllPeers();
-
-            foreach ($peers as $peer) {
-                $comment = $peer['comment'] ?? '';
-                if ($comment === $profileName) {
-                    // بررسی وضعیت disabled
-                    if (isset($peer['disabled']) && $peer['disabled'] === 'true') {
-                        return false;
-                    }
-                    return true;
-                }
-            }
-            return null;
-        } catch (\Exception $e) {
-            Log::error("خطا در دریافت وضعیت Peer {$profileName}: " . $e->getMessage());
-            return null;
-        }
-    }
-
-    // =====================================================
-    // متدهای عملیاتی برای رفع مشکلات
-    // =====================================================
-
-    public function deleteOrphanPeer(int $serverId, string $profileName): array
+    public function createConfigAndPeer(int $serverId, string $username): array
     {
         $server = Nas::find($serverId);
         if (!$server) {
@@ -218,53 +282,160 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
         }
 
         try {
+            $account = Accounts::where('username', $username)->where('service_group', 'wireguard')->first();
+            if (!$account) {
+                return ['status' => false, 'message' => "اکانت {$username} یافت نشد."];
+            }
+
+            // ایجاد Peer در سرور
             $wgService = new WireguardService($server);
-            $peers = $wgService->getAllPeers();
-            $publicKey = null;
-            foreach ($peers as $peer) {
-                $comment = $peer['comment'] ?? '';
-                if ($comment === $profileName) {
-                    $publicKey = $peer['public-key'] ?? null;
-                    break;
-                }
+            $speed = $account->group->mikrotik_speed ?? '80M/10M';
+            $result = $wgService->createClient($username, $speed);
+
+            if (!$result['status']) {
+                return ['status' => false, 'message' => "خطا در ایجاد Peer: " . ($result['message'] ?? 'نامشخص')];
             }
 
-            if (!$publicKey) {
-                return ['status' => false, 'message' => "Peer با نام {$profileName} در سرور یافت نشد."];
-            }
+            $data = $result['data'];
 
-            $result = $wgService->removeClient($publicKey);
+            // ایجاد رکورد WireGuardUsers
+            WireGuardUsers::create([
+                'user_id' => $account->id,
+                'server_id' => $serverId,
+                'profile_name' => $username,
+                'user_ip' => $data['ip_address'] ?? '',
+                'public_key' => $data['client_public_key'] ?? '',
+                'config_limit' => $speed,
+                'is_enabled' => 1,
+            ]);
 
-            if ($result['status']) {
-                Log::info("Peer Orphan {$profileName} از سرور {$server->name} حذف شد.");
-                return ['status' => true, 'message' => "Peer با موفقیت حذف شد."];
-            } else {
-                return ['status' => false, 'message' => "خطا در حذف Peer: " . ($result['message'] ?? 'نامشخص')];
-            }
+            Log::info("کانفیگ و Peer برای اکانت {$username} ایجاد شد.");
+            $this->closeOpenIssues($username, auth()->id());
+
+            return ['status' => true, 'message' => "کانفیگ و Peer با موفقیت ایجاد شد."];
         } catch (\Exception $e) {
-            Log::error("خطا در حذف Peer Orphan {$profileName}: " . $e->getMessage());
+            Log::error("خطا در ایجاد کانفیگ برای {$username}: " . $e->getMessage());
             return ['status' => false, 'message' => "خطا: " . $e->getMessage()];
         }
     }
 
-    public function deleteAllOrphans(int $serverId): array
+    /**
+     * دکمه ۲: بازسازی Peer (missing_peer)
+     */
+    public function recreatePeer(int $serverId, string $username): array
     {
         $server = Nas::find($serverId);
         if (!$server) {
             return ['status' => false, 'message' => "سرور با ID {$serverId} یافت نشد."];
         }
 
-        $issues = $this->getOpenIssues()
-            ->where('server_id', $serverId)
-            ->where('issue_type', 'orphan')
+        try {
+            $wgUser = WireGuardUsers::where('profile_name', $username)->first();
+            if (!$wgUser) {
+                return ['status' => false, 'message' => "کانفیگ برای {$username} یافت نشد."];
+            }
+
+            $account = $wgUser->account;
+            if (!$account) {
+                return ['status' => false, 'message' => "اکانت مرتبط یافت نشد."];
+            }
+
+            $wgService = new WireguardService($server);
+
+            // حذف Peer قدیمی
+            $peers = $wgService->getAllPeers();
+            foreach ($peers as $peer) {
+                if (($peer['comment'] ?? '') === $username) {
+                    $wgService->removeClient($peer['public-key'] ?? '');
+                    break;
+                }
+            }
+
+            // ایجاد Peer جدید
+            $speed = $account->group->mikrotik_speed ?? '80M/10M';
+            $result = $wgService->createClient($username, $speed);
+
+            if (!$result['status']) {
+                return ['status' => false, 'message' => "خطا در ایجاد Peer: " . ($result['message'] ?? 'نامشخص')];
+            }
+
+            $data = $result['data'];
+            $wgUser->update([
+                'user_ip' => $data['ip_address'] ?? '',
+                'public_key' => $data['client_public_key'] ?? '',
+                'is_enabled' => 1,
+            ]);
+
+            Log::info("Peer {$username} بازسازی شد.");
+            $this->closeOpenIssues($username, auth()->id());
+
+            return ['status' => true, 'message' => "Peer با موفقیت بازسازی شد."];
+        } catch (\Exception $e) {
+            Log::error("خطا در بازسازی Peer {$username}: " . $e->getMessage());
+            return ['status' => false, 'message' => "خطا: " . $e->getMessage()];
+        }
+    }
+
+    /**
+     * دکمه ۳: حذف کامل (Orphan)
+     */
+    public function deleteOrphan(int $serverId, string $username): array
+    {
+        $server = Nas::find($serverId);
+        if (!$server) {
+            return ['status' => false, 'message' => "سرور با ID {$serverId} یافت نشد."];
+        }
+
+        try {
+            // ۱. حذف از سرور
+            $wgService = new WireguardService($server);
+            $peers = $wgService->getAllPeers();
+            foreach ($peers as $peer) {
+                if (($peer['comment'] ?? '') === $username) {
+                    $wgService->removeClient($peer['public-key'] ?? '');
+                    break;
+                }
+            }
+
+            // ۲. حذف از wireguard_users (اگر وجود داشته باشد)
+            WireGuardUsers::where('profile_name', $username)->delete();
+
+            // ۳. حذف از accounts (اگر وجود داشته باشد و شرط داشته باشد)
+            // فقط در صورتی که اکانت منقضی شده باشد یا بدون سرویس باشد
+            $account = Accounts::where('username', $username)->where('service_group', 'wireguard')->first();
+            if ($account) {
+                // اگر اکانت منقضی شده یا بدون سرویس باشد، حذف شود
+                $isExpired = $account->expire_date && Carbon::parse($account->expire_date)->isPast();
+                if ($isExpired || !WireGuardUsers::where('user_id', $account->id)->exists()) {
+                    $account->delete();
+                }
+            }
+
+            Log::info("Orphan {$username} حذف شد.");
+            $this->closeOpenIssues($username, auth()->id());
+
+            return ['status' => true, 'message' => "Orphan با موفقیت حذف شد."];
+        } catch (\Exception $e) {
+            Log::error("خطا در حذف Orphan {$username}: " . $e->getMessage());
+            return ['status' => false, 'message' => "خطا: " . $e->getMessage()];
+        }
+    }
+
+    /**
+     * حذف همه Orphan‌ها
+     */
+    public function deleteAllOrphans(): array
+    {
+        $orphanIssues = $this->getOpenIssues()
+            ->whereIn('issue_type', ['orphan_peer_only', 'orphan_full', 'orphan_peer_config'])
             ->where('status', 'open');
 
         $deleted = 0;
         $failed = 0;
         $errors = [];
 
-        foreach ($issues as $issue) {
-            $result = $this->deleteOrphanPeer($serverId, $issue->username);
+        foreach ($orphanIssues as $issue) {
+            $result = $this->deleteOrphan($issue->server_id, $issue->username);
             if ($result['status']) {
                 $deleted++;
                 $issue->update(['status' => 'resolved', 'resolved_at' => now()]);
@@ -276,32 +447,8 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
 
         return [
             'status' => true,
-            'message' => "{$deleted} Peer حذف شد، {$failed} Peer با خطا مواجه شد.",
+            'message' => "{$deleted} Orphan حذف شد، {$failed} مورد با خطا مواجه شد.",
             'errors' => $errors,
-            'deleted' => $deleted,
-            'failed' => $failed
-        ];
-    }
-
-    public function deleteAllOrphansAllServers(): array
-    {
-        $totalDeleted = 0;
-        $totalFailed = 0;
-        $allErrors = [];
-
-        foreach ($this->servers as $server) {
-            $result = $this->deleteAllOrphans($server->id);
-            $totalDeleted += $result['deleted'] ?? 0;
-            $totalFailed += $result['failed'] ?? 0;
-            if (!empty($result['errors'])) {
-                $allErrors = array_merge($allErrors, $result['errors']);
-            }
-        }
-
-        return [
-            'status' => true,
-            'message' => "{$totalDeleted} Peer از تمام سرورها حذف شد، {$totalFailed} Peer با خطا مواجه شد.",
-            'errors' => $allErrors
         ];
     }
 }

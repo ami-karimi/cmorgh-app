@@ -102,50 +102,98 @@
                         <table class="w-full text-right text-xs">
                             <thead class="bg-zinc-900/50 text-zinc-400 border-b border-zinc-800">
                             <tr>
-                                <th class="p-3">سرویس</th>
+                                <th class="p-3">#</th>
                                 <th class="p-3">کاربر</th>
+                                <th class="p-3">اکانت</th>
+                                <th class="p-3">کانفیگ</th>
+                                <th class="p-3">Peer</th>
                                 <th class="p-3">نوع مشکل</th>
                                 <th class="p-3">شدت</th>
                                 <th class="p-3">جزئیات</th>
-                                <th class="p-3">عملیات</th>
+                                <th class="p-3 text-center">عملیات</th>
                             </tr>
                             </thead>
                             <tbody class="divide-y divide-zinc-800/50">
-                            @foreach($healthIssues as $issue)
+                            @foreach($healthIssues as $index => $issue)
                                 <tr class="hover:bg-zinc-900/30 transition">
-                                    <td class="p-3 text-white">{{ $issue->service }}</td>
+                                    <td class="p-3 text-zinc-500">{{ $index + 1 }}</td>
                                     <td class="p-3 font-mono text-white">{{ $issue->username }}</td>
                                     <td class="p-3">
-                                            <span class="px-2 py-1 rounded-full text-[10px] font-bold
-                                                {{ $issue->issue_type === 'orphan' ? 'bg-amber-500/20 text-amber-400' : '' }}
-                                            {{ $issue->issue_type === 'missing' ? 'bg-rose-500/20 text-rose-400' : '' }}
-                                            {{ $issue->issue_type === 'mismatch' ? 'bg-blue-500/20 text-blue-400' : '' }}">
-                                                {{ $issue->issue_type }}
-                                            </span>
+                    <span class="text-[10px] font-bold {{ $issue->has_account ? 'text-emerald-400' : 'text-rose-400' }}">
+                        {{ $issue->has_account ? '✅ دارد' : '❌ ندارد' }}
+                    </span>
                                     </td>
                                     <td class="p-3">
-                                            <span class="px-2 py-1 rounded-full text-[10px] font-bold
-                                                {{ $issue->severity === 'critical' ? 'bg-rose-500/20 text-rose-400' : '' }}
-                                            {{ $issue->severity === 'warning' ? 'bg-amber-500/20 text-amber-400' : '' }}
-                                            {{ $issue->severity === 'info' ? 'bg-blue-500/20 text-blue-400' : '' }}">
-                                                {{ $issue->severity }}
-                                            </span>
+                    <span class="text-[10px] font-bold {{ $issue->has_config ? 'text-emerald-400' : 'text-rose-400' }}">
+                        {{ $issue->has_config ? '✅ دارد' : '❌ ندارد' }}
+                    </span>
+                                    </td>
+                                    <td class="p-3">
+                    <span class="text-[10px] font-bold {{ $issue->has_peer ? 'text-emerald-400' : 'text-rose-400' }}">
+                        {{ $issue->has_peer ? '✅ دارد' : '❌ ندارد' }}
+                    </span>
+                                    </td>
+                                    <td class="p-3">
+                    <span class="px-2 py-1 rounded-full text-[10px] font-bold
+                        {{ $issue->issue_type === 'missing_peer' ? 'bg-rose-500/20 text-rose-400' : '' }}
+                    {{ $issue->issue_type === 'orphan_peer_config' ? 'bg-amber-500/20 text-amber-400' : '' }}
+                    {{ $issue->issue_type === 'account_without_service' ? 'bg-orange-500/20 text-orange-400' : '' }}
+                    {{ $issue->issue_type === 'orphan_full' ? 'bg-red-500/20 text-red-400' : '' }}
+                    {{ $issue->issue_type === 'orphan_peer_only' ? 'bg-amber-500/20 text-amber-400' : '' }}
+                    {{ $issue->issue_type === 'config_without_account' ? 'bg-purple-500/20 text-purple-400' : '' }}">
+                        {{ $issue->issue_type }}
+                    </span>
+                                    </td>
+                                    <td class="p-3">
+                    <span class="px-2 py-1 rounded-full text-[10px] font-bold
+                        {{ $issue->severity === 'critical' ? 'bg-rose-500/20 text-rose-400' : '' }}
+                    {{ $issue->severity === 'warning' ? 'bg-amber-500/20 text-amber-400' : '' }}
+                    {{ $issue->severity === 'info' ? 'bg-blue-500/20 text-blue-400' : '' }}">
+                        {{ $issue->severity }}
+                    </span>
                                     </td>
                                     <td class="p-3 text-zinc-400 max-w-xs truncate">{{ $issue->details }}</td>
-                                    <td class="p-3">
-                                        @if($issue->issue_type === 'orphan' && $issue->service === 'wireguard')
-                                            <button wire:click="deleteWireguardOrphan({{ $issue->id }})"
-                                                    class="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white text-[10px] rounded-lg transition">
-                                                حذف Orphan
-                                            </button>
-                                        @elseif($issue->issue_type === 'missing' && $issue->service === 'wireguard')
-                                            <button wire:click="recreateWireguardPeer({{ $issue->id }})"
-                                                    class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] rounded-lg transition">
-                                                بازسازی
-                                            </button>
+                                    <td class="p-3 text-center">
+                                        @if($issue->service === 'wireguard' && $issue->status === 'open')
+                                            <div class="flex flex-wrap items-center justify-center gap-1.5">
+                                                @if(in_array($issue->issue_type, ['account_without_service', 'orphan_peer_config', 'orphan_peer_only']))
+                                                    {{-- دکمه ایجاد کانفیگ و Peer --}}
+                                                    <button wire:click="handleWireguardAction({{ $issue->id }}, 'create_config_and_peer')"
+                                                            wire:loading.attr="disabled"
+                                                            class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] font-bold rounded-lg transition">
+                                                        ➕ ایجاد
+                                                    </button>
+                                                @endif
+
+                                                @if(in_array($issue->issue_type, ['missing_peer']))
+                                                    {{-- دکمه بازسازی Peer --}}
+                                                    <button wire:click="handleWireguardAction({{ $issue->id }}, 'recreate_peer')"
+                                                            wire:loading.attr="disabled"
+                                                            class="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-bold rounded-lg transition">
+                                                        🔄 بازسازی
+                                                    </button>
+                                                @endif
+
+                                                @if(in_array($issue->issue_type, ['orphan_peer_only', 'orphan_full', 'orphan_peer_config']))
+                                                    {{-- دکمه حذف Orphan --}}
+                                                    <button wire:click="handleWireguardAction({{ $issue->id }}, 'delete_orphan')"
+                                                            wire:loading.attr="disabled"
+                                                            class="px-2.5 py-1 bg-rose-600 hover:bg-rose-500 text-white text-[9px] font-bold rounded-lg transition">
+                                                        🗑️ حذف
+                                                    </button>
+                                                @endif
+
+                                                @if($issue->issue_type === 'config_without_account')
+                                                    <button wire:click="handleWireguardAction({{ $issue->id }}, 'create_account_or_delete')"
+                                                            wire:loading.attr="disabled"
+                                                            class="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white text-[9px] font-bold rounded-lg transition">
+                                                        🔄 بررسی
+                                                    </button>
+                                                @endif
+                                            </div>
                                         @else
                                             <button wire:click="ignoreIssue({{ $issue->id }})"
-                                                    class="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-white text-[10px] rounded-lg transition">
+                                                    class="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-white text-[9px] rounded-lg transition">
                                                 نادیده گرفتن
                                             </button>
                                         @endif

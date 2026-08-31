@@ -127,27 +127,7 @@ class SystemMaintenance extends Component
         $this->loadHealthIssues();
     }
 
-    public function deleteAllWireguardOrphans()
-    {
-        $checker = new \App\Services\System\Checkers\WireGuardIntegrityChecker();
-        $result = $checker->deleteAllOrphansAllServers();
 
-        if ($result['status']) {
-            session()->flash('maintenance_message', $result['message']);
-            // بستن تمام issues مربوطه
-            SystemHealthIssue::where('service', 'wireguard')
-                ->where('issue_type', 'orphan')
-                ->where('status', 'open')
-                ->update([
-                    'status' => 'resolved',
-                    'resolved_at' => now(),
-                    'resolved_by' => Auth::id()
-                ]);
-        } else {
-            session()->flash('maintenance_error', 'خطا در حذف Orphan‌ها: ' . $result['message']);
-        }
-        $this->loadHealthIssues();
-    }
 
     // متد اجرای پاکسازی کلی (همه کاربران)
     public function bulkDeleteAll()
@@ -191,6 +171,60 @@ class SystemMaintenance extends Component
         session()->flash('maintenance_message', 'عملیات حذف به صف ارسال شد. نتیجه به زودی اعلام می‌شود.');
         $this->selectedUsers = [];
         $this->loadStats();
+    }
+
+
+
+    public function handleWireguardAction($issueId, $action)
+    {
+        $issue = SystemHealthIssue::find($issueId);
+        if (!$issue || $issue->service !== 'wireguard' || $issue->status !== 'open') {
+            session()->flash('maintenance_error', 'Issue معتبر نیست.');
+            return;
+        }
+
+        $checker = new \App\Services\System\Checkers\WireGuardIntegrityChecker();
+        $result = null;
+
+        switch ($action) {
+            case 'create_config_and_peer':
+                $result = $checker->createConfigAndPeer($issue->server_id, $issue->username);
+                break;
+            case 'recreate_peer':
+                $result = $checker->recreatePeer($issue->server_id, $issue->username);
+                break;
+            case 'delete_orphan':
+                $result = $checker->deleteOrphan($issue->server_id, $issue->username);
+                break;
+            default:
+                session()->flash('maintenance_error', 'عملیات نامعتبر.');
+                return;
+        }
+
+        if ($result['status']) {
+            $issue->update(['status' => 'resolved', 'resolved_at' => now(), 'resolved_by' => Auth::id()]);
+            session()->flash('maintenance_message', $result['message']);
+        } else {
+            session()->flash('maintenance_error', 'خطا: ' . $result['message']);
+        }
+        $this->loadHealthIssues();
+    }
+
+    public function deleteAllWireguardOrphans()
+    {
+        $checker = new \App\Services\System\Checkers\WireGuardIntegrityChecker();
+        $result = $checker->deleteAllOrphans();
+
+        if ($result['status']) {
+            session()->flash('maintenance_message', $result['message']);
+            SystemHealthIssue::where('service', 'wireguard')
+                ->whereIn('issue_type', ['orphan_peer_only', 'orphan_full', 'orphan_peer_config'])
+                ->where('status', 'open')
+                ->update(['status' => 'resolved', 'resolved_at' => now(), 'resolved_by' => Auth::id()]);
+        } else {
+            session()->flash('maintenance_error', 'خطا: ' . $result['message']);
+        }
+        $this->loadHealthIssues();
     }
 
     public function runHealthCheck()
