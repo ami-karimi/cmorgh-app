@@ -1,19 +1,13 @@
 <?php
-// app/Services/System/SystemCleaner.php
 
 namespace App\Services\System;
 
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
-use App\Models\User;
 use App\Models\Accounts;
 use Carbon\Carbon;
 
 class SystemCleaner
 {
-    /**
-     * حجم فایل‌های لاگ در storage/logs
-     */
     public function getLogsSize(): array
     {
         $logPath = storage_path('logs');
@@ -45,7 +39,6 @@ class SystemCleaner
         if (is_dir($logPath)) {
             $files = glob($logPath . '/*.log');
             foreach ($files as $file) {
-                // فقط فایل‌هایی که قدیمی‌تر از 7 روز هستند را پاک کن
                 if (filemtime($file) < now()->subDays(7)->timestamp) {
                     $deletedSize += filesize($file);
                     unlink($file);
@@ -62,14 +55,11 @@ class SystemCleaner
         ];
     }
 
-    /**
-     * یافتن کاربران قابل پاکسازی (منقضی یا تمام‌شده)
-     */
-    public function findExpiredUsers(int $daysOld = 15): array
+    public function findExpiredUsersPaginated(int $daysOld = 15, int $perPage = 20)
     {
         $threshold = now()->subDays($daysOld);
 
-        $expiredAccounts = Accounts::where(function ($q) use ($threshold) {
+        $query = Accounts::where(function ($q) use ($threshold) {
             $q->whereNotNull('expire_date')
                 ->where('expire_date', '<', $threshold)
                 ->orWhere(function ($sub) use ($threshold) {
@@ -78,10 +68,11 @@ class SystemCleaner
                         ->whereRaw('download_usage >= max_usage')
                         ->where('updated_at', '<', $threshold);
                 });
-        })->with('group')->get();
+        })->with('group');
 
-        $result = [];
-        foreach ($expiredAccounts as $acc) {
+        $paginated = $query->paginate($perPage);
+
+        $result = $paginated->map(function ($acc) {
             $expireDate = $acc->expire_date ? Carbon::parse($acc->expire_date) : null;
             $daysSinceExpire = $expireDate ? $expireDate->diffInDays(now()) : 0;
             $reason = [];
@@ -91,7 +82,7 @@ class SystemCleaner
             if ($acc->max_usage > 0 && $acc->download_usage >= $acc->max_usage) {
                 $reason[] = 'حجم تمام شده';
             }
-            $result[] = [
+            return [
                 'id' => $acc->id,
                 'username' => $acc->username,
                 'service_group' => $acc->service_group,
@@ -102,9 +93,33 @@ class SystemCleaner
                 'reason' => implode(' - ', $reason),
                 'can_delete' => true,
             ];
-        }
+        });
 
-        return $result;
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $result,
+            $paginated->total(),
+            $paginated->perPage(),
+            $paginated->currentPage(),
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+        );
+    }
+
+    public function getExpiredStats(): array
+    {
+        $threshold = now()->subDays(15);
+        return [
+            'total' => Accounts::where(function ($q) use ($threshold) {
+                $q->whereNotNull('expire_date')->where('expire_date', '<', $threshold)
+                    ->orWhere(function ($sub) use ($threshold) {
+                        $sub->whereNotNull('max_usage')->where('max_usage', '>', 0)
+                            ->whereRaw('download_usage >= max_usage')
+                            ->where('updated_at', '<', $threshold);
+                    });
+            })->count(),
+            'expired' => Accounts::whereNotNull('expire_date')->where('expire_date', '<', now())->count(),
+            'volume_finished' => Accounts::whereNotNull('max_usage')->where('max_usage', '>', 0)
+                ->whereRaw('download_usage >= max_usage')->count(),
+        ];
     }
 
     protected function formatBytes($bytes, $precision = 2): string

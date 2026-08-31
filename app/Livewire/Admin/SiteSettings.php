@@ -31,11 +31,10 @@ class SiteSettings extends Component
 
     // متغیرهای مربوط به فایل
     public $logo;
-    public $current_logo; // لینک لوگوی فعلی
+    public $current_logo;
 
     public function mount()
     {
-        // لود کردن تنظیمات از دیتابیس (دقیقاً با کلیدهای جدول شما)
         $this->site_title = Setting::get('SITE_TITLE', 'همراه سیمرغ ایران');
         $this->qr_watermark = Setting::get('QR_WATRMARK', 'cmorgh VPN');
         $this->current_logo = Setting::get('SITE_LOGO');
@@ -53,18 +52,16 @@ class SiteSettings extends Component
     {
         $this->validate([
             'site_title' => 'required|string|max:255',
-            'logo' => 'nullable|image|max:2048', // حداکثر 2 مگابایت
+            'logo' => 'nullable|image|max:2048',
         ]);
 
-        // ذخیره لوگو در صورت آپلود عکس جدید
         if ($this->logo) {
-            $logoPath = $this->logo->store('general', 'public'); // پوشه ذخیره سازی
+            $logoPath = $this->logo->store('general', 'public');
             $logoUrl = asset('storage/' . $logoPath);
             Setting::set('SITE_LOGO', $logoUrl, 'general', 'public');
             $this->current_logo = $logoUrl;
         }
 
-        // ذخیره سایر تنظیمات در دیتابیس
         Setting::set('SITE_TITLE', $this->site_title, 'general', 'public');
         Setting::set('QR_WATRMARK', $this->qr_watermark, 'general', 'public');
 

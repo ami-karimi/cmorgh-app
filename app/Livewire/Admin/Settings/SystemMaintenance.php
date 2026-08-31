@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 class SystemMaintenance extends Component
 {
     public $activeSubTab = 'health'; // health, cleanup, logs
-
+    public $perPage = 50;
     // پاکسازی لاگ‌ها
     public $logsInfo = [];
     public $isCleaningLogs = false;
@@ -71,7 +71,8 @@ class SystemMaintenance extends Component
         $this->isLoadingExpired = true;
         try {
             $cleaner = new SystemCleaner();
-            $this->expiredUsers = $cleaner->findExpiredUsers(15);
+            // استفاده از paginate برای بارگذاری تدریجی
+            $this->expiredUsers = $cleaner->findExpiredUsersPaginated(15, $this->perPage);
         } catch (\Exception $e) {
             Log::error('Load expired users error: ' . $e->getMessage());
             session()->flash('maintenance_error', 'خطا در بارگذاری کاربران منقضی: ' . $e->getMessage());

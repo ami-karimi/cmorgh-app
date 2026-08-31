@@ -1,13 +1,10 @@
 <?php
-// app/Services/System/SystemHealthFacade.php
 
 namespace App\Services\System;
 
 use App\Services\System\Checkers\MikrotikIntegrityChecker;
 use App\Services\System\Checkers\WireGuardIntegrityChecker;
-use App\Services\System\Checkers\OpenVPNIntegrityChecker;
-use App\Services\System\Checkers\V2RayIntegrityChecker;
-use Illuminate\Support\Facades\Log;
+use App\Models\SystemHealthIssue;
 
 class SystemHealthFacade
 {
@@ -18,6 +15,7 @@ class SystemHealthFacade
         $checkers = [
             'mikrotik' => MikrotikIntegrityChecker::class,
             'wireguard' => WireGuardIntegrityChecker::class,
+            // برای OpenVPN و V2Ray می‌توانید چکرهای مشابه اضافه کنید
         ];
 
         foreach ($checkers as $service => $class) {
@@ -35,7 +33,7 @@ class SystemHealthFacade
 
     public function getLatestIssues(int $limit = 50): \Illuminate\Support\Collection
     {
-        return \App\Models\SystemHealthIssue::with('user')
+        return SystemHealthIssue::with('user')
             ->where('status', 'open')
             ->orderBy('created_at', 'desc')
             ->limit($limit)

@@ -80,9 +80,12 @@ class AgentWalletHandler
             }
         }
 
-        $managerId = User::whereIn('role', ['admin', 'manager'])->value('id');
-
-        return AgentBankAccount::where('user_id', $managerId)->first() ?? AgentBankAccount::first();
+        return AgentBankAccount::whereHas('user', function($query) {
+                           $query->where('role', 'manager');
+                       })
+                           ->where('is_show', 1)
+                           ->orderBy('id', 'asc')
+                           ->first();
     }
 
     /**

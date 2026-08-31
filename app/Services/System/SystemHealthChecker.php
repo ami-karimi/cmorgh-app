@@ -1,5 +1,4 @@
 <?php
-// app/Services/System/SystemHealthChecker.php
 
 namespace App\Services\System;
 
@@ -72,9 +71,6 @@ abstract class SystemHealthChecker
         }
     }
 
-    /**
-     * بازگشت issues قبلی که هنوز باز هستند
-     */
     protected function getOpenIssues(?string $username = null): \Illuminate\Support\Collection
     {
         $query = SystemHealthIssue::where('service', $this->service)
@@ -87,9 +83,6 @@ abstract class SystemHealthChecker
         return $query->get();
     }
 
-    /**
-     * بستن issues قبلی برای یک کاربر خاص
-     */
     protected function closeOpenIssues(string $username, ?int $resolvedBy = null): void
     {
         SystemHealthIssue::where('service', $this->service)
@@ -102,9 +95,6 @@ abstract class SystemHealthChecker
             ]);
     }
 
-    /**
-     * نادیده گرفتن issue
-     */
     public function ignoreIssue(int $issueId, ?int $adminId = null): bool
     {
         $issue = SystemHealthIssue::where('service', $this->service)

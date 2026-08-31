@@ -1,5 +1,40 @@
-{{-- resources/views/livewire/admin/settings/system-maintenance.blade.php --}}
-<div class="space-y-6">
+<div class="space-y-6 animate-fade-in">
+    {{-- Statistics Cards --}}
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-zinc-950/50 border border-zinc-800/80 rounded-2xl p-4 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div>
+                <span class="text-[10px] font-bold text-zinc-500 block">کاربران منقضی</span>
+                <span class="text-xl font-bold text-white">{{ $stats['expired'] ?? 0 }}</span>
+                <span class="text-xs text-zinc-500">نفر</span>
+            </div>
+        </div>
+
+        <div class="bg-zinc-950/50 border border-zinc-800/80 rounded-2xl p-4 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path></svg>
+            </div>
+            <div>
+                <span class="text-[10px] font-bold text-zinc-500 block">حجم تمام شده</span>
+                <span class="text-xl font-bold text-white">{{ $stats['volume_finished'] ?? 0 }}</span>
+                <span class="text-xs text-zinc-500">نفر</span>
+            </div>
+        </div>
+
+        <div class="bg-zinc-950/50 border border-zinc-800/80 rounded-2xl p-4 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </div>
+            <div>
+                <span class="text-[10px] font-bold text-zinc-500 block">قابل پاکسازی</span>
+                <span class="text-xl font-bold text-white">{{ $stats['total'] ?? 0 }}</span>
+                <span class="text-xs text-zinc-500">نفر</span>
+            </div>
+        </div>
+    </div>
+
     {{-- Sub Tabs --}}
     <div class="flex gap-2 border-b border-zinc-800 pb-3">
         <button wire:click="$set('activeSubTab', 'health')" class="px-4 py-2 text-xs font-bold rounded-xl transition {{ $activeSubTab === 'health' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 'text-zinc-400 hover:text-white' }}">🔍 سلامت سیستم</button>
@@ -36,7 +71,6 @@
                 </div>
             @endif
 
-            {{-- Issues Table --}}
             @if($healthIssues->count() > 0)
                 <div class="bg-zinc-950/50 border border-zinc-800/80 rounded-2xl overflow-hidden">
                     <div class="overflow-x-auto">
@@ -124,12 +158,12 @@
                     </div>
                 </div>
 
-                @if(!empty($expiredUsers))
+                @if($expiredUsers && $expiredUsers->count() > 0)
                     <div class="mt-4 overflow-x-auto">
                         <table class="w-full text-right text-xs">
                             <thead class="bg-zinc-900/50 text-zinc-400 border-b border-zinc-800">
                             <tr>
-                                <th class="p-2"><input type="checkbox" wire:model="selectAll" class="rounded border-zinc-700 bg-zinc-900 text-orange-500"></th>
+                                <th class="p-2"><input type="checkbox" wire:model="selectedUsers" value="{{ $expiredUsers->first()['id'] ?? '' }}" class="rounded border-zinc-700 bg-zinc-900 text-orange-500"></th>
                                 <th class="p-2">کاربر</th>
                                 <th class="p-2">سرویس</th>
                                 <th class="p-2">تاریخ انقضا</th>
@@ -151,12 +185,37 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="mt-4 flex justify-end">
+
+                    {{-- Pagination --}}
+                    @if($expiredUsers->hasPages())
+                        <div class="mt-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+                            <div class="text-xs text-zinc-500">
+                                نمایش {{ $expiredUsers->firstItem() }} تا {{ $expiredUsers->lastItem() }} از {{ $expiredUsers->total() }} کاربر
+                            </div>
+                            <div>
+                                {{ $expiredUsers->links() }}
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="mt-4 flex flex-wrap justify-end gap-3 border-t border-zinc-800 pt-4">
+                        <div class="flex items-center gap-2 text-xs text-zinc-500">
+                            <span>تعداد در هر صفحه:</span>
+                            <select wire:model.live="perPage" class="bg-zinc-800 border border-zinc-700 text-white rounded-lg px-2 py-1 text-xs">
+                                <option value="20">۲۰</option>
+                                <option value="50">۵۰</option>
+                                <option value="100">۱۰۰</option>
+                            </select>
+                        </div>
                         <button wire:click="deleteSelectedUsers" wire:loading.attr="disabled" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-rose-500/20 flex items-center gap-2">
                             <span wire:loading.remove>🗑 حذف انتخاب‌شده‌ها ({{ count($selectedUsers) }})</span>
                             <span wire:loading>⏳</span>
                         </button>
                     </div>
+                @elseif($isLoadingExpired)
+                    <div class="py-8 text-center text-zinc-500 text-sm">⏳ در حال بارگذاری...</div>
+                @else
+                    <div class="py-8 text-center text-zinc-500 text-sm">✅ هیچ کاربر منقضی یا تمام‌شده‌ای یافت نشد.</div>
                 @endif
             </div>
         </div>

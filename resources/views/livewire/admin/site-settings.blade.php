@@ -58,124 +58,123 @@
                 <svg class="w-8 h-8 animate-spin text-orange-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"></path></svg>
             </div>
 
+            {{-- تب عمومی --}}
+            @if($activeTab === 'general')
+                <div class="space-y-6 animate-fade-in">
+                    <div>
+                        <label class="block text-sm font-bold text-zinc-300 mb-2">عنوان سایت (SITE_TITLE)</label>
+                        <input wire:model="site_title" type="text" class="w-full bg-zinc-950 border border-zinc-700/50 text-white rounded-xl p-4 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 transition-all shadow-inner" placeholder="مثلاً: همراه سیمرغ ایران">
+                        @error('site_title') <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-zinc-300 mb-2">واترمارک کدهای QR (QR_WATRMARK)</label>
+                        <input wire:model="qr_watermark" type="text" dir="ltr" class="w-full bg-zinc-950 border border-zinc-700/50 text-zinc-300 rounded-xl p-4 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 transition-all shadow-inner" placeholder="cmorgh VPN">
+                    </div>
+
+                    <div class="pt-6 border-t border-zinc-800/80">
+                        <label class="block text-sm font-bold text-zinc-300 mb-4">لوگوی سایت (SITE_LOGO)</label>
+                        <div class="flex items-center gap-6">
+                            <div class="w-24 h-24 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                                @if ($logo)
+                                    <img src="{{ $logo->temporaryUrl() }}" class="w-full h-full object-cover">
+                                @elseif($current_logo)
+                                    <img src="{{ $current_logo }}" class="w-full h-full object-cover">
+                                @else
+                                    <svg class="w-8 h-8 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                @endif
+                            </div>
+                            <div class="flex-1">
+                                <input type="file" wire:model="logo" id="logo_upload" class="hidden" accept="image/*">
+                                <label for="logo_upload" class="inline-block px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-medium text-sm rounded-xl cursor-pointer transition-colors border border-zinc-700">
+                                    آپلود لوگوی جدید
+                                </label>
+                                <p class="text-xs text-zinc-500 mt-2">فرمت‌های مجاز: PNG, WEBP (پس‌زمینه ترنسپرنت پیشنهاد می‌شود)</p>
+                                @error('logo') <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- تب دسترسی --}}
+            @if($activeTab === 'access')
+                <div class="space-y-4 animate-fade-in">
+                    <div class="p-5 bg-zinc-950/50 border border-zinc-800/80 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <h4 class="text-white font-bold text-sm mb-1">ساخت اکانت وایرگارد (WireGuard)</h4>
+                            <p class="text-[11px] text-zinc-500">امکان ساخت اکانت وایرگارد برای نمایندگان فعال باشد.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input type="checkbox" wire:model="create_wg_account" class="sr-only peer">
+                            <div class="w-12 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
+                        </label>
+                    </div>
+
+                    <div class="p-5 bg-zinc-950/50 border border-zinc-800/80 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <h4 class="text-white font-bold text-sm mb-1">ساخت اکانت OpenVPN / L2TP</h4>
+                            <p class="text-[11px] text-zinc-500">امکان ساخت اکانت OpenVPN برای نمایندگان فعال باشد.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input type="checkbox" wire:model="create_op_account" class="sr-only peer">
+                            <div class="w-12 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
+                        </label>
+                    </div>
+
+                    <div class="p-5 bg-zinc-950/50 border border-zinc-800/80 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <h4 class="text-white font-bold text-sm mb-1">ساخت اکانت V2Ray</h4>
+                            <p class="text-[11px] text-zinc-500">امکان ساخت اکانت V2Ray برای نمایندگان فعال باشد.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input type="checkbox" wire:model="create_v2_account" class="sr-only peer">
+                            <div class="w-12 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
+                        </label>
+                    </div>
+
+                    <div class="p-5 mt-4 bg-rose-500/5 border border-rose-500/20 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <h4 class="text-rose-400 font-bold text-sm mb-1">فعال‌سازی حالت تعمیرات</h4>
+                            <p class="text-[11px] text-zinc-400">سایت از دسترس خارج شده و فقط ادمین‌ها می‌توانند وارد شوند.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input type="checkbox" wire:model="maintenance_mode" class="sr-only peer">
+                            <div class="w-12 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600 shadow-inner"></div>
+                        </label>
+                    </div>
+                </div>
+            @endif
+
+            {{-- تب پشتیبانی --}}
+            @if($activeTab === 'support')
+                <div class="space-y-6 animate-fade-in">
+                    <div>
+                        <label class="block text-sm font-bold text-zinc-300 mb-2">لینک پشتیبانی تلگرام</label>
+                        <input wire:model="telegram_support" type="text" dir="ltr" class="w-full bg-zinc-950 border border-zinc-700/50 text-zinc-300 rounded-xl p-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all shadow-inner" placeholder="https://t.me/...">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-zinc-300 mb-2">متن قوانین و مقررات</label>
+                        <textarea wire:model="rules_text" rows="6" class="w-full bg-zinc-950 border border-zinc-700/50 text-zinc-300 rounded-xl p-4 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 transition-all shadow-inner leading-relaxed" placeholder="متن توافقنامه کاربری..."></textarea>
+                    </div>
+                </div>
+            @endif
+
+            {{-- تب مدیریت RADIUS --}}
             @if($activeTab === 'radius')
                 <livewire:admin.settings.radius-manager />
             @endif
 
+            {{-- تب سلامت و پاکسازی --}}
             @if($activeTab === 'maintenance')
                 <livewire:admin.settings.system-maintenance />
             @endif
-
-
-            <form wire:submit.prevent="save">
-
-
-                {{-- تب عمومی --}}
-                @if($activeTab === 'general')
-                    <div class="space-y-6 animate-fade-in">
-                        <div>
-                            <label class="block text-sm font-bold text-zinc-300 mb-2">عنوان سایت (SITE_TITLE)</label>
-                            <input wire:model="site_title" type="text" class="w-full bg-zinc-950 border border-zinc-700/50 text-white rounded-xl p-4 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 transition-all shadow-inner" placeholder="مثلاً: همراه سیمرغ ایران">
-                            @error('site_title') <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span> @enderror
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold text-zinc-300 mb-2">واترمارک کدهای QR (QR_WATRMARK)</label>
-                            <input wire:model="qr_watermark" type="text" dir="ltr" class="w-full bg-zinc-950 border border-zinc-700/50 text-zinc-300 rounded-xl p-4 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 transition-all shadow-inner" placeholder="cmorgh VPN">
-                        </div>
-
-                        <div class="pt-6 border-t border-zinc-800/80">
-                            <label class="block text-sm font-bold text-zinc-300 mb-4">لوگوی سایت (SITE_LOGO)</label>
-                            <div class="flex items-center gap-6">
-                                <div class="w-24 h-24 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
-                                    @if ($logo)
-                                        <img src="{{ $logo->temporaryUrl() }}" class="w-full h-full object-cover">
-                                    @elseif($current_logo)
-                                        <img src="{{ $current_logo }}" class="w-full h-full object-cover">
-                                    @else
-                                        <svg class="w-8 h-8 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                    @endif
-                                </div>
-                                <div class="flex-1">
-                                    <input type="file" wire:model="logo" id="logo_upload" class="hidden" accept="image/*">
-                                    <label for="logo_upload" class="inline-block px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-medium text-sm rounded-xl cursor-pointer transition-colors border border-zinc-700">
-                                        آپلود لوگوی جدید
-                                    </label>
-                                    <p class="text-xs text-zinc-500 mt-2">فرمت‌های مجاز: PNG, WEBP (پس‌زمینه ترنسپرنت پیشنهاد می‌شود)</p>
-                                    @error('logo') <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span> @enderror
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                {{-- تب دسترسی پروتکل‌ها --}}
-                @if($activeTab === 'access')
-                    <div class="space-y-4 animate-fade-in">
-
-                        <div class="p-5 bg-zinc-950/50 border border-zinc-800/80 rounded-2xl flex items-center justify-between">
-                            <div>
-                                <h4 class="text-white font-bold text-sm mb-1">ساخت اکانت وایرگارد (WireGuard)</h4>
-                                <p class="text-[11px] text-zinc-500">امکان ساخت اکانت وایرگارد برای نمایندگان فعال باشد.</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                                <input type="checkbox" wire:model="create_wg_account" class="sr-only peer">
-                                <div class="w-12 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
-                            </label>
-                        </div>
-
-                        <div class="p-5 bg-zinc-950/50 border border-zinc-800/80 rounded-2xl flex items-center justify-between">
-                            <div>
-                                <h4 class="text-white font-bold text-sm mb-1">ساخت اکانت OpenVPN / L2TP</h4>
-                                <p class="text-[11px] text-zinc-500">امکان ساخت اکانت OpenVPN برای نمایندگان فعال باشد.</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                                <input type="checkbox" wire:model="create_op_account" class="sr-only peer">
-                                <div class="w-12 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
-                            </label>
-                        </div>
-
-                        <div class="p-5 bg-zinc-950/50 border border-zinc-800/80 rounded-2xl flex items-center justify-between">
-                            <div>
-                                <h4 class="text-white font-bold text-sm mb-1">ساخت اکانت V2Ray</h4>
-                                <p class="text-[11px] text-zinc-500">امکان ساخت اکانت V2Ray برای نمایندگان فعال باشد.</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                                <input type="checkbox" wire:model="create_v2_account" class="sr-only peer">
-                                <div class="w-12 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
-                            </label>
-                        </div>
-
-                        <div class="p-5 mt-4 bg-rose-500/5 border border-rose-500/20 rounded-2xl flex items-center justify-between">
-                            <div>
-                                <h4 class="text-rose-400 font-bold text-sm mb-1">فعال‌سازی حالت تعمیرات</h4>
-                                <p class="text-[11px] text-zinc-400">سایت از دسترس خارج شده و فقط ادمین‌ها می‌توانند وارد شوند.</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                                <input type="checkbox" wire:model="maintenance_mode" class="sr-only peer">
-                                <div class="w-12 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600 shadow-inner"></div>
-                            </label>
-                        </div>
-
-                    </div>
-                @endif
-
-                {{-- تب پشتیبانی --}}
-                @if($activeTab === 'support')
-                    <div class="space-y-6 animate-fade-in">
-                        <div>
-                            <label class="block text-sm font-bold text-zinc-300 mb-2">لینک پشتیبانی تلگرام</label>
-                            <input wire:model="telegram_support" type="text" dir="ltr" class="w-full bg-zinc-950 border border-zinc-700/50 text-zinc-300 rounded-xl p-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all shadow-inner" placeholder="https://t.me/...">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold text-zinc-300 mb-2">متن قوانین و مقررات</label>
-                            <textarea wire:model="rules_text" rows="6" class="w-full bg-zinc-950 border border-zinc-700/50 text-zinc-300 rounded-xl p-4 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 transition-all shadow-inner leading-relaxed" placeholder="متن توافقنامه کاربری..."></textarea>
-                        </div>
-                    </div>
-                @endif
-
-            </form>
         </div>
     </div>
 </div>
+
+<style>
+    .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
