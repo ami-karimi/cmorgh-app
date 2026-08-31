@@ -690,26 +690,6 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
             // ۱. پیدا کردن رکورد WireGuardUsers (اگر وجود داشته باشد)
             $wgUser = WireGuardUsers::where('profile_name', $username)->first();
 
-            // ۲. حذف Queue مرتبط با این کاربر (حتی اگر رکورد وجود نداشته باشد، ممکن است Queue در سرور باشد)
-            try {
-                $wgService = new WireguardService($server);
-
-                // ابتدا Queue را حذف کن (بر اساس نام)
-                $queues = $wgService->api->bs_mkt_rest_api_get("/queue/simple");
-                if ($queues['ok'] && !empty($queues['data'])) {
-                    foreach ($queues['data'] as $queue) {
-                        if (($queue['name'] ?? '') === $username) {
-                            $wgService->api->bs_mkt_rest_api_del("/queue/simple/{$queue['.id']}");
-                            Log::info("Queue اورفان {$username} از سرور {$server->name} حذف شد.");
-                            break;
-                        }
-                    }
-                }
-            } catch (\Exception $e) {
-                $errors[] = "خطا در حذف Queue: " . $e->getMessage();
-                Log::warning("خطا در حذف Queue برای {$username}: " . $e->getMessage());
-            }
-
             if ($wgUser && !empty($wgUser->public_key)) {
                 try {
                     $wgService = new WireguardService($server);
