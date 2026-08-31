@@ -16,16 +16,15 @@ class TelegramNotificationService
     public function __construct()
     {
         $config = config('nutgram');
-        $configuration = new Configuration();
 
-        if (!empty($config['config']['api_url'])) {
-            $configuration->setApiUrl($config['config']['api_url']);
-        }
+        // ساخت شیء Configuration با تنظیمات (مانند api_url)
+        $configuration = new Configuration($config['config'] ?? []);
 
-        // You can also set other options if needed:
+        // در صورت نیاز تنظیمات دیگر
         // $configuration->setSafeMode($config['safe_mode'] ?? false);
 
         $this->bot = new Nutgram($config['token'], $configuration);
+
     }
 
     /**
