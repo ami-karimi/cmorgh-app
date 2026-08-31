@@ -10,6 +10,7 @@ use App\Models\Financial;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+
 #[Title('مدیریت زیر نمایندگان | پنل نمایندگی')]
 #[Layout('layouts.agent')]
 class SubAgentManager extends Component
@@ -32,8 +33,11 @@ class SubAgentManager extends Component
 
     // متغیرهای شارژ/کسر کیف پول زیرنماینده
     public $walletAmount = '';
-    public $walletType = 'plus'; // plus یا minus
+    public $walletType = 'plus';
     public $walletDescription = '';
+
+    // متغیر برای ذخیره اطلاعات زیرنماینده انتخاب شده در مودال کیف پول
+    public $selectedAgent = null;
 
     protected $paginationTheme = 'tailwind';
 
@@ -47,7 +51,8 @@ class SubAgentManager extends Component
      */
     public function openCreateModal()
     {
-        $this->reset(['editingAgentId', 'name', 'username', 'email', 'phone', 'password', 'is_active']);$this->is_active = 1;
+        $this->reset(['editingAgentId', 'name', 'username', 'email', 'phone', 'password', 'is_active']);
+        $this->is_active = 1;
         $this->isModalOpen = true;
     }
 
@@ -58,13 +63,13 @@ class SubAgentManager extends Component
     {
         $agent = User::where('creator', Auth::id())->findOrFail($agentId);
 
-        $this->editingAgentId =$agent->id;
-        $this->name =$agent->name;
-        $this->username =$agent->username;
-        $this->email =$agent->email;
-        $this->phone =$agent->phone;
-        $this->is_active =$agent->is_active;
-        $this->password = ''; // برای تغییر اختیاری
+        $this->editingAgentId = $agent->id;
+        $this->name = $agent->name;
+        $this->username = $agent->username;
+        $this->email = $agent->email;
+        $this->phone = $agent->phone;
+        $this->is_active = $agent->is_active;
+        $this->password = '';
 
         $this->isModalOpen = true;
     }
@@ -74,7 +79,6 @@ class SubAgentManager extends Component
      */
     public function saveAgent()
     {
-        // ۱. اعتبارسنجی فیلدها
         $rules = [
             'name'      => 'required|string|max:255',
             'phone'     => 'required|string|max:20|unique:users,phone,' . $this->editingAgentId,
@@ -82,7 +86,6 @@ class SubAgentManager extends Component
             'is_active' => 'required|boolean',
         ];
 
-        // کلمه عبور فقط هنگام ساخت الزامی است (در ویرایش اختیاری)
         if (!$this->editingAgentId) {
             $rules['password'] = 'required|min:6';
         }
@@ -98,7 +101,6 @@ class SubAgentManager extends Component
         ]);
 
         if ($this->editingAgentId) {
-            // ✏️ ویرایش زیر‌نماینده موجود
             $agent = User::where('creator', Auth::id())
                 ->where('role', 'sub_agent')
                 ->findOrFail($this->editingAgentId);
@@ -106,7 +108,7 @@ class SubAgentManager extends Component
             $data = [
                 'name'      => $this->name,
                 'phone'     => $this->phone,
-                'username'  => $this->phone, // تنظیم یوزرنیم بر اساس شماره تماس برای یکپارچگی
+                'username'  => $this->phone,
                 'email'     => $this->email ?: strtolower($this->phone) . '@subagent.com',
                 'is_active' => $this->is_active,
             ];
@@ -118,15 +120,14 @@ class SubAgentManager extends Component
             $agent->update($data);
             session()->flash('success', 'اطلاعات زیر‌نماینده با موفقیت به‌روزرسانی شد.');
         } else {
-            // ➕ ایجاد زیر‌نماینده جدید
             User::create([
                 'name'      => $this->name,
                 'phone'     => $this->phone,
-                'username'  => $this->phone, // استفاده از شماره تماس به عنوان نام کاربری سیستم
+                'username'  => $this->phone,
                 'email'     => $this->email ?: strtolower($this->phone) . '@subagent.com',
                 'password'  => Hash::make($this->password),
                 'role'      => 'sub_agent',
-                'creator'   => Auth::id(), // تنظیم نماینده بالادست
+                'creator'   => Auth::id(),
                 'is_active' => $this->is_active,
             ]);
 
@@ -154,9 +155,16 @@ class SubAgentManager extends Component
      */
     public function openWalletModal($agentId)
     {
-        $this->editingAgentId =$agentId;
+        $this->editingAgentId = $agentId;
         $this->reset(['walletAmount', 'walletDescription']);
-        $this->walletType = 'plus';$this->isWalletModalOpen = true;
+        $this->walletType = 'plus';
+
+        // دریافت اطلاعات زیرنماینده برای نمایش در مودال
+        $this->selectedAgent = User::where('creator', Auth::id())
+            ->where('role', 'sub_agent')
+            ->find($agentId);
+
+        $this->isWalletModalOpen = true;
     }
 
     /**
@@ -173,12 +181,17 @@ class SubAgentManager extends Component
 
         try {
             DB::transaction(function () {
-                $myUser = Auth::user();$subAgent = User::where('creator', $myUser->id)->findOrFail($this->editingAgentId);
+                $myUser = Auth::user();
+                $subAgent = User::where('creator', $myUser->id)->findOrFail($this->editingAgentId);
                 $amount = (float)$this->walletAmount;
 
                 if ($this->walletType === 'plus') {
+                    // بررسی موجودی نماینده برای شارژ زیرنماینده
+                    if ($myUser->balance < $amount) {
+                        throw new \Exception('موجودی کیف پول شما برای این شارژ کافی نیست!');
+                    }
 
-
+                    // ۱. شارژ زیرنماینده
                     Financial::create([
                         'creator'     => $myUser->id,
                         'for'         => $subAgent->id,
@@ -188,9 +201,19 @@ class SubAgentManager extends Component
                         'approved'    => 1,
                     ]);
 
+                    // ۲. کسر از نماینده
+                    Financial::create([
+                        'creator'     => $myUser->id,
+                        'for'         => $myUser->id,
+                        'type'        => 'minus',
+                        'price'       => $amount,
+                        'description' => 'انتقال شارژ به زیرنماینده (' . $subAgent->name . ')' . ($this->walletDescription ? " ({$this->walletDescription})" : ''),
+                        'approved'    => 1,
+                    ]);
+
                 } else {
                     // کسر از زیرنماینده ⬅️ برگشت به کیف پول نماینده
-                    if ($subAgent->balance <$amount) {
+                    if ($subAgent->balance < $amount) {
                         throw new \Exception('موجودی زیر‌نماینده کمتر از مبلغ درخواستی جهت کسر است!');
                     }
 
@@ -204,15 +227,24 @@ class SubAgentManager extends Component
                         'approved'    => 1,
                     ]);
 
-
+                    // ۲. افزودن به نماینده
+                    Financial::create([
+                        'creator'     => $myUser->id,
+                        'for'         => $myUser->id,
+                        'type'        => 'plus',
+                        'price'       => $amount,
+                        'description' => 'بازگشت وجه از زیرنماینده (' . $subAgent->name . ')' . ($this->walletDescription ? " ({$this->walletDescription})" : ''),
+                        'approved'    => 1,
+                    ]);
                 }
             });
 
             session()->flash('success', 'تراکنش کیف پول زیر‌نماینده با موفقیت انجام شد.');
             $this->isWalletModalOpen = false;
+            $this->selectedAgent = null;
 
         } catch (\Exception $e) {
-            $this->addError('walletAmount',$e->getMessage());
+            $this->addError('walletAmount', $e->getMessage());
         }
     }
 
@@ -220,9 +252,8 @@ class SubAgentManager extends Component
     {
         $myId = Auth::id();
 
-        // 🔒 کوئری دریافت زیرنمایندگان بر اساس سازنده و نقش sub_agent
         $query = User::where('creator', $myId)
-            ->where('role', 'sub_agent') // 🔴 افزودن فیلتر نقش
+            ->where('role', 'sub_agent')
             ->latest();
 
         if ($this->search) {
@@ -235,13 +266,12 @@ class SubAgentManager extends Component
 
         $subAgents = $query->paginate(12);
 
-        // محاسبه موجودی طبق Accessor و آمار جدید
         $allSubAgents = User::where('creator', $myId)->where('role', 'sub_agent')->get();
 
         $stats = [
             'totalCount'   => $allSubAgents->count(),
             'activeCount'  => $allSubAgents->where('is_active', 1)->count(),
-            'totalBalance' => $allSubAgents->sum('balance'), // محاسبه از روی Accessor مدل User
+            'totalBalance' => $allSubAgents->sum('balance'),
         ];
 
         return view('livewire.agent.sub-agent-manager', [

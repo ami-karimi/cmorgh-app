@@ -249,5 +249,52 @@
 @livewireScripts
 <script src="{{url('js/chart.js')}}"></script>
 
+<script>
+    window.addEventListener('toast', event => {
+        const { type, title, message } = event.detail;
+        // نمایش toast با کتابخانه دلخواه یا کد دستی
+        // در اینجا از Alpine.js استفاده شده است
+    });
+
+    function copyToClipboard(text, label = 'متن') {
+        if (!text) {
+            alert('اطلاعاتی برای کپی وجود ندارد.');
+            return;
+        }
+
+        // کپی کردن
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('success', 'کپی شد', label + ' با موفقیت کپی شد.');
+            }).catch(() => {
+                fallbackCopy(text, label);
+            });
+        } else {
+            fallbackCopy(text, label);
+        }
+    }
+
+    function fallbackCopy(text, label) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            showToast('success', 'کپی شد', label + ' با موفقیت کپی شد.');
+        } catch (err) {
+            showToast('error', 'خطا', 'کپی ناموفق بود. لطفاً دستی کپی کنید.');
+        }
+        document.body.removeChild(textarea);
+    }
+
+    function showToast(type, title, message) {
+        // می‌توانید از کتابخانه Toastr یا Alpine.js استفاده کنید
+        alert(title + ': ' + message);
+    }
+
+</script>
 </body>
 </html>
