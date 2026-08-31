@@ -172,6 +172,56 @@ class WireguardService
         ];
     }
 
+
+    public function cleanupOrphanQueuesByIssues(array $orphanUsernames): array
+    {
+        if (!$this->connect()) {
+            return ['status' => false, 'message' => 'سرور میکروتیک در دسترس نیست.'];
+        }
+
+        if (empty($orphanUsernames)) {
+            return ['status' => true, 'message' => 'هیچ اورفانی برای پاکسازی وجود ندارد.', 'deleted' => 0];
+        }
+
+        $deleted = 0;
+        $errors = [];
+
+        // ۱. دریافت همه Queueهای Simple (یک بار درخواست)
+        $queues = $this->api->bs_mkt_rest_api_get("/queue/simple");
+        if (!$queues['ok'] || empty($queues['data'])) {
+            return ['status' => true, 'message' => 'هیچ Queueای روی سرور یافت نشد.', 'deleted' => 0];
+        }
+
+        // ۲. برای هر Queue، اگر نام آن در لیست اورفان‌ها باشد، حذف کن
+        foreach ($queues['data'] as $queue) {
+            $queueName = $queue['name'] ?? '';
+            if (empty($queueName)) {
+                continue;
+            }
+
+            // بررسی اینکه آیا این نام در لیست اورفان‌ها وجود دارد؟
+            if (in_array($queueName, $orphanUsernames)) {
+                $result = $this->api->bs_mkt_rest_api_del("/queue/simple/{$queue['.id']}");
+                if ($result['ok']) {
+                    $deleted++;
+                    \Illuminate\Support\Facades\Log::info("Queue اورفان {$queueName} از سرور حذف شد.");
+                } else {
+                    $errorMsg = $result['error'] ?? 'نامشخص';
+                    $errors[] = "خطا در حذف Queue {$queueName}: {$errorMsg}";
+                    \Illuminate\Support\Facades\Log::error("خطا در حذف Queue {$queueName}: {$errorMsg}");
+                }
+            }
+        }
+
+        return [
+            'status' => true,
+            'message' => "{$deleted} Queue اورفان از سرور حذف شد.",
+            'deleted' => $deleted,
+            'errors' => $errors,
+        ];
+    }
+
+
     /**
      * حذف کامل کاربر و Queue از سرور
      */
@@ -256,6 +306,71 @@ class WireguardService
         }
 
         return [];
+    }
+
+
+    public function cleanupOrphanQueues(): array
+    {
+        if (!$this->connect()) {
+            return ['status' => false, 'message' => 'سرور میکروتیک در دسترس نیست.'];
+        }
+
+        $deleted = 0;
+        $errors = [];
+
+        // ۱. دریافت همه Queueها
+        $queues = $this->api->bs_mkt_rest_api_get("/queue/simple");
+        if (!$queues['ok'] || empty($queues['data'])) {
+            return ['status' => true, 'message' => 'هیچ Queueای یافت نشد.', 'deleted' => 0];
+        }
+
+        // ۲. دریافت همه Peerهای فعال (برای مقایسه)
+        $peers = $this->api->bs_mkt_rest_api_get("/interface/wireguard/peers");
+        $activeIps = [];
+        $activeNames = [];
+        if ($peers['ok'] && !empty($peers['data'])) {
+            foreach ($peers['data'] as $peer) {
+                if (isset($peer['allowed-address'])) {
+                    $activeIps[] = $peer['allowed-address'];
+                }
+                if (isset($peer['comment']) && !empty($peer['comment'])) {
+                    $activeNames[] = $peer['comment'];
+                }
+            }
+        }
+
+        // ۳. بررسی هر Queue
+        foreach ($queues['data'] as $queue) {
+            $target = $queue['target'] ?? '';
+            $name = $queue['name'] ?? '';
+            $isOrphan = true;
+
+            // بررسی بر اساس IP (target)
+            if ($target && in_array($target, $activeIps)) {
+                $isOrphan = false;
+            }
+
+            // بررسی بر اساس نام (اگر Queue با نام کاربری ساخته شده باشد)
+            if (!$isOrphan && $name && in_array($name, $activeNames)) {
+                $isOrphan = false;
+            }
+
+            if ($isOrphan) {
+                $result = $this->api->bs_mkt_rest_api_del("/queue/simple/{$queue['.id']}");
+                if ($result['ok']) {
+                    $deleted++;
+                } else {
+                    $errors[] = "خطا در حذف Queue {$name}: " . ($result['error'] ?? 'نامشخص');
+                }
+            }
+        }
+
+        return [
+            'status' => true,
+            'message' => "{$deleted} Queue اورفان حذف شد.",
+            'deleted' => $deleted,
+            'errors' => $errors,
+        ];
     }
 
     // ==========================================

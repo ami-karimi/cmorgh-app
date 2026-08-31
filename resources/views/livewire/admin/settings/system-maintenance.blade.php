@@ -43,43 +43,32 @@
     </div>
 
     {{-- Health Sub Tab --}}
+    {{-- بخش سلامت سیستم در system-maintenance.blade.php --}}
     @if($activeSubTab === 'health')
         <div class="space-y-4">
-            @if (session()->has('maintenance_message'))
-                <div class="p-4 mb-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-bold flex items-start gap-3">
-                    <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    <span>{{ session('maintenance_message') }}</span>
-                </div>
-            @endif
-
-            @if (session()->has('maintenance_error'))
-                <div class="p-4 mb-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm font-bold flex items-start gap-3">
-                    <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    <span>{{ session('maintenance_error') }}</span>
-                </div>
-            @endif
-
             <div class="flex items-center justify-between">
                 <div>
                     <h4 class="text-sm font-bold text-white">بررسی مغایرت سرویس‌ها</h4>
-                    <p class="text-xs text-zinc-400">مقایسه دیتابیس با سرورهای MikroTik, WireGuard, OpenVPN, V2Ray</p>
+                    <p class="text-xs text-zinc-400">مقایسه دیتابیس با سرورهای MikroTik, WireGuard</p>
                 </div>
-                <button wire:click="runHealthCheck" wire:loading.attr="disabled"
-                        class="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-orange-500/20 flex items-center gap-2">
-                    <span wire:loading.remove wire:target="runHealthCheck">🚀 شروع بررسی کامل</span>
-                    <span wire:loading wire:target="runHealthCheck">⏳ در حال بررسی...</span>
-                </button>
+                <div class="flex items-center gap-3">
+                    @if($healthIssues->whereIn('issue_type', ['orphan_peer_only', 'orphan_full', 'orphan_peer_config', 'config_without_account'])->where('status', 'open')->count() > 0)
+                        <button wire:click="cleanupOrphanQueuesByServer"
+                                wire:loading.attr="disabled"
+                                class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-purple-500/20 flex items-center gap-2">
+                            <span wire:loading.remove>🧹 پاکسازی Queueهای اورفان (گروهی)</span>
+                            <span wire:loading>⏳</span>
+                        </button>
+                    @endif
 
+                    <button wire:click="runHealthCheck"
+                            wire:loading.attr="disabled"
+                            class="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-orange-500/20 flex items-center gap-2">
+                        <span wire:loading.remove wire:target="runHealthCheck">🚀 شروع بررسی کامل</span>
+                        <span wire:loading wire:target="runHealthCheck">⏳ در حال بررسی...</span>
+                    </button>
+                </div>
             </div>
-
-            @if($healthIssues->where('service', 'wireguard')->where('issue_type', 'orphan')->where('status', 'open')->count() > 0)
-                <button wire:click="deleteAllWireguardOrphans"
-                        wire:loading.attr="disabled"
-                        class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-rose-500/20 flex items-center gap-2">
-                    <span wire:loading.remove>🗑️ حذف تمام Orphan‌های WireGuard</span>
-                    <span wire:loading>⏳</span>
-                </button>
-            @endif
 
             @if(!empty($healthResults))
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -96,7 +85,83 @@
                 </div>
             @endif
 
-            @if($healthIssues->count() > 0)
+            <div class="bg-zinc-950/30 border border-zinc-800 rounded-xl p-4 space-y-3">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-bold text-zinc-400 ml-1">فیلتر:</span>
+
+                    {{-- فیلتر سرویس --}}
+                    <select wire:model.live="filterService" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-orange-500">
+                        <option value="all">همه سرویس‌ها</option>
+                        <option value="wireguard">WireGuard</option>
+                        <option value="mikrotik">MikroTik</option>
+                    </select>
+
+                    {{-- فیلتر نوع Issue --}}
+                    <select wire:model.live="filterIssueType" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-orange-500">
+                        <option value="all">همه انواع</option>
+                        <option value="orphan_peer_only">Orphan Peer Only</option>
+                        <option value="orphan_peer_config">Orphan Peer + Config</option>
+                        <option value="orphan_full">Orphan کامل</option>
+                        <option value="account_without_service">اکانت بدون سرویس</option>
+                        <option value="missing_peer">Peer گم‌شده</option>
+                        <option value="status_mismatch">ناهماهنگی وضعیت</option>
+                        <option value="expired_account">اکانت منقضی</option>
+                        <option value="speed_mismatch">ناهماهنگی سرعت</option>
+                        <option value="config_without_account">کانفیگ بدون اکانت</option>
+                    </select>
+
+                    {{-- فیلتر شدت --}}
+                    <select wire:model.live="filterSeverity" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-orange-500">
+                        <option value="all">همه شدت‌ها</option>
+                        <option value="critical">⚠️ حیاتی</option>
+                        <option value="warning">⚡ هشدار</option>
+                        <option value="info">ℹ️ اطلاع‌رسانی</option>
+                    </select>
+
+                    {{-- فیلتر وضعیت --}}
+                    <select wire:model.live="filterStatus" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-orange-500">
+                        <option value="open">باز</option>
+                        <option value="resolved">حل شده</option>
+                        <option value="ignored">نادیده گرفته</option>
+                        <option value="all">همه</option>
+                    </select>
+
+                    {{-- فیلتر سرور --}}
+                    <select wire:model.live="filterServerId" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-orange-500">
+                        <option value="all">همه سرورها</option>
+                        @foreach($servers as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+
+                    {{-- جستجوی متنی --}}
+                    <div class="relative">
+                        <input wire:model.live.debounce.300ms="filterSearch"
+                               type="text"
+                               placeholder="جستجوی نام کاربری..."
+                               class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 pr-8 focus:ring-1 focus:ring-orange-500 w-36">
+                        <svg class="w-3.5 h-3.5 text-zinc-500 absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+
+                    {{-- دکمه پاک کردن فیلترها --}}
+                    <button wire:click="resetFilters" class="text-xs text-orange-400 hover:text-orange-300 transition font-bold px-2 py-1">
+                        ✕ پاک کردن همه
+                    </button>
+                </div>
+
+                {{-- نمایش تعداد Issues --}}
+                <div class="text-xs text-zinc-500">
+                    تعداد Issues: <span class="text-white font-bold">{{ $healthIssues->total() }}</span>
+                    @if($healthIssues->total() > 0)
+                        <span class="text-zinc-600">({{ $healthIssues->firstItem() ?? 0 }} - {{ $healthIssues->lastItem() ?? 0 }})</span>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Issues Table with Pagination --}}
+            @if($healthIssues && $healthIssues->count() > 0)
+
+
                 <div class="bg-zinc-950/50 border border-zinc-800/80 rounded-2xl overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-right text-xs">
@@ -116,66 +181,75 @@
                             <tbody class="divide-y divide-zinc-800/50">
                             @foreach($healthIssues as $index => $issue)
                                 <tr class="hover:bg-zinc-900/30 transition">
-                                    <td class="p-3 text-zinc-500">{{ $index + 1 }}</td>
+                                    <td class="p-3 text-zinc-500">{{ $healthIssues->firstItem() + $index }}</td>
                                     <td class="p-3 font-mono text-white">{{ $issue->username }}</td>
                                     <td class="p-3">
-                    <span class="text-[10px] font-bold {{ $issue->has_account ? 'text-emerald-400' : 'text-rose-400' }}">
-                        {{ $issue->has_account ? '✅ دارد' : '❌ ندارد' }}
-                    </span>
+                                        <span class="text-[10px] font-bold {{ $issue->has_account ? 'text-emerald-400' : 'text-rose-400' }}">
+                                            {{ $issue->has_account ? '✅ دارد' : '❌ ندارد' }}
+                                        </span>
+                                        @if($issue->is_expired)
+                                            <span class="text-[9px] text-rose-400 block">منقضی</span>
+                                        @endif
                                     </td>
                                     <td class="p-3">
-                    <span class="text-[10px] font-bold {{ $issue->has_config ? 'text-emerald-400' : 'text-rose-400' }}">
-                        {{ $issue->has_config ? '✅ دارد' : '❌ ندارد' }}
-                    </span>
+                                        <span class="text-[10px] font-bold {{ $issue->has_config ? 'text-emerald-400' : 'text-rose-400' }}">
+                                            {{ $issue->has_config ? '✅ دارد' : '❌ ندارد' }}
+                                        </span>
                                     </td>
                                     <td class="p-3">
-                    <span class="text-[10px] font-bold {{ $issue->has_peer ? 'text-emerald-400' : 'text-rose-400' }}">
-                        {{ $issue->has_peer ? '✅ دارد' : '❌ ندارد' }}
-                    </span>
+                                        <span class="text-[10px] font-bold {{ $issue->has_peer ? 'text-emerald-400' : 'text-rose-400' }}">
+                                            {{ $issue->has_peer ? '✅ دارد' : '❌ ندارد' }}
+                                        </span>
                                     </td>
                                     <td class="p-3">
-                    <span class="px-2 py-1 rounded-full text-[10px] font-bold
-                        {{ $issue->issue_type === 'missing_peer' ? 'bg-rose-500/20 text-rose-400' : '' }}
-                    {{ $issue->issue_type === 'orphan_peer_config' ? 'bg-amber-500/20 text-amber-400' : '' }}
-                    {{ $issue->issue_type === 'account_without_service' ? 'bg-orange-500/20 text-orange-400' : '' }}
-                    {{ $issue->issue_type === 'orphan_full' ? 'bg-red-500/20 text-red-400' : '' }}
-                    {{ $issue->issue_type === 'orphan_peer_only' ? 'bg-amber-500/20 text-amber-400' : '' }}
-                    {{ $issue->issue_type === 'config_without_account' ? 'bg-purple-500/20 text-purple-400' : '' }}">
-                        {{ $issue->issue_type }}
-                    </span>
+                                        <span class="px-2 py-1 rounded-full text-[10px] font-bold
+                                            {{ $issue->issue_type === 'missing_peer' ? 'bg-rose-500/20 text-rose-400' : '' }}
+                                        {{ $issue->issue_type === 'orphan_peer_config' ? 'bg-amber-500/20 text-amber-400' : '' }}
+                                        {{ $issue->issue_type === 'account_without_service' ? 'bg-orange-500/20 text-orange-400' : '' }}
+                                        {{ $issue->issue_type === 'orphan_full' ? 'bg-red-500/20 text-red-400' : '' }}
+                                        {{ $issue->issue_type === 'orphan_peer_only' ? 'bg-amber-500/20 text-amber-400' : '' }}
+                                        {{ $issue->issue_type === 'config_without_account' ? 'bg-purple-500/20 text-purple-400' : '' }}
+                                        {{ $issue->issue_type === 'speed_mismatch' ? 'bg-blue-500/20 text-blue-400' : '' }}">
+                                            {{ $issue->issue_type }}
+                                        </span>
                                     </td>
                                     <td class="p-3">
-                    <span class="px-2 py-1 rounded-full text-[10px] font-bold
-                        {{ $issue->severity === 'critical' ? 'bg-rose-500/20 text-rose-400' : '' }}
-                    {{ $issue->severity === 'warning' ? 'bg-amber-500/20 text-amber-400' : '' }}
-                    {{ $issue->severity === 'info' ? 'bg-blue-500/20 text-blue-400' : '' }}">
-                        {{ $issue->severity }}
-                    </span>
+                                        <span class="px-2 py-1 rounded-full text-[10px] font-bold
+                                            {{ $issue->severity === 'critical' ? 'bg-rose-500/20 text-rose-400' : '' }}
+                                        {{ $issue->severity === 'warning' ? 'bg-amber-500/20 text-amber-400' : '' }}
+                                        {{ $issue->severity === 'info' ? 'bg-blue-500/20 text-blue-400' : '' }}">
+                                            {{ $issue->severity }}
+                                        </span>
                                     </td>
                                     <td class="p-3 text-zinc-400 max-w-xs truncate">{{ $issue->details }}</td>
                                     <td class="p-3 text-center">
                                         @if($issue->service === 'wireguard' && $issue->status === 'open')
                                             <div class="flex flex-wrap items-center justify-center gap-1.5">
-                                                @if(in_array($issue->issue_type, ['account_without_service', 'orphan_peer_config', 'orphan_peer_only']))
-                                                    {{-- دکمه ایجاد کانفیگ و Peer --}}
+                                                @if(in_array($issue->issue_type, ['account_without_service', 'orphan_peer_config']))
                                                     <button wire:click="handleWireguardAction({{ $issue->id }}, 'create_config_and_peer')"
                                                             wire:loading.attr="disabled"
                                                             class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] font-bold rounded-lg transition">
-                                                        ➕ ایجاد
+                                                        ➕ ایجاد کانفیگ
+                                                    </button>
+                                                @endif
+
+                                                @if($issue->issue_type === 'orphan_peer_only')
+                                                    <button wire:click="handleWireguardAction({{ $issue->id }}, 'create_account')"
+                                                            wire:loading.attr="disabled"
+                                                            class="px-2.5 py-1 bg-green-600 hover:bg-green-500 text-white text-[9px] font-bold rounded-lg transition">
+                                                        ➕ ایجاد اکانت
                                                     </button>
                                                 @endif
 
                                                 @if(in_array($issue->issue_type, ['missing_peer']))
-                                                    {{-- دکمه بازسازی Peer --}}
                                                     <button wire:click="handleWireguardAction({{ $issue->id }}, 'recreate_peer')"
                                                             wire:loading.attr="disabled"
                                                             class="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-bold rounded-lg transition">
-                                                        🔄 بازسازی
+                                                        🔄 بازسازی Peer
                                                     </button>
                                                 @endif
 
-                                                @if(in_array($issue->issue_type, ['orphan_peer_only', 'orphan_full', 'orphan_peer_config']))
-                                                    {{-- دکمه حذف Orphan --}}
+                                                @if(in_array($issue->issue_type, ['orphan_peer_only', 'orphan_full', 'orphan_peer_config', 'config_without_account']))
                                                     <button wire:click="handleWireguardAction({{ $issue->id }}, 'delete_orphan')"
                                                             wire:loading.attr="disabled"
                                                             class="px-2.5 py-1 bg-rose-600 hover:bg-rose-500 text-white text-[9px] font-bold rounded-lg transition">
@@ -183,11 +257,19 @@
                                                     </button>
                                                 @endif
 
-                                                @if($issue->issue_type === 'config_without_account')
-                                                    <button wire:click="handleWireguardAction({{ $issue->id }}, 'create_account_or_delete')"
+                                                @if($issue->issue_type === 'speed_mismatch')
+                                                    <button wire:click="handleWireguardAction({{ $issue->id }}, 'sync_speed')"
                                                             wire:loading.attr="disabled"
                                                             class="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white text-[9px] font-bold rounded-lg transition">
-                                                        🔄 بررسی
+                                                        ⚡ همگام‌سازی
+                                                    </button>
+                                                @endif
+
+                                                @if($issue->issue_type === 'expired_account')
+                                                    <button wire:click="handleWireguardAction({{ $issue->id }}, 'delete_orphan')"
+                                                            wire:loading.attr="disabled"
+                                                            class="px-2.5 py-1 bg-rose-600 hover:bg-rose-500 text-white text-[9px] font-bold rounded-lg transition">
+                                                        🗑️ حذف منقضی
                                                     </button>
                                                 @endif
                                             </div>
@@ -203,6 +285,18 @@
                             </tbody>
                         </table>
                     </div>
+
+                    {{-- Pagination --}}
+                    @if($healthIssues->hasPages())
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 border-t border-zinc-800 bg-zinc-900/30">
+                            <div class="text-xs text-zinc-500">
+                                نمایش {{ $healthIssues->firstItem() }} تا {{ $healthIssues->lastItem() }} از {{ $healthIssues->total() }} Issue
+                            </div>
+                            <div>
+                                {{ $healthIssues->links() }}
+                            </div>
+                        </div>
+                    @endif
                 </div>
             @else
                 <div class="py-8 text-center text-zinc-500 text-sm">✅ همه سرویس‌ها سالم هستند. هیچ مغایرتی یافت نشد.</div>

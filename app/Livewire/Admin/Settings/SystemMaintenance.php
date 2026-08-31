@@ -11,7 +11,8 @@ use App\Models\SystemMaintenanceLog;
 use App\Jobs\DeleteExpiredUsersJob;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use App\Services\System\Checkers\WireGuardIntegrityChecker;
+use App\Models\Nas;
+
 
 class SystemMaintenance extends Component
 {
@@ -29,19 +30,49 @@ class SystemMaintenance extends Component
 
     public $healthResults = [];
     public $isRunningHealthCheck = false;
-    public $healthIssues = [];
+
+    // حذف: public $healthIssues = [];
+
     public $jobStatus = null;
 
-    // متغیرهای مربوط به مودال تأیید پاکسازی کلی
     public $showBulkConfirmModal = false;
     public $bulkTotalCount = 0;
+
+    // برای Pagination Issues
+    public $issuePerPage = 20;
+
+    public $filterService = 'all';
+    public $filterIssueType = 'all';
+    public $filterSeverity = 'all';
+    public $filterStatus = 'open';
+    public $filterServerId = 'all';
+    public $filterSearch = '';
 
     public function mount()
     {
         $this->loadLogsInfo();
-        $this->loadHealthIssues();
         $this->loadStats();
     }
+
+
+    public function updated($property)
+    {
+        if (in_array($property, ['filterService', 'filterIssueType', 'filterSeverity', 'filterStatus', 'filterServerId', 'filterSearch'])) {
+            $this->resetPage();
+        }
+    }
+
+    public function resetFilters()
+    {
+        $this->filterService = 'all';
+        $this->filterIssueType = 'all';
+        $this->filterSeverity = 'all';
+        $this->filterStatus = 'open';
+        $this->filterServerId = 'all';
+        $this->filterSearch = '';
+        $this->resetPage();
+    }
+
 
     public function loadStats()
     {
@@ -53,6 +84,12 @@ class SystemMaintenance extends Component
     {
         $cleaner = new SystemCleaner();
         $this->logsInfo = $cleaner->getLogsSize();
+    }
+
+    public function loadExpiredUsers()
+    {
+        $this->resetPage();
+        $this->loadStats();
     }
 
     public function cleanLogs()
@@ -80,14 +117,6 @@ class SystemMaintenance extends Component
         $this->isCleaningLogs = false;
     }
 
-    public function loadExpiredUsers()
-    {
-        $this->resetPage(); // ریست صفحه‌بندی
-        $this->loadStats(); // به‌روزرسانی آمار
-        // داده‌ها از طریق render() دریافت می‌شوند
-    }
-
-    // متد برای باز کردن مودال تأیید پاکسازی کلی
     public function openBulkDeleteConfirm()
     {
         $cleaner = new SystemCleaner();
@@ -102,34 +131,6 @@ class SystemMaintenance extends Component
         $this->showBulkConfirmModal = true;
     }
 
-
-    public function deleteWireguardOrphan($issueId)
-    {
-        $issue = SystemHealthIssue::find($issueId);
-        if (!$issue || $issue->service !== 'wireguard' || $issue->issue_type !== 'orphan') {
-            session()->flash('maintenance_error', 'Issue معتبر نیست.');
-            return;
-        }
-
-        $checker = new \App\Services\System\Checkers\WireGuardIntegrityChecker();
-        $result = $checker->deleteOrphanPeer($issue->server_id, $issue->username);
-
-        if ($result['status']) {
-            $issue->update([
-                'status' => 'resolved',
-                'resolved_at' => now(),
-                'resolved_by' => Auth::id()
-            ]);
-            session()->flash('maintenance_message', 'Peer Orphan با موفقیت حذف شد.');
-        } else {
-            session()->flash('maintenance_error', 'خطا در حذف: ' . $result['message']);
-        }
-        $this->loadHealthIssues();
-    }
-
-
-
-    // متد اجرای پاکسازی کلی (همه کاربران)
     public function bulkDeleteAll()
     {
         $cleaner = new SystemCleaner();
@@ -142,7 +143,6 @@ class SystemMaintenance extends Component
             return;
         }
 
-        // ارسال همه IDها به Job
         DeleteExpiredUsersJob::dispatch($allUserIds, Auth::id());
 
         $this->jobStatus = 'در حال پردازش...';
@@ -150,12 +150,6 @@ class SystemMaintenance extends Component
         $this->selectedUsers = [];
         $this->showBulkConfirmModal = false;
         $this->loadStats();
-    }
-
-    public function getExpiredUsersPaginator()
-    {
-        $cleaner = new SystemCleaner();
-        return $cleaner->getExpiredUsersQuery()->paginate($this->perPage);
     }
 
     public function deleteSelectedUsers()
@@ -173,8 +167,40 @@ class SystemMaintenance extends Component
         $this->loadStats();
     }
 
+    // =============================================
+    // بررسی سلامت سیستم
+    // =============================================
+    public function runHealthCheck()
+    {
+        $this->isRunningHealthCheck = true;
 
+        try {
+            Log::info('شروع بررسی سلامت سیستم');
 
+            $facade = new SystemHealthFacade();
+            $this->healthResults = $facade->runFullCheck();
+
+            // دیگر نیازی به loadHealthIssues نیست چون render دوباره اجرا می‌شود
+            $totalIssues = collect($this->healthResults)->sum('issues_count');
+            session()->flash('maintenance_message', "بررسی سلامت سیستم با موفقیت انجام شد. تعداد کل مغایرت‌ها: {$totalIssues}");
+
+        } catch (\Exception $e) {
+            Log::error('Health check error: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            session()->flash('maintenance_error', 'خطا در بررسی سلامت: ' . $e->getMessage());
+        }
+
+        $this->isRunningHealthCheck = false;
+    }
+
+    public function updatedIssuePerPage()
+    {
+        $this->resetPage();
+    }
+
+    // =============================================
+    // عملیات WireGuard
+    // =============================================
     public function handleWireguardAction($issueId, $action)
     {
         $issue = SystemHealthIssue::find($issueId);
@@ -196,18 +222,28 @@ class SystemMaintenance extends Component
             case 'delete_orphan':
                 $result = $checker->deleteOrphan($issue->server_id, $issue->username);
                 break;
+            case 'create_account':
+                $result = $checker->createAccountFromPeer($issue->server_id, $issue->username);
+                break;
+            case 'sync_speed':
+                $result = $checker->syncSpeed($issue->server_id, $issue->username);
+                break;
             default:
                 session()->flash('maintenance_error', 'عملیات نامعتبر.');
                 return;
         }
 
         if ($result['status']) {
-            $issue->update(['status' => 'resolved', 'resolved_at' => now(), 'resolved_by' => Auth::id()]);
+            $issue->update([
+                'status' => 'resolved',
+                'resolved_at' => now(),
+                'resolved_by' => Auth::id()
+            ]);
             session()->flash('maintenance_message', $result['message']);
         } else {
             session()->flash('maintenance_error', 'خطا: ' . $result['message']);
         }
-        $this->loadHealthIssues();
+        // نیازی به loadHealthIssues نیست، render دوباره اجرا می‌شود
     }
 
     public function deleteAllWireguardOrphans()
@@ -220,40 +256,14 @@ class SystemMaintenance extends Component
             SystemHealthIssue::where('service', 'wireguard')
                 ->whereIn('issue_type', ['orphan_peer_only', 'orphan_full', 'orphan_peer_config'])
                 ->where('status', 'open')
-                ->update(['status' => 'resolved', 'resolved_at' => now(), 'resolved_by' => Auth::id()]);
+                ->update([
+                    'status' => 'resolved',
+                    'resolved_at' => now(),
+                    'resolved_by' => Auth::id()
+                ]);
         } else {
             session()->flash('maintenance_error', 'خطا: ' . $result['message']);
         }
-        $this->loadHealthIssues();
-    }
-
-    public function runHealthCheck()
-    {
-        $this->isRunningHealthCheck = true;
-
-        try {
-            $facade = new \App\Services\System\SystemHealthFacade();
-            $this->healthResults = $facade->runFullCheck();
-
-            // بارگذاری مجدد issues
-            $this->loadHealthIssues();
-
-            // پیام موفقیت با جزئیات
-            $totalIssues = collect($this->healthResults)->sum('issues_count');
-            session()->flash('maintenance_message', "بررسی سلامت سیستم با موفقیت انجام شد. تعداد کل مغایرت‌ها: {$totalIssues}");
-
-        } catch (\Exception $e) {
-            Log::error('Health check error: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
-            session()->flash('maintenance_error', 'خطا در بررسی سلامت: ' . $e->getMessage());
-        }
-
-        $this->isRunningHealthCheck = false;
-    }
-    public function loadHealthIssues()
-    {
-        $facade = new SystemHealthFacade();
-        $this->healthIssues = $facade->getLatestIssues(50);
     }
 
     public function ignoreIssue($issueId)
@@ -265,18 +275,124 @@ class SystemMaintenance extends Component
                 'resolved_at' => now(),
                 'resolved_by' => Auth::id(),
             ]);
-            $this->loadHealthIssues();
             session()->flash('maintenance_message', 'Issue با موفقیت نادیده گرفته شد.');
         }
     }
 
+    // =============================================
+    // RENDER
+    // =============================================
     public function render()
     {
         $cleaner = new SystemCleaner();
         $expiredUsers = $cleaner->getExpiredUsersQuery()->paginate($this->perPage);
 
+        // ساخت کوئری Issues با فیلترها
+        $query = SystemHealthIssue::with('user')
+            ->orderBy('created_at', 'desc');
+
+        // فیلتر سرویس
+        if ($this->filterService !== 'all') {
+            $query->where('service', $this->filterService);
+        }
+
+        // فیلتر نوع Issue
+        if ($this->filterIssueType !== 'all') {
+            $query->where('issue_type', $this->filterIssueType);
+        }
+
+        // فیلتر شدت
+        if ($this->filterSeverity !== 'all') {
+            $query->where('severity', $this->filterSeverity);
+        }
+
+        // فیلتر وضعیت
+        if ($this->filterStatus !== 'all') {
+            $query->where('status', $this->filterStatus);
+        } else {
+            // اگر 'all' باشد، همه وضعیت‌ها را نمایش بده
+            $query->whereIn('status', ['open', 'resolved', 'ignored']);
+        }
+
+        // فیلتر سرور
+        if ($this->filterServerId !== 'all') {
+            $query->where('server_id', $this->filterServerId);
+        }
+
+        // فیلتر جستجو (بر اساس username)
+        if (!empty($this->filterSearch)) {
+            $query->where('username', 'like', '%' . $this->filterSearch . '%');
+        }
+
+        $healthIssues = $query->paginate($this->issuePerPage);
+
+        // لیست سرورها برای فیلتر
+        $servers = Nas::where('is_enabled', 1)->pluck('name', 'id');
+
         return view('livewire.admin.settings.system-maintenance', [
             'expiredUsers' => $expiredUsers,
+            'healthIssues' => $healthIssues,
+            'servers' => $servers,
         ]);
     }
+
+    public function cleanupOrphanQueuesByServer()
+    {
+        $checker = new \App\Services\System\Checkers\WireGuardIntegrityChecker();
+        $orphansByServer = $checker->getOrphansGroupedByServer();
+
+        if (empty($orphansByServer)) {
+            session()->flash('maintenance_message', 'هیچ اورفانی برای پاکسازی وجود ندارد.');
+            return;
+        }
+
+        $totalDeleted = 0;
+        $allErrors = [];
+        $allUsernames = [];
+
+        foreach ($orphansByServer as $serverId => $usernames) {
+            $server = Nas::find($serverId);
+            if (!$server) {
+                $allErrors[] = "سرور با ID {$serverId} یافت نشد.";
+                continue;
+            }
+
+            try {
+                $wgService = new \App\Services\WireguardService($server);
+                $result = $wgService->cleanupOrphanQueuesByIssues($usernames);
+
+                if ($result['status']) {
+                    $totalDeleted += $result['deleted'];
+                    $allUsernames = array_merge($allUsernames, $usernames);
+                    if (!empty($result['errors'])) {
+                        $allErrors = array_merge($allErrors, $result['errors']);
+                    }
+                } else {
+                    $allErrors[] = "خطا در سرور {$server->name}: " . ($result['message'] ?? 'نامشخص');
+                }
+            } catch (\Exception $e) {
+                $allErrors[] = "خطا در سرور {$server->name}: " . $e->getMessage();
+            }
+        }
+
+        // بستن Issues مربوطه
+        if ($totalDeleted > 0) {
+            SystemHealthIssue::whereIn('issue_type', ['orphan_peer_only', 'orphan_full', 'orphan_peer_config', 'config_without_account'])
+                ->whereIn('username', $allUsernames)
+                ->where('status', 'open')
+                ->update([
+                    'status' => 'resolved',
+                    'resolved_at' => now(),
+                    'resolved_by' => Auth::id()
+                ]);
+        }
+
+        if (empty($allErrors)) {
+            session()->flash('maintenance_message', "{$totalDeleted} Queue اورفان از تمام سرورها پاکسازی شد.");
+        } else {
+            $errorMsg = implode(' | ', array_slice($allErrors, 0, 5));
+            session()->flash('maintenance_error', "{$totalDeleted} Queue حذف شد. خطاها: {$errorMsg}");
+        }
+    }
+
 }

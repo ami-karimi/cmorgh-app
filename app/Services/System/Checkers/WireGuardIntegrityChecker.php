@@ -23,6 +23,132 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
             ->get();
     }
 
+    public function syncSpeed(int $serverId, string $username): array
+    {
+        $server = Nas::find($serverId);
+        if (!$server) {
+            return ['status' => false, 'message' => "سرور با ID {$serverId} یافت نشد."];
+        }
+
+        try {
+            $wgUser = WireGuardUsers::where('profile_name', $username)->first();
+            if (!$wgUser) {
+                return ['status' => false, 'message' => "کانفیگ برای {$username} یافت نشد."];
+            }
+
+            $account = $wgUser->account;
+            if (!$account) {
+                return ['status' => false, 'message' => "اکانت مرتبط یافت نشد."];
+            }
+
+            $expectedSpeed = $account->group->mikrotik_speed ?? '80M/10M';
+
+            // به‌روزرسانی در دیتابیس
+            $wgUser->config_limit = $expectedSpeed;
+            $wgUser->save();
+
+            // به‌روزرسانی در سرور
+            $wgService = new WireguardService($server);
+            $result = $wgService->updateClientSpeed($wgUser->user_ip, $username, $expectedSpeed);
+
+            if (!$result['status']) {
+                return ['status' => false, 'message' => "خطا در به‌روزرسانی سرعت در سرور: " . ($result['message'] ?? 'نامشخص')];
+            }
+
+            Log::info("سرعت Peer {$username} به {$expectedSpeed} همگام‌سازی شد.");
+            $this->closeOpenIssues($username, auth()->id());
+
+            return ['status' => true, 'message' => "سرعت با موفقیت همگام‌سازی شد."];
+        } catch (\Exception $e) {
+            Log::error("خطا در همگام‌سازی سرعت {$username}: " . $e->getMessage());
+            return ['status' => false, 'message' => "خطا: " . $e->getMessage()];
+        }
+    }
+
+    public function createAccountFromPeer(int $serverId, string $username): array
+    {
+        $server = Nas::find($serverId);
+        if (!$server) {
+            return ['status' => false, 'message' => "سرور با ID {$serverId} یافت نشد."];
+        }
+
+        try {
+            // دریافت اطلاعات Peer از سرور
+            $wgService = new WireguardService($server);
+            $peers = $wgService->getAllPeers();
+
+            $peerData = null;
+            foreach ($peers as $peer) {
+                if (($peer['comment'] ?? '') === $username) {
+                    $peerData = $peer;
+                    break;
+                }
+            }
+
+            if (!$peerData) {
+                return ['status' => false, 'message' => "Peer با نام {$username} در سرور یافت نشد."];
+            }
+
+            // ایجاد اکانت جدید
+            $account = Accounts::create([
+                'username' => $username,
+                'password' => bin2hex(random_bytes(8)),
+                'service_group' => 'wireguard',
+                'creator' => auth()->id() ?? 1,
+                'is_enabled' => 1,
+                'expire_date' => now()->addDays(30),
+            ]);
+
+            // ایجاد رکورد WireGuardUsers
+            WireGuardUsers::create([
+                'user_id' => $account->id,
+                'server_id' => $serverId,
+                'profile_name' => $username,
+                'user_ip' => $peerData['allowed-address'] ?? '',
+                'public_key' => $peerData['public-key'] ?? '',
+                'config_limit' => $peerData['comment'] ?? '80M/10M',
+                'is_enabled' => 1,
+            ]);
+
+            Log::info("اکانت جدید از روی Peer {$username} ایجاد شد. Account ID: {$account->id}");
+            $this->closeOpenIssues($username, auth()->id());
+
+            return ['status' => true, 'message' => "اکانت با موفقیت ایجاد و به Peer متصل شد."];
+        } catch (\Exception $e) {
+            Log::error("خطا در ایجاد اکانت از روی Peer {$username}: " . $e->getMessage());
+            return ['status' => false, 'message' => "خطا: " . $e->getMessage()];
+        }
+    }
+
+// در WireGuardIntegrityChecker.php
+
+    /**
+     * دریافت لیست اورفان‌ها (نام‌های کاربری) به تفکیک هر سرور
+     *
+     * @return array ['server_id' => ['username1', 'username2', ...]]
+     */
+    public function getOrphansGroupedByServer(): array
+    {
+        $orphansByServer = [];
+
+        // دریافت Issues باز از نوع اورفان
+        $issues = $this->getOpenIssues()
+            ->whereIn('issue_type', ['orphan_peer_only', 'orphan_full', 'orphan_peer_config', 'config_without_account'])
+            ->where('status', 'open')
+            ->get();
+
+        foreach ($issues as $issue) {
+            $serverId = $issue->server_id;
+            if (!isset($orphansByServer[$serverId])) {
+                $orphansByServer[$serverId] = [];
+            }
+            $orphansByServer[$serverId][] = $issue->username;
+        }
+
+        return $orphansByServer;
+    }
+
+
     protected function performCheck(): array
     {
         $issues = [];
