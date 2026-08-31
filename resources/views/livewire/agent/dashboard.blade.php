@@ -1,6 +1,5 @@
 <div class="space-y-6 pb-12">
     <!-- Load Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     {{-- ============================================ --}}
     {{-- 1. WELCOME HEADER + QUICK ACTIONS            --}}

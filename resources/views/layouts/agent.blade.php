@@ -247,5 +247,7 @@
 </div>
 
 @livewireScripts
+<script src="{{url('js/chart.js')}}"></script>
+
 </body>
 </html>
