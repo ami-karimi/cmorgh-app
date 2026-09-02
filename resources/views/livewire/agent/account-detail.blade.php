@@ -378,6 +378,15 @@
                         </span>
                     </div>
                     <div class="flex justify-between py-2 border-b border-[#202938]/50">
+                        <span class="text-[#94A3B8]">کلمه عبور</span>
+                        <span class="font-mono text-[#F8FAFC] flex items-center gap-2" dir="ltr">
+                            {{ $account->password }}
+                            <button onclick="navigator.clipboard.writeText('{{ $account->password }}')" class="text-[#94A3B8] hover:text-[#F8FAFC] transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            </button>
+                        </span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-[#202938]/50">
                         <span class="text-[#94A3B8]">نوع سرویس</span>
                         <span class="font-bold text-[#F8FAFC]">{{ strtoupper($account->service_group) }}</span>
                     </div>
