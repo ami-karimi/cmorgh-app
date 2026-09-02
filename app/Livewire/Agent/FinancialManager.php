@@ -86,14 +86,23 @@ class FinancialManager extends Component
     // ==========================================
     private function loadBankAccount()
     {
-        $account = AgentBankAccount::whereHas('user', function($query) {
-            $query->where('role', 'manager');
-        })
-            ->where('is_show', 1)
-            ->orderBy('id', 'asc')
-            ->first();
 
-        $this->bankAccount = $account;
+        $user = auth()->user();
+        $bankAccount = null;
+
+        if ($user->creator) {
+            $bankAccount = AgentBankAccount::where('user_id', $user->creator)->first();
+        }
+
+        if (!$bankAccount) {
+            $bankAccount = AgentBankAccount::whereHas('user', function($query) {
+                $query->where('role', 'manager');
+            })
+                ->where('is_show', 1)
+                ->orderBy('id', 'asc')
+                ->first();
+        }
+        $this->bankAccount = $bankAccount;
     }
 
     // ==========================================
