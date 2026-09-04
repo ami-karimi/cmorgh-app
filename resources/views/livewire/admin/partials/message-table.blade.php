@@ -18,7 +18,8 @@
                     <td class="p-3 font-mono text-[#F8FAFC]">#{{ $message->id }}</td>
                     <td class="p-3 font-mono text-[#F8FAFC]">{{ $message->account_number }}</td>
                     <td class="p-3 font-mono font-bold text-[#F59E0B]">{{ number_format($message->deposit_amount) }}</td>
-                    <td class="p-3 text-[10px] text-[#94A3B8] font-mono">{{ $message->transaction_datetime?->format('Y/m/d H:i') ?? '-' }}</td>
+                    <td class="p-3 text-[10px] text-[#94A3B8] font-mono">    {{ $message->transaction_datetime ? $this->toJalaliDateTime($message->transaction_datetime) : '-' }}
+                    </td>
                     <td class="p-3">
                             <span class="px-2 py-1 rounded-lg text-[10px] font-bold border {{ $message->processed ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' }}">
                                 {{ $message->processed ? 'پردازش شده' : 'در انتظار' }}

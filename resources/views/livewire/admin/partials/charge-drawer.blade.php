@@ -21,50 +21,72 @@
         <div class="p-6 space-y-6">
             @if($selectedRequest)
                 {{-- اطلاعات درخواست --}}
-                <div class="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <span class="text-[#94A3B8] text-xs">شناسه</span>
-                        <div class="font-bold text-[#F8FAFC]">#{{ $selectedRequest->id }}</div>
-                    </div>
-                    <div>
-                        <span class="text-[#94A3B8] text-xs">نماینده</span>
-                        <div class="font-bold text-[#F8FAFC]">{{ $selectedRequest->user?->name ?? 'نامشخص' }}</div>
-                        <div class="text-[10px] text-[#94A3B8]">@ {{ $selectedRequest->user?->username ?? '' }}</div>
-                    </div>
-                    <div>
-                        <span class="text-[#94A3B8] text-xs">مبلغ درخواستی</span>
-                        <div class="font-bold text-[#F8FAFC]">{{ number_format($selectedRequest->requested_amount) }} تومان</div>
-                    </div>
-                    <div>
-                        <span class="text-[#94A3B8] text-xs">مبلغ یونیک (قابل پرداخت)</span>
-                        <div class="font-bold text-[#F59E0B]">{{ number_format($selectedRequest->payable_amount) }} تومان</div>
-                    </div>
-                    <div>
-                        <span class="text-[#94A3B8] text-xs">وضعیت</span>
-                        <span class="px-2 py-1 rounded-lg text-[10px] font-bold border {{ $colors[$selectedRequest->status] ?? 'bg-gray-500/10 text-gray-500' }}">
-                            {{ $labels[$selectedRequest->status] ?? $selectedRequest->status }}
-                        </span>
-                    </div>
-                    <div>
-                        <span class="text-[#94A3B8] text-xs">تطبیق</span>
-                        @if($selectedRequest->matched_bank_message_id)
-                            <span class="px-2 py-1 rounded-lg text-[10px] font-bold border bg-green-500/10 text-green-500 border-green-500/20">
-                                {{ $selectedRequest->match_status === 'manual' ? 'دستی' : 'خودکار' }}
-                            </span>
-                        @else
-                            <span class="px-2 py-1 rounded-lg text-[10px] font-bold border bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
-                                در انتظار
-                            </span>
+                <div class="space-y-4">
+                    {{-- اطلاعات درخواست --}}
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <span class="text-[#94A3B8]">شناسه</span>
+                            <div class="font-bold text-[#F8FAFC]">#{{ $selectedRequest->id }}</div>
+                        </div>
+                        <div>
+                            <span class="text-[#94A3B8]">نماینده</span>
+                            <div class="font-bold text-[#F8FAFC]">{{ $selectedRequest->user?->name ?? 'نامشخص' }}</div>
+                        </div>
+                        <div>
+                            <span class="text-[#94A3B8]">مبلغ درخواستی</span>
+                            <div class="font-bold text-[#F8FAFC]">{{ number_format($selectedRequest->requested_amount) }} تومان</div>
+                        </div>
+                        <div>
+                            <span class="text-[#94A3B8]">مبلغ یونیک</span>
+                            <div class="font-bold text-[#F59E0B]">{{ number_format($selectedRequest->payable_amount) }} تومان</div>
+                        </div>
+                        <div>
+                            <span class="text-[#94A3B8]">تاریخ ثبت</span>
+                            <div class="font-bold text-[#F8FAFC]">{{ $this->toJalaliDateTime($selectedRequest->created_at) }}</div>
+                        </div>
+                        <div>
+                            <span class="text-[#94A3B8]">زمان انقضا</span>
+                            <div class="font-bold text-[#F8FAFC]">{{ $this->toJalaliDateTime($selectedRequest->expires_at) }}</div>
+                        </div>
+                        <div>
+                            <span class="text-[#94A3B8]">وضعیت</span>
+                            <div class="font-bold">
+                                @php
+                                    $statusLabels = ['pending' => 'در انتظار', 'paid' => 'پرداخت شده', 'verifying' => 'در حال بررسی', 'approved' => 'تأیید شده', 'rejected' => 'رد شده', 'expired' => 'منقضی شده'];
+                                @endphp
+                                {{ $statusLabels[$selectedRequest->status] ?? $selectedRequest->status }}
+                            </div>
+                        </div>
+                        @if($selectedRequest->matched_at)
+                            <div>
+                                <span class="text-[#94A3B8]">تاریخ تطبیق</span>
+                                <div class="font-bold text-[#F8FAFC]">{{ $this->toJalaliDateTime($selectedRequest->matched_at) }}</div>
+                            </div>
                         @endif
                     </div>
-                    <div>
-                        <span class="text-[#94A3B8] text-xs">تاریخ ثبت</span>
-                        <div class="font-mono text-[#F8FAFC]">{{ $selectedRequest->created_at->format('Y/m/d H:i') }}</div>
-                    </div>
-                    @if($selectedRequest->expires_at)
-                        <div>
-                            <span class="text-[#94A3B8] text-xs">زمان انقضا</span>
-                            <div class="font-mono text-[#F8FAFC]">{{ $selectedRequest->expires_at->format('Y/m/d H:i') }}</div>
+
+                    {{-- پیام بانکی مرتبط --}}
+                    @if($selectedRequest->matchedBankMessage)
+                        <div class="border-t border-[#202938] pt-4">
+                            <h4 class="text-[11px] text-[#94A3B8] font-bold mb-2">پیام بانکی مرتبط</h4>
+                            <div class="grid grid-cols-2 gap-3 text-xs bg-[#080B12] p-3 rounded-xl">
+                                <div>
+                                    <span class="text-[#94A3B8]">شناسه</span>
+                                    <div class="font-bold text-[#F8FAFC]">#{{ $selectedRequest->matchedBankMessage->id }}</div>
+                                </div>
+                                <div>
+                                    <span class="text-[#94A3B8]">مبلغ</span>
+                                    <div class="font-bold text-[#F59E0B]">{{ number_format($selectedRequest->matchedBankMessage->deposit_amount) }} تومان</div>
+                                </div>
+                                <div>
+                                    <span class="text-[#94A3B8]">شماره حساب</span>
+                                    <div class="font-bold text-[#F8FAFC] font-mono">{{ $selectedRequest->matchedBankMessage->account_number }}</div>
+                                </div>
+                                <div>
+                                    <span class="text-[#94A3B8]">تاریخ تراکنش</span>
+                                    <div class="font-bold text-[#F8FAFC]">{{ $this->toJalaliDateTime($selectedRequest->matchedBankMessage->transaction_datetime) }}</div>
+                                </div>
+                            </div>
                         </div>
                     @endif
                 </div>

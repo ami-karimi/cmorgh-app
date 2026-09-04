@@ -7,28 +7,30 @@ use App\Models\BankMessage;
 use App\Models\User;
 use App\Models\Financial;
 use App\Models\AuditLog;
+use App\Traits\ConvertsDates;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-#[Title('مدیریت تایید خوکار | همراه سیمرغ')]
+use Morilog\Jalali\Jalalian;
+
+#[Title('تایید خودکار کارت به کارت | همراه سیمرغ')]
 #[Layout('layouts.admin')]
 class ManageCharges extends Component
 {
-    use WithPagination;
+    use WithPagination, ConvertsDates;
 
-    public $activeTab = 'requests'; // requests | messages
+    public $activeTab = 'requests';
     public $perPage = 15;
-
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
 
+    // حذف match_status از فیلترها
     public $filters = [
         'search' => '',
         'status' => '',
-        'match_status' => '',
         'date_from' => '',
         'date_to' => '',
         'today' => false,
@@ -55,14 +57,13 @@ class ManageCharges extends Component
         'filters' => ['except' => []],
     ];
 
-    // ========== متدهای فیلتر و سورت ==========
+    // ========== متدهای فیلتر ==========
 
     public function resetFilters()
     {
         $this->filters = [
             'search' => '',
             'status' => '',
-            'match_status' => '',
             'date_from' => '',
             'date_to' => '',
             'today' => false,
@@ -83,12 +84,13 @@ class ManageCharges extends Component
         }
     }
 
-    // ========== کوئری اصلی درخواست‌ها ==========
+    // ========== کوئری درخواست‌ها ==========
 
     public function getRequestsQuery()
     {
         $query = TopupRequest::with(['user', 'matchedBankMessage']);
 
+        // جستجو
         if (!empty($this->filters['search'])) {
             $search = $this->filters['search'];
             $query->where(function ($q) use ($search) {
@@ -103,25 +105,31 @@ class ManageCharges extends Component
             });
         }
 
+        // فیلتر وضعیت
         if (!empty($this->filters['status'])) {
             $query->where('status', $this->filters['status']);
         }
 
-        if (!empty($this->filters['match_status'])) {
-            $query->where('match_status', $this->filters['match_status']);
-        }
-
+        // فیلتر بازه تاریخ شمسی → تبدیل به میلادی
         if (!empty($this->filters['date_from'])) {
-            $query->whereDate('created_at', '>=', $this->filters['date_from']);
+            $gregorianFrom = $this->jalaliToGregorian($this->filters['date_from']);
+            if ($gregorianFrom) {
+                $query->whereDate('created_at', '>=', $gregorianFrom);
+            }
         }
         if (!empty($this->filters['date_to'])) {
-            $query->whereDate('created_at', '<=', $this->filters['date_to']);
+            $gregorianTo = $this->jalaliToGregorian($this->filters['date_to']);
+            if ($gregorianTo) {
+                $query->whereDate('created_at', '<=', $gregorianTo);
+            }
         }
 
+        // فیلتر امروز
         if ($this->filters['today']) {
             $query->whereDate('created_at', today());
         }
 
+        // فیلتر مبلغ
         if (!empty($this->filters['amount_min'])) {
             $query->where('requested_amount', '>=', (int) $this->filters['amount_min']);
         }
@@ -129,10 +137,12 @@ class ManageCharges extends Component
             $query->where('requested_amount', '<=', (int) $this->filters['amount_max']);
         }
 
+        // فقط درخواست‌های بدون تطبیق (matched_bank_message_id IS NULL)
         if ($this->filters['unmatched_only']) {
             $query->whereNull('matched_bank_message_id');
         }
 
+        // سورت
         $query->orderBy($this->sortField, $this->sortDirection);
 
         return $query;
@@ -199,7 +209,7 @@ class ManageCharges extends Component
             });
 
             $this->dispatch('toast', type: 'success', message: 'درخواست با موفقیت تأیید شد.');
-            $this->resetPage();
+            $this->refreshData();
 
         } catch (\Exception $e) {
             $this->dispatch('toast', type: 'error', message: $e->getMessage());
@@ -250,7 +260,7 @@ class ManageCharges extends Component
             $this->rejectReason = '';
 
             $this->dispatch('toast', type: 'success', message: 'درخواست رد شد.');
-            $this->resetPage();
+            $this->refreshData();
 
         } catch (\Exception $e) {
             $this->dispatch('toast', type: 'error', message: $e->getMessage());
@@ -263,11 +273,9 @@ class ManageCharges extends Component
     {
         $this->matchRequestId = $requestId;
         $this->matchMessageId = null;
-
         $this->matchableMessages = BankMessage::where('processed', false)
             ->orderBy('created_at', 'desc')
             ->get();
-
         $this->showMatchModal = true;
     }
 
@@ -298,10 +306,10 @@ class ManageCharges extends Component
                     throw new \Exception('مبلغ درخواست با مبلغ پیام بانکی مطابقت ندارد.');
                 }
 
+                // به‌روزرسانی با matched_bank_message_id
                 $request->update([
                     'matched_bank_message_id' => $message->id,
                     'matched_at' => now(),
-                    'match_status' => 'manual',
                     'status' => 'paid',
                 ]);
 
@@ -315,8 +323,8 @@ class ManageCharges extends Component
                     'action' => 'manual_match',
                     'entity' => 'topup_request',
                     'entity_id' => $request->id,
-                    'old_value' => ['match_status' => $request->match_status],
-                    'new_value' => ['match_status' => 'manual', 'message_id' => $message->id],
+                    'old_value' => ['matched_bank_message_id' => null],
+                    'new_value' => ['matched_bank_message_id' => $message->id],
                     'ip' => request()->ip(),
                 ]);
             });
@@ -326,11 +334,20 @@ class ManageCharges extends Component
             $this->matchMessageId = null;
 
             $this->dispatch('toast', type: 'success', message: 'تطبیق با موفقیت انجام شد.');
-            $this->resetPage();
+            $this->refreshData();
 
         } catch (\Exception $e) {
             $this->dispatch('toast', type: 'error', message: $e->getMessage());
         }
+    }
+
+    // ========== پردازش مجدد پیام ==========
+
+    public function reprocessMessage($messageId)
+    {
+        $message = BankMessage::findOrFail($messageId);
+        $message->update(['processed' => false]);
+        $this->dispatch('toast', type: 'success', message: 'پیام برای پردازش مجدد در صف قرار گرفت.');
     }
 
     // ========== جزئیات Drawer ==========
@@ -356,13 +373,18 @@ class ManageCharges extends Component
         $this->selectedMessageId = null;
     }
 
-    // ========== پردازش مجدد پیام ==========
+    // ========== متدهای کمکی ==========
 
-    public function reprocessMessage($messageId)
+    public function refreshData()
     {
-        $message = BankMessage::findOrFail($messageId);
-        $message->update(['processed' => false]);
-        $this->dispatch('toast', type: 'success', message: 'پیام برای پردازش مجدد در صف قرار گرفت.');
+        $this->resetPage();
+    }
+
+    public function getListeners()
+    {
+        return [
+            'toast' => '$refresh',
+        ];
     }
 
     // ========== Render ==========

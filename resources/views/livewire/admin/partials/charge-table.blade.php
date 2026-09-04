@@ -40,15 +40,16 @@
                     <td class="p-3">
                         @if($request->matched_bank_message_id)
                             <span class="px-2 py-1 rounded-lg text-[10px] font-bold border bg-green-500/10 text-green-500 border-green-500/20">
-                                    {{ $request->match_status === 'manual' ? 'دستی' : 'تطبیق شده' }}
-                                </span>
+            تطبیق شده
+        </span>
                         @else
                             <span class="px-2 py-1 rounded-lg text-[10px] font-bold border bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
-                                    در انتظار
-                                </span>
+            در انتظار
+        </span>
                         @endif
                     </td>
-                    <td class="p-3 text-[10px] text-[#94A3B8] font-mono">{{ $request->created_at->format('Y/m/d H:i') }}</td>
+
+                    <td class="p-3 text-[10px] text-[#94A3B8] font-mono">{{ $this->toJalaliDateTime($request->created_at) }}</td>
                     <td class="p-3">
                         <div class="flex items-center gap-1.5">
                             <button wire:click="showRequestDetail({{ $request->id }})" class="p-1.5 rounded-lg bg-[#202938] hover:bg-[#3B82F6] text-[#94A3B8] hover:text-white transition" title="جزئیات">

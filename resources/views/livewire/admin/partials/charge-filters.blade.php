@@ -20,6 +20,7 @@
             <option value="expired">منقضی شده</option>
         </select>
 
+
         <select wire:model.live="filters.match_status" class="bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
             <option value="">همه تطبیق‌ها</option>
             <option value="pending">در انتظار</option>
@@ -37,9 +38,20 @@
                placeholder="حداکثر مبلغ"
                class="w-28 bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
 
-        <input wire:model.live="filters.date_from" type="date" class="bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
-        <span class="text-[#94A3B8] text-xs">تا</span>
-        <input wire:model.live="filters.date_to" type="date" class="bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
+        <div>
+            <input wire:model.live="filters.date_from"
+                   type="text"
+                   placeholder="1405/06/01"
+                   class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition font-mono"
+                   dir="ltr">
+        </div>
+        <div>
+            <input wire:model.live="filters.date_to"
+                   type="text"
+                   placeholder="1405/06/30"
+                   class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition font-mono"
+                   dir="ltr">
+        </div>
 
         <label class="flex items-center gap-1.5 text-xs text-[#94A3B8] cursor-pointer">
             <input wire:model.live="filters.today" type="checkbox" class="w-4 h-4 rounded border-[#202938] bg-[#080B12] text-[#F59E0B] focus:ring-[#F59E0B]">
