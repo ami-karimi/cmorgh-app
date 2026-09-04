@@ -121,14 +121,40 @@ class BankMessageService
         $transactionDatetime = null;
         if (!empty($dateMatch)) {
             try {
-                $jalaliDate = Jalalian::fromFormat('d/m/y-H:i', $dateMatch[1]);
-                $transactionDatetime = $jalaliDate->toCarbon()->toDateTimeString(); // خروجی: Y-m-d H:i:s
+                // جداسازی تاریخ و ساعت
+                $parts = explode('-', $dateMatch[1]);
+                $datePart = $parts[0]; // "05/06/12"
+                $timePart = $parts[1]; // "09:57"
+
+                // تقسیم تاریخ به اجزا
+                $dateSegments = explode('/', $datePart);
+                // انتظار: [سال, ماه, روز] یا [روز, ماه, سال]؟ با توجه به توضیح شما، سال اول است
+                // پس: $year = $dateSegments[0]; $month = $dateSegments[1]; $day = $dateSegments[2];
+                $year = $dateSegments[0];
+                $month = $dateSegments[1];
+                $day = $dateSegments[2];
+
+                // تبدیل سال دو رقمی به چهار رقمی با فرض قرن ۱۴۰۰
+                $year = 1400 + (int)$year; // اگر سال ۰۵ باشد => 1405
+                // یا می‌توان از تابع تبدیل استفاده کرد: اما برای سادگی همین کافی است
+
+                // ساخت تاریخ شمسی به صورت رشته
+                $jalaliDateStr = $year . '/' . $month . '/' . $day . ' ' . $timePart . ':00';
+
+                // تبدیل به میلادی با استفاده از Jalalian::fromFormat
+                $jalali = Jalalian::fromFormat('Y/m/d H:i:s', $jalaliDateStr);
+                $transactionDatetime = $jalali->toCarbon()->toDateTimeString();
             } catch (\Exception $e) {
                 Log::warning("خطا در تبدیل تاریخ شمسی: {$dateMatch[1]} - " . $e->getMessage());
             }
         }
+
         if (!$transactionDatetime) {
             $transactionDatetime = now()->toDateTimeString();
+        }
+
+        if (!$accountNumber || !$depositAmount) {
+            throw new \Exception('فرمت پیام نامعتبر است');
         }
 
 
