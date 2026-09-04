@@ -23,7 +23,7 @@ class BankMessageService
             'deposit_amount' => 'required|integer|min:1',
             'balance' => 'nullable|integer|min:0',
             'transaction_datetime' => 'nullable|date_format:Y-m-d H:i:s',
-            'raw_message' => 'nullable|string',
+            'message' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -53,7 +53,7 @@ class BankMessageService
                 'deposit_amount' => $data['deposit_amount'],
                 'balance' => $data['balance'] ?? 0,
                 'transaction_datetime' => $data['transaction_datetime'],
-                'raw_message' => $data['raw_message'] ?? null,
+                'raw_message' => $data['message'] ?? null,
                 'processed' => false,
             ]);
 
