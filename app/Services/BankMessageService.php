@@ -120,17 +120,23 @@ class BankMessageService
         $transactionDatetime = null;
         if (!empty($dateMatch)) {
             try {
-                $datetimeStr = $dateMatch[1];
-                $parts = explode('-', $datetimeStr);
+                $parts = explode('-', $dateMatch[1]);
                 $datePart = $parts[0] ?? '00/00/00';
                 $timePart = $parts[1] ?? '00:00';
                 $dateParts = explode('/', $datePart);
-                $year = '20' . ($dateParts[2] ?? '00');
-                $month = $dateParts[1] ?? '00';
-                $day = $dateParts[0] ?? '00';
-                $transactionDatetime = "{$year}-{$month}-{$day} {$timePart}:00";
+                $year = (int) $dateParts[2] ?? 0;
+                $month = (int) $dateParts[1] ?? 0;
+                $day = (int) $dateParts[0] ?? 0;
+                $timeParts = explode(':', $timePart);
+                $hour = (int) $timeParts[0] ?? 0;
+                $minute = (int) $timeParts[1] ?? 0;
+
+                // ساخت تاریخ شمسی
+                $jalali = Jalalian::create($year, $month, $day, $hour, $minute, 0);
+                // تبدیل به میلادی (Carbon)
+                $datetime = $jalali->toCarbon()->toDateTimeString(); // '2026-06-05 09:57:00'
             } catch (\Exception $e) {
-                // اگر تاریخ pars نشد، نادیده بگیر
+                throw new \Exception('تاریخ نامعتبر است: ' . $e->getMessage());
             }
         }
 
