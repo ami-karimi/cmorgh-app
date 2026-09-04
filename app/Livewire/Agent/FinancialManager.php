@@ -13,7 +13,7 @@ use App\Models\AgentBankAccount;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Services\TelegramNotificationService;
-
+use App\Models\TopupRequest;
 
 #[Title('مدیریت مالی | پنل نمایندگی')]
 #[Layout('layouts.agent')]
@@ -22,6 +22,9 @@ class FinancialManager extends Component
     use WithFileUploads, WithPagination;
 
     public $activeTab = 'my_wallet';
+    public $chargeAmount; // مبلغ ورودی نماینده
+    public $activeRequest = null; // درخواست فعال جاری
+    public $isWaiting = false; // برای نمایش وضعیت انتظار
 
     // متغیرهای فرم آپلود فیش نماینده
     public $myAmount, $myDescription, $myReceipt;
@@ -44,8 +47,93 @@ class FinancialManager extends Component
 
     public function mount()
     {
+
+        $this->activeRequest = TopupRequest::where('user_id', auth()->id())->active()->first();
+        if ($this->activeRequest) {
+            $this->isWaiting = true;
+        }
+
         $this->loadBankAccount();
     }
+
+    // ایجاد درخواست جدید
+    public function createTopupRequest()
+    {
+        if (auth()->user()->role !== 'agent') {
+            abort(403);
+        }
+
+        $this->validate([
+            'chargeAmount' => 'required|integer|min:1000|max:100000000',
+        ]);
+
+        // بررسی درخواست فعال قبلی
+        if (TopupRequest::where('user_id', auth()->id())->active()->exists()) {
+            session()->flash('error', 'شما یک درخواست فعال دارید. لطفاً منتظر بمانید یا آن را لغو کنید.');
+            return;
+        }
+
+        // تولید عدد یونیک منحصربه‌فرد
+        do {
+            $unique = rand(1, 999);
+            $payable = $this->chargeAmount + $unique;
+        } while (TopupRequest::where('payable_amount', $payable)->where('status', 'pending')->exists());
+
+        $request = TopupRequest::create([
+            'user_id' => auth()->id(),
+            'requested_amount' => $this->chargeAmount,
+            'unique_amount' => $unique,
+            'payable_amount' => $payable,
+            'status' => 'pending',
+            'expires_at' => now()->addMinutes(20),
+        ]);
+
+        $this->activeRequest = $request;
+        $this->isWaiting = true;
+        $this->chargeAmount = null;
+        session()->flash('success', 'درخواست ثبت شد. لطفاً مبلغ مشخص شده را واریز کنید.');
+    }
+
+// لغو درخواست
+    public function cancelRequest()
+    {
+        if ($this->activeRequest && $this->activeRequest->status === 'pending') {
+            $this->activeRequest->update(['status' => 'expired']);
+            $this->activeRequest = null;
+            $this->isWaiting = false;
+            session()->flash('success', 'درخواست لغو شد.');
+        }
+    }
+
+// بررسی خودکار وضعیت (از طریق Polling)
+    public function checkStatus()
+    {
+        if (!$this->activeRequest) {
+            return;
+        }
+
+        // اگر درخواست منقضی شده باشد
+        if ($this->activeRequest->expires_at < now()) {
+            $this->activeRequest->update(['status' => 'expired']);
+            $this->activeRequest = null;
+            $this->isWaiting = false;
+            session()->flash('error', 'زمان پرداخت به پایان رسید. درخواست منقضی شد.');
+            return;
+        }
+
+        // اگر وضعیت completed شد، موجودی قبلاً اضافه شده است
+        if ($this->activeRequest->status === 'completed') {
+            $this->isWaiting = false;
+            session()->flash('success', 'کیف پول شما با موفقیت شارژ شد!');
+            $this->activeRequest = null;
+            // می‌توانید موجودی را مجدداً از دیتابیس بخوانید
+            return;
+        }
+
+        // در غیر این صورت، وضعیت هنوز pending است
+    }
+
+
 
     public function toggleBankDetails()
     {

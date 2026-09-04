@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Services\BankMessageService;
+use App\Jobs\ProcessBankMessages;
 
 class MessagesController extends Controller
 {
@@ -26,6 +27,8 @@ class MessagesController extends Controller
             $parsedData = $this->bankMessageService->parseRawMessage($request->message);
 
             $bankMessage = $this->bankMessageService->storeFromArray($parsedData);
+
+            ProcessBankMessages::dispatch();
 
             return response()->json([
                 'success' => true,

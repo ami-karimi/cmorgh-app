@@ -148,6 +148,13 @@
                 <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#F59E0B]/20 text-[#F59E0B]">{{ $pendingCount }}</span>
             @endif
         </button>
+        @if(auth()->user()->role === 'agent')
+            <button wire:click="$set('activeTab', 'auto_charge')"
+                    class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 {{ $activeTab === 'auto_charge' ? 'bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#202938]/50' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                 کارت به کارت تایید آنی
+            </button>
+        @endif
         <button wire:click="$set('activeTab', 'sub_agents')"
                 class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 {{ $activeTab === 'sub_agents' ? 'bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#202938]/50' }}">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -158,6 +165,153 @@
             @endif
         </button>
     </div>
+
+
+    {{-- ============================================ --}}
+    {{-- 6. TAB: AUTO CHARGE (فقط برای agent)        --}}
+    {{-- ============================================ --}}
+    @if($activeTab === 'auto_charge' && auth()->user()->role === 'agent')
+        <div class="animate-fade-in">
+            @if(!$isWaiting)
+                {{-- فرم ورود مبلغ --}}
+                <div class="bg-[#111722] border border-[#202938] rounded-2xl p-5 shadow-sm max-w-2xl mx-auto">
+                    <h3 class="text-sm font-bold text-[#F8FAFC] mb-1">شارژ خودکار کیف پول</h3>
+                    <p class="text-[10px] text-[#94A3B8] mb-4">مبلغ موردنظر را وارد کنید تا مبلغ نهایی قابل پرداخت را دریافت کنید.</p>
+
+                    @if (session()->has('error'))
+                        <div class="p-3 mb-4 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#EF4444] text-[11px] font-bold flex items-start gap-2">
+                            <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span>{{ session('error') }}</span>
+                        </div>
+                    @endif
+
+                    <form wire:submit.prevent="createTopupRequest" class="space-y-4">
+                        <div>
+                            <label class="block text-[11px] text-[#94A3B8] font-bold mb-1.5">مبلغ موردنظر برای شارژ (تومان) <span class="text-[#EF4444]">*</span></label>
+                            <div class="relative">
+                                <input wire:model.live.debounce.300ms="chargeAmount"
+                                       type="number"
+                                       dir="ltr"
+                                       class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-sm rounded-xl px-4 py-3 font-mono tabular-nums focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition"
+                                       placeholder="مثال: 1000000">
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#94A3B8] font-bold pointer-events-none">تومان</span>
+                            </div>
+                            @error('chargeAmount') <span class="text-[#EF4444] text-[10px] mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+
+                        <button type="submit"
+                                wire:loading.attr="disabled"
+                                class="w-full py-3 bg-[#F59E0B] hover:bg-[#D97706] text-white font-black text-xs rounded-xl transition shadow-lg shadow-[#F59E0B]/20 flex items-center justify-center gap-2">
+                            <svg wire:loading wire:target="createTopupRequest" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"/></svg>
+                            <span wire:loading.remove wire:target="createTopupRequest">ادامه و دریافت مبلغ پرداخت</span>
+                            <span wire:loading wire:target="createTopupRequest">در حال ثبت...</span>
+                        </button>
+                    </form>
+                </div>
+            @else
+                {{-- نمایش اطلاعات درخواست فعال --}}
+                <div class="bg-[#111722] border border-[#202938] rounded-2xl p-5 shadow-sm max-w-2xl mx-auto" wire:poll.5s="checkStatus">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-bold text-[#F8FAFC] flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-[#F59E0B] animate-pulse"></span>
+                            در انتظار واریز
+                        </h3>
+                        <button wire:click="cancelRequest" class="text-[10px] text-[#94A3B8] hover:text-[#EF4444] transition font-bold">
+                            لغو درخواست
+                        </button>
+                    </div>
+
+                    {{-- مبلغ شارژ --}}
+                    <div class="bg-[#080B12] border border-[#202938] rounded-xl p-4 text-center">
+                        <span class="text-[10px] text-[#94A3B8]">مبلغ شارژ کیف پول</span>
+                        <div class="text-2xl font-black text-[#F8FAFC] mt-1">{{ number_format($activeRequest->requested_amount) }} <span class="text-sm text-[#94A3B8] font-sans">تومان</span></div>
+                    </div>
+
+                    {{-- مبلغ قابل پرداخت --}}
+                    <div class="mt-4 bg-[#F59E0B]/5 border border-[#F59E0B]/30 rounded-xl p-4 text-center relative">
+                        <span class="text-[10px] text-[#F59E0B] font-bold">مبلغی که باید واریز کنید</span>
+                        <div class="text-3xl font-black text-[#F59E0B] mt-1 font-mono" dir="ltr">
+                            {{ number_format($activeRequest->payable_amount) }}
+                        </div>
+                        <span class="text-[10px] text-[#94A3B8] block mt-1">تومان</span>
+                        <button onclick="copyToClipboard('{{ $activeRequest->payable_amount }}', 'مبلغ')"
+                                class="absolute left-3 top-3 p-1.5 rounded-lg bg-[#202938] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition group">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        </button>
+                    </div>
+
+                    {{-- هشدار --}}
+                    <div class="mt-3 flex items-start gap-2 text-[10px] text-[#EF4444] bg-[#EF4444]/5 border border-[#EF4444]/20 rounded-xl p-3">
+                        <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span><strong>توجه:</strong> برای تأیید خودکار، دقیقاً مبلغ <strong>{{ number_format($activeRequest->payable_amount) }}</strong> تومان را به شماره کارت زیر واریز کنید.</span>
+                    </div>
+
+                    {{-- اطلاعات حساب مقصد --}}
+                    @if($bankAccount)
+                        <div class="mt-4 border-t border-[#202938] pt-4">
+                            <h4 class="text-[11px] text-[#94A3B8] font-bold mb-2">واریز به حساب</h4>
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div>
+                                    <span class="text-[#94A3B8]">بانک</span>
+                                    <div class="font-bold text-[#F8FAFC]">{{ $bankAccount->bank_name }}</div>
+                                </div>
+                                <div>
+                                    <span class="text-[#94A3B8]">صاحب حساب</span>
+                                    <div class="font-bold text-[#F8FAFC]">{{ $bankAccount->account_name }}</div>
+                                </div>
+                                @if($bankAccount->card_number)
+                                    <div class="col-span-2">
+                                        <span class="text-[#94A3B8]">شماره کارت</span>
+                                        <div class="flex items-center gap-2">
+                                        <span class="font-mono font-bold text-[#F8FAFC] tracking-wider" dir="ltr">
+                                            @if($showBankDetails)
+                                                {{ $bankAccount->card_number }}
+                                            @else
+                                                {{ $this->maskCardNumber($bankAccount->card_number) }}
+                                            @endif
+                                        </span>
+                                            <button onclick="copyToClipboard('{{ $bankAccount->card_number }}', 'شماره کارت')"
+                                                    class="p-1.5 rounded-lg bg-[#202938] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition group">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                            <button wire:click="toggleBankDetails"
+                                    class="mt-3 text-[10px] text-[#94A3B8] hover:text-[#F8FAFC] transition flex items-center gap-1">
+                                {{ $showBankDetails ? 'مخفی کردن اطلاعات حساب' : 'نمایش اطلاعات حساب' }}
+                            </button>
+                        </div>
+                    @endif
+
+                    {{-- تایمر --}}
+                    <div class="mt-4 flex items-center justify-between text-xs">
+                        <div>
+                            <span class="text-[#94A3B8]">وضعیت:</span>
+                            <span class="font-bold text-[#F59E0B] mr-1">در انتظار واریز</span>
+                        </div>
+                        <div x-data="{
+    timeLeft: {{ max(0, (int) now()->diffInSeconds($activeRequest->expires_at)) }},
+    interval: null
+}"
+                             x-init="interval = setInterval(() => { if (timeLeft > 0) timeLeft--; }, 1000);
+         $watch('timeLeft', value => { if (value <= 0) clearInterval(interval); })"
+                             class="flex items-center gap-1 text-[#94A3B8]">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>زمان باقی‌مانده:</span>
+                            <span class="font-mono font-bold text-[#F8FAFC]"
+                                  x-text="String(Math.floor(timeLeft / 60)).padStart(2, '0') + ':' + String(Math.floor(timeLeft % 60)).padStart(2, '0')">
+    </span>
+                        </div>
+                    </div>
+
+                    {{-- دکمه تست (فقط برای محیط توسعه) --}}
+
+                </div>
+            @endif
+        </div>
+    @endif
 
     {{-- ============================================ --}}
     {{-- 4. TAB: MY WALLET                            --}}
