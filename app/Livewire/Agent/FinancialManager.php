@@ -82,8 +82,8 @@ class FinancialManager extends Component
         $request = TopupRequest::create([
             'user_id' => auth()->id(),
             'requested_amount' => $this->chargeAmount,
-            'unique_amount' => $unique,
-            'payable_amount' => $payable,
+            'unique_amount' => $unique * 10,
+            'payable_amount' => $payable * 10,
             'status' => 'pending',
             'expires_at' => now()->addMinutes(20),
         ]);

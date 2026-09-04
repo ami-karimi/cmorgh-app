@@ -231,7 +231,7 @@
                     <div class="mt-4 bg-[#F59E0B]/5 border border-[#F59E0B]/30 rounded-xl p-4 text-center relative">
                         <span class="text-[10px] text-[#F59E0B] font-bold">مبلغی که باید واریز کنید</span>
                         <div class="text-3xl font-black text-[#F59E0B] mt-1 font-mono" dir="ltr">
-                            {{ number_format($activeRequest->payable_amount) }}
+                            {{ number_format($activeRequest->payable_amount ) }}
                         </div>
                         <span class="text-[10px] text-[#94A3B8] block mt-1">تومان</span>
                         <button onclick="copyToClipboard('{{ $activeRequest->payable_amount }}', 'مبلغ')"
