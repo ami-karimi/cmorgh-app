@@ -9,10 +9,24 @@ use App\Services\BankMessageService;
 
 class MessagesController extends Controller
 {
-    public function get(Request  $request){
+    protected $bankMessageService;
+
+    public function __construct(BankMessageService $bankMessageService)
+    {
+        $this->bankMessageService = $bankMessageService;
+    }
+
+    /**
+     * دریافت و ذخیره‌سازی پیام بانکی
+     */
+    public function get(Request $request)
+    {
         try {
-            $service = new BankMessageService();
-            $bankMessage = $service->storeFromArray($request->message);
+            // ۱. پارس کردن پیام خام
+            $parsedData = $this->bankMessageService->parseRawMessage($request->message);
+
+            // ۲. ذخیره‌سازی در دیتابیس با استفاده از سرویس
+            $bankMessage = $this->bankMessageService->storeFromArray($parsedData);
 
             return response()->json([
                 'success' => true,
@@ -21,6 +35,8 @@ class MessagesController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
+            Log::error("خطا در ذخیره‌سازی پیام بانکی: " . $e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()

@@ -97,7 +97,7 @@ class BankMessageService
      * تابع کمکی برای pars کردن پیام خام
      * فرمت: "حساب9490032979 واریز10,000,000 مانده3,058,498,934 05/06/12-09:57"
      */
-    private function parseRawMessage(string $rawMessage): ?array
+    public  function parseRawMessage(string $rawMessage): ?array
     {
         // استخراج شماره حساب
         preg_match('/حساب([\d]+)/', $rawMessage, $accountMatch);
