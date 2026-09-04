@@ -115,6 +115,7 @@ class ProcessBankMessages implements ShouldQueue
 
                 // ۲. به‌روزرسانی درخواست
                 $request->update([
+                    'matched_bank_message_id' => $message->id,
                     'status' => 'completed',
                 ]);
 

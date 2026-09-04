@@ -105,6 +105,7 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     Route::get('/accounts/{id}',\App\Livewire\Admin\AccountDetails::class)->name('accounts.show');
     Route::get('/users',\App\Livewire\Admin\UserManager::class)->name('users.index');
     Route::get('/settings',\App\Livewire\Admin\SiteSettings::class)->name('settings');
+    Route::get('/manage-charges',\App\Livewire\Admin\ManageCharges::class)->name('manage_charges');
     Route::get('/users/{id}',\App\Livewire\Admin\UserDetails::class)->name('users.show');
     Route::get('/users/{id}',\App\Livewire\Admin\UserDetails::class)->name('users.show');
 

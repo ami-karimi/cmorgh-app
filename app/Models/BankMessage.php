@@ -26,4 +26,10 @@ class BankMessage extends Model
     {
         return $query->where('processed', false);
     }
+
+    public function matchedRequest()
+    {
+        return $this->hasOne(TopupRequest::class, 'matched_bank_message_id');
+    }
+
 }
