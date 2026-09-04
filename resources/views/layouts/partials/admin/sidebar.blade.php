@@ -117,7 +117,7 @@
         </div>
 
         <!-- امور مالی -->
-        <div x-data="{ open: {{ request()->routeIs('admin.financial*', 'admin.payment.*') ? 'true' : 'false' }} }" class="mb-1">
+        <div x-data="{ open: {{ request()->routeIs('admin.financial*', 'admin.payment.*','admin.manage_charges*') ? 'true' : 'false' }} }" class="mb-1">
             <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100 transition-all focus:outline-none">
                 <div class="flex items-center gap-3">
                     <svg class="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -133,6 +133,10 @@
                 <a href="{{ route('admin.payment.methods') }}" wire:navigate class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all {{ request()->routeIs('admin.payment.methods') ? 'text-orange-400 bg-orange-500/10 border-r-2 border-orange-400' : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/30' }}">
                     <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.payment.methods') ? 'bg-orange-400' : 'bg-zinc-600' }}"></span>
                     <span>شیوه‌های پرداخت</span>
+                </a>
+                <a href="{{ route('admin.manage_charges') }}" wire:navigate class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all {{ request()->routeIs('admin.payment.methods') ? 'text-orange-400 bg-orange-500/10 border-r-2 border-orange-400' : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/30' }}">
+                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.manage_charges') ? 'bg-orange-400' : 'bg-zinc-600' }}"></span>
+                    <span>تایید خودکار</span>
                 </a>
             </div>
         </div>
