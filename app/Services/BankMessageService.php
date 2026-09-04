@@ -153,9 +153,6 @@ class BankMessageService
             $transactionDatetime = now()->toDateTimeString();
         }
 
-        if (!$accountNumber || !$depositAmount) {
-            throw new \Exception('فرمت پیام نامعتبر است');
-        }
 
 
         return [
