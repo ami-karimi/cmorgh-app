@@ -25,7 +25,6 @@ class MessagesController extends Controller
             // ۱. پارس کردن پیام خام
             $parsedData = $this->bankMessageService->parseRawMessage($request->message);
 
-            // ۲. ذخیره‌سازی در دیتابیس با استفاده از سرویس
             $bankMessage = $this->bankMessageService->storeFromArray($parsedData);
 
             return response()->json([
