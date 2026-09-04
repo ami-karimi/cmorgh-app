@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
+use App\Jobs\ProcessBankMessages;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -23,5 +24,8 @@ Schedule::command('vpn:clear-radius')
     ->everySixHours()
     ->withoutOverlapping();
 
+Schedule::job(new ProcessBankMessages())
+    ->everyThirtySeconds()
+    ->withoutOverlapping();
 
 Schedule::command('vpn:disable-expired')->dailyAt('00:00');
