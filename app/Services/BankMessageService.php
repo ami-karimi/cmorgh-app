@@ -138,6 +138,7 @@ class BankMessageService
             'account_number' => $accountMatch[1],
             'deposit_amount' => (int) str_replace(',', '', $depositMatch[1]),
             'balance' => $balance,
+            'message' => $rawMessage,
             'transaction_datetime' => $transactionDatetime ?? now()->format('Y-m-d H:i:s'),
         ];
     }
