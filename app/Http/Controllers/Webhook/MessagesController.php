@@ -9,6 +9,6 @@ use Illuminate\Support\Facades\Log;
 class MessagesController extends Controller
 {
     public function get(Request  $request){
-        Log::info(var_dump($request->all()));
+        Log::info($request->message);
     }
 }
