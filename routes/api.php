@@ -1,5 +1,10 @@
 <?php
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Webhook\MessagesController;
+
+
+Route::post('/message', [MessagesController::class, 'get'])->name('message');
+
 
 Route::prefix('mobile')->group(function () {
     Route::post('/sign-in', [\App\Http\Controllers\Mobile\AuthController::class, 'sign_in'])->name('sign_in');
