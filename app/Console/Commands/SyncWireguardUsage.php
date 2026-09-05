@@ -81,7 +81,7 @@ class SyncWireguardUsage extends Command
                         $syncedCount++;
 
                     } else {
-                        Log::warning("Queue for IP {$user->user_ip} not found on server {$server->nasname}.");
+                        Log::warning("Queue for IP {$user->user_ip} not found on server {$server->name}.");
                     }
                 }
 

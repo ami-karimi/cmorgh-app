@@ -28,7 +28,6 @@ class MessagesController extends Controller
 
             $bankMessage = $this->bankMessageService->storeFromArray($parsedData);
 
-            ProcessBankMessages::dispatch();
 
             return response()->json([
                 'success' => true,

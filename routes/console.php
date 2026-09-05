@@ -14,6 +14,10 @@ Schedule::command('vpn:sync-wg-usage')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/wireguard_sync.log'));
 
+Schedule::command('bank:sync-payment')
+    ->everyThirtySeconds()
+    ->withoutOverlapping();
+
 
 Schedule::command('vpn:sync-radius-usage')
     ->everyMinute()
@@ -24,8 +28,6 @@ Schedule::command('vpn:clear-radius')
     ->everySixHours()
     ->withoutOverlapping();
 
-Schedule::job(new ProcessBankMessages())
-    ->everyThirtySeconds()
-    ->withoutOverlapping();
+
 
 Schedule::command('vpn:disable-expired')->dailyAt('00:00');
