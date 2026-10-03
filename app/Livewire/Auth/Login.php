@@ -161,6 +161,7 @@ class Login extends Component
         $user = User::create([
             'name' => $this->name,
             'email' => $this->email ?: null,
+            'role' => 'customer',
             'phone' => $formattedPhone,
             'password' => Hash::make($this->password),
         ]);

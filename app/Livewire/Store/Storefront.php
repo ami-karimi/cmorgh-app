@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store;
 
+use App\Models\AgentBankAccount;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -34,7 +35,12 @@ class Storefront extends Component
     {
         $host = request()->getHost();
         $host = str_replace('www.', '',$host);
-
+        $this->bankDetails = AgentBankAccount::whereHas('user', function($query) {
+            $query->where('role', 'manager');
+        })
+            ->where('is_show', 1)
+            ->orderBy('id', 'asc')
+            ->first();
         $agent = User::where('custom_domain',$host)->where('domain_status', 'approved')->first();
         if(Auth::user()){
             $agent = auth()->user()->parentAgent;
