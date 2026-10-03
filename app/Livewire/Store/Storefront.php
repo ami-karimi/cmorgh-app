@@ -35,12 +35,7 @@ class Storefront extends Component
     {
         $host = request()->getHost();
         $host = str_replace('www.', '',$host);
-        $this->bankDetails = AgentBankAccount::whereHas('user', function($query) {
-            $query->where('role', 'manager');
-        })
-            ->where('is_show', 1)
-            ->orderBy('id', 'asc')
-            ->first();
+
         $agent = User::where('custom_domain',$host)->where('domain_status', 'approved')->first();
         if(Auth::user()){
             $agent = auth()->user()->parentAgent;
@@ -71,6 +66,14 @@ class Storefront extends Component
             $this->bankDetails = DB::table('agent_bank_accounts')->where('user_id', $mng->id)->first();
         }
 
+        if($this->bankDetails == null){
+            $this->bankDetails = AgentBankAccount::whereHas('user', function($query) {
+                $query->where('role', 'manager');
+            })
+                ->where('is_show', 1)
+                ->orderBy('id', 'asc')
+                ->first();
+        }
         if (Auth::check()) {
             $this->name = Auth::user()->name;
             $this->phone = Auth::user()->phone;
