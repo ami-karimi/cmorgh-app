@@ -11,11 +11,11 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Enums\Role;
 use Morilog\Jalali\Jalalian;
 use Illuminate\Support\Facades\DB;
-
+use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens,HasFactory, Notifiable;
 
     public const ROLE_MANAGER = 'manager';
     public const ROLE_ADMIN = 'admin';

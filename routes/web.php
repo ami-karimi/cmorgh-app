@@ -13,6 +13,7 @@ Route::get('/sub/{hash}', \App\Livewire\User\PublicAccountView::class)->name('pu
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', \App\Livewire\Auth\Login::class)->name('login');
+
 });
 
 use Illuminate\Support\Facades\File;
@@ -32,6 +33,7 @@ Route::get('/download-wg/{profile}', function ($profile) {
 
     return response()->download($path, $profile . '.conf', $headers);
 })->name('download.wg.config');
+
 
 
 Route::middleware(['auth'])->group(function () {

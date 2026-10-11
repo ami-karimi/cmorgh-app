@@ -42,6 +42,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'api' => [  // ← این گارد را اضافه کنید
+            'driver' => 'sanctum',
+            'provider' => 'users',
+        ],
     ],
 
     /*

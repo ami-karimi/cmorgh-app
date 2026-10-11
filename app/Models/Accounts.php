@@ -24,6 +24,12 @@ class Accounts extends Model
         return $this->belongsTo(User::class, 'creator');
     }
 
+    public function wireguardUser()
+    {
+        return $this->hasOne(WireGuardUsers::class, 'user_id', 'id');
+    }
+
+
     public function formatBytes($bytes, $precision = 2)
     {
         if ($bytes <= 0) return '0 B';

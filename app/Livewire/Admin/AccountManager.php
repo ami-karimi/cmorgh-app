@@ -161,7 +161,9 @@ class AccountManager extends Component
 
                         $acc->update([
                             'usage' => 0,
-                            'max_usage' => $acc->group->group_volume * 1073741824,                             'expire_date' =>$newExpireDate,
+                            'max_usage' => $acc->group->group_volume * 1073741824,
+                            'expire_date' => $newExpireDate,
+                            'multi_login' => $acc->group->multi_login,
                             'expired' => 0,
                             'is_enabled' => 1
                         ]);

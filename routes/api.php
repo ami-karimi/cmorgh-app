@@ -6,6 +6,20 @@ use App\Http\Controllers\Webhook\MessagesController;
 Route::post('/message', [MessagesController::class, 'get'])->name('message');
 
 
+Route::prefix('v2')->name('pc.')->group(function () {
+    Route::middleware('guest')->group(function () {
+        Route::post('login', [\App\Http\Controllers\Pc\AuthController::class, 'login'])->name('login');
+    });
+
+    Route::middleware(['auth:api'])->group(function () {
+        Route::get('accounts', [\App\Http\Controllers\Pc\AccountsController::class, 'accounts'])->name('accounts');
+        Route::get('user', [\App\Http\Controllers\Pc\AuthController::class, 'user'])->name('user');
+        Route::get('servers', [\App\Http\Controllers\Pc\ServersListController::class, 'index'])->name('servers');
+    });
+
+});
+
+
 Route::prefix('mobile')->group(function () {
     Route::post('/sign-in', [\App\Http\Controllers\Mobile\AuthController::class, 'sign_in'])->name('sign_in');
     Route::post('/config', [\App\Http\Controllers\Mobile\AuthController::class, 'is_valid_token'])->name('is_valid_token');

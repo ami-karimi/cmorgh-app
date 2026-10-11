@@ -195,6 +195,7 @@ class VpnManagerService
             }
 
             $account->first_login = null;
+            $account->multi_login = $group->multi_login;
             $account->is_enabled = 1;
             $account->limited = 0;
             $account->save();

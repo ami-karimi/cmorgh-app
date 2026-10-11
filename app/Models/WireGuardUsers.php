@@ -19,4 +19,15 @@ class WireGuardUsers extends Model
         return $this->belongsTo(Accounts::class, 'user_id');
     }
 
+    public function getConfigContent(): ?string
+    {
+        $path = storage_path("app/configs/{$this->profilename}.conf");
+
+        if (!file_exists($path)) {
+            return null;
+        }
+
+        return file_get_contents($path);
+    }
+
 }
