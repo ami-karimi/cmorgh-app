@@ -204,7 +204,7 @@ class AccountDetail extends Component
     {
         $this->validate([
             'newWgServerId' => 'required|exists:nas,id',
-            'selectedWgConfigId' => 'required|exists:wire_guard_users,id'
+            'selectedWgConfigId' => 'required|exists:wireguard_users,id'
         ]);
 
         // پاس دادن هر سه پارامتر به سرویس
