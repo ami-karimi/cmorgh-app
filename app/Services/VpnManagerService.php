@@ -162,6 +162,7 @@ class VpnManagerService
                 'minutes' => $expVal,
                 'hours'   => $expVal * 60,
                 'days'    => $expVal * 24 * 60,
+                'months'   => $expVal * 30 * 24 * 60,
                 'month'   => $expVal * 30 * 24 * 60,
                 'year'    => $expVal * 365 * 24 * 60,
                 default   => 0,
