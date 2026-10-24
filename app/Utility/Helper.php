@@ -69,6 +69,10 @@ class Helper
                 $exp_val_minute = $expire_value * 43200; // 30 روز
                 $max_usage = ($expire_value * 100 * $GB_IN_BYTES) * $findGroup->multi_login;
                 break;
+                case 'months':
+                $exp_val_minute = $expire_value * 43200; // 30 روز
+                $max_usage = ($expire_value * 100 * $GB_IN_BYTES) * $findGroup->multi_login;
+                break;
             case 'year':
                 $exp_val_minute = $expire_value * 525600; // 365 روز
                 $max_usage = 90000000000 * $expire_value * $findGroup->multi_login;
