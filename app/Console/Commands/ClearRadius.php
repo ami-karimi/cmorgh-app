@@ -32,7 +32,7 @@ class ClearRadius extends Command
             $query->where('group_type', 'expire');
         })->where('service_group', 'l2tp_cisco')->where('limited', 0)->get();
         foreach ($data as $item){
-            RadAcct::where('username',$item->username)->where('acctstoptime','!=',NULL)->delete();
+            Radacct::where('username',$item->username)->where('acctstoptime','!=',NULL)->delete();
             RadPostAuth::where('username',$item->username)->delete();
         }
 
