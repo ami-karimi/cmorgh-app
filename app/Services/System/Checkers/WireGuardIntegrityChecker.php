@@ -134,8 +134,7 @@ class WireGuardIntegrityChecker extends SystemHealthChecker
         // دریافت Issues باز از نوع اورفان
         $issues = $this->getOpenIssues()
             ->whereIn('issue_type', ['orphan_peer_only', 'orphan_full', 'orphan_peer_config', 'config_without_account'])
-            ->where('status', 'open')
-            ->get();
+            ->where('status', 'open');
 
         foreach ($issues as $issue) {
             $serverId = $issue->server_id;
