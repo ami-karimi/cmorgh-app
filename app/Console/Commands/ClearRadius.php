@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Accounts;
-use App\Models\RadAcct;
+use App\Models\Radacct;
 use App\Models\RadPostAuth;
 use Illuminate\Console\Command;
 
