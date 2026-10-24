@@ -140,77 +140,81 @@ class VpnManagerService
                 }
             }
 
-
-            $remainingDays = 0;
+            // -------------------------------------------------------------
+            // محاسبه دقیق اعتبار باقی‌مانده (بر اساس دقیقه، نه روز کامل)
+            // -------------------------------------------------------------
+            $remainingMinutes = 0;
             if ($account->expire_date && Carbon::parse($account->expire_date)->isFuture()) {
-                $remainingDays = floor(now()->diffInDays(Carbon::parse($account->expire_date)));
+                $remainingMinutes = (int) floor(now()->diffInMinutes(Carbon::parse($account->expire_date)));
             }
 
-            $rolloverDays = min(3, $remainingDays);
-            $rolloverMinutes = $rolloverDays * 24 * 60;
+            // rollover حداکثر ۳ روز = ۴۳۲۰ دقیقه
+            $rolloverMinutes = min(3 * 24 * 60, $remainingMinutes);
+            $rolloverDays = (int) floor($rolloverMinutes / (24 * 60));
+
             $expType = $group->expire_type ?? 'days';
+            $expVal  = (int) ($group->expire_value ?? 30);
 
-            $expVal = (int)($group->expire_value ?? 30);
-
-            $baseMinutes = 0;
+            // -------------------------------------------------------------
+            // محاسبه دقیقه پایه بر اساس نوع پلن
+            // -------------------------------------------------------------
             $baseMinutes = match ($expType) {
                 'minutes' => $expVal,
-                'hours' => $expVal * 60,
-                'days' => $expVal * 24 * 60,
-                'month' => $expVal * 30 * 24 * 60,
-                'year' => $expVal * 365 * 24 * 60,
-                default => 0,
+                'hours'   => $expVal * 60,
+                'days'    => $expVal * 24 * 60,
+                'month'   => $expVal * 30 * 24 * 60,
+                'year'    => $expVal * 365 * 24 * 60,
+                default   => 0,
             };
 
+            // مجموع دقیقه = پایه + rollover
+            $totalMinutes = $baseMinutes + $rolloverMinutes;
+
+            // -------------------------------------------------------------
+            // تاریخ انقضا هم باید با totalMinutes هماهنگ باشد
+            // -------------------------------------------------------------
             $expireDate = null;
             if ($group->first_login == 0) {
-                $expireDate = match ($expType) {
-                    'minutes' => now()->addMinutes($expVal),
-                    'hours' => now()->addHours($expVal),
-                    'days' => now()->addDays($expVal),
-                    'month' => now()->addMonths($expVal),
-                    'year' => now()->addYears($expVal),
-                    default => now()->addDays(30),
-                };
+                $expireDate = now()->addMinutes($totalMinutes);
             }
 
-
-            $account->group_id = $group->id;
-            $account->upload_usage = 0;
+            // -------------------------------------------------------------
+            // به‌روزرسانی اکانت
+            // -------------------------------------------------------------
+            $account->group_id       = $group->id;
+            $account->upload_usage   = 0;
             $account->download_usage = 0;
-            $account->usage = 0;
-            $account->max_usage = ($group->group_volume > 0) ? ($group->group_volume * 1024 * 1024 * 1024) : 0;
+            $account->usage          = 0;
+            $account->max_usage      = ($group->group_volume > 0)
+                ? ($group->group_volume * 1024 * 1024 * 1024)
+                : 0;
 
-            $account->exp_val_minute = $baseMinutes + $rolloverMinutes;
+            $account->exp_val_minute = $totalMinutes;
 
             if (isset($group->expire_type)) {
-                $account->expire_type = $group->expire_type;
+                $account->expire_type  = $group->expire_type;
                 $account->expire_value = $group->expire_value;
             }
 
-            if ($group->first_login == 0) {
-                $account->expire_date = $expireDate;
-            } else {
-                $account->expire_date = null;
-            }
+            // اگر first_login == 0 تاریخ ست می‌شود (شامل rollover)، در غیر این صورت null
+            $account->expire_date = ($group->first_login == 0) ? $expireDate : null;
 
             $account->first_login = null;
             $account->multi_login = $group->multi_login;
-            $account->is_enabled = 1;
-            $account->limited = 0;
+            $account->is_enabled  = 1;
+            $account->limited     = 0;
             $account->save();
 
             self::applyRechargeToServer($account, $group);
             self::toggleAccount($account, true);
 
-            // ثبت نهایی تغییرات
             DB::commit();
 
             // -------------------------------------------------------------
-            // ۶. ثبت لاگ سیستم
+            // ثبت لاگ سیستم
             // -------------------------------------------------------------
             $logMsg = "اکانت با بسته {$group->name} تمدید/ایجاد شد.";
-            if ($rolloverDays > 0) {
+            if ($rolloverMinutes > 0) {
                 $logMsg .= " ({$rolloverDays} روز اعتبار قبلی منتقل شد).";
             }
             ActivityLogger::log($account->id, $logMsg, 1, 1);
