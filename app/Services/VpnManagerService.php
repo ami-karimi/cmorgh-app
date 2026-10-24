@@ -174,7 +174,7 @@ class VpnManagerService
             // تاریخ انقضا هم باید با totalMinutes هماهنگ باشد
             // -------------------------------------------------------------
             $expireDate = null;
-            if ($group->first_login == 0) {
+            if (!$group->first_login) {
                 $expireDate = now()->addMinutes($totalMinutes);
             }
 
@@ -197,7 +197,7 @@ class VpnManagerService
             }
 
             // اگر first_login == 0 تاریخ ست می‌شود (شامل rollover)، در غیر این صورت null
-            $account->expire_date = ($group->first_login == 0) ? $expireDate : null;
+            $account->expire_date = $expireDate;
 
             $account->first_login = null;
             $account->multi_login = $group->multi_login;
