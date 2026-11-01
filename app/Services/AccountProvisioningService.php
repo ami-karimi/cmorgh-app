@@ -59,6 +59,7 @@ class AccountProvisioningService
                 'hours'   => $expVal * 60,
                 'days'    => $expVal * 24 * 60,
                 'month'   => $expVal * 30 * 24 * 60,
+                'months'   => $expVal * 30 * 24 * 60,
                 'year'    => $expVal * 365 * 24 * 60,
                 default   => 0,
             };
@@ -70,6 +71,7 @@ class AccountProvisioningService
                 'hours'   => now()->addHours($expVal),
                 'days'    => now()->addDays($expVal),
                 'month'   => now()->addMonths($expVal),
+                'months'   => now()->addMonths($expVal),
                 'year'    => now()->addYears($expVal),
                 default   => now()->addDays(30),
             };
@@ -83,7 +85,8 @@ class AccountProvisioningService
             'phonenumber'   => $phone ?? $user->phone ?? null,
             'group_id'      => $group->id,
             'service_group' => $serviceGroup,
-            'multi_login'   => $group->multi_login ?? 1,
+            'multi_login'   => $group->
+                ?? 1,
             'expire_type'   => $group->expire_type ?? 'month',
             'expire_value'  => $group->expire_value ?? 1,
             'expire_date'   => $expireDate,
