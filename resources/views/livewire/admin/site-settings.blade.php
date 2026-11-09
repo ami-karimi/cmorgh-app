@@ -1,11 +1,11 @@
 <div class="space-y-6 pb-12 font-sans" wire:key="site-settings-view">
 
-    <div class="relative overflow-hidden bg-zinc-900/60 backdrop-blur-xl border border-zinc-800/60 rounded-[2rem] p-8 shadow-2xl">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="relative overflow-hidden bg-zinc-900/60 backdrop-blur-xl border border-zinc-800/60 rounded-[1.25rem] p-8 shadow-2xl">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div class="flex items-center gap-5">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 flex items-center justify-center text-orange-400 shadow-inner shadow-white/5">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 flex items-center justify-center text-brand-400 shadow-inner shadow-white/5">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </div>
                 <div>
@@ -14,7 +14,7 @@
                 </div>
             </div>
 
-            <button wire:click="save" wire:loading.attr="disabled" class="px-8 py-3.5 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-sm rounded-xl shadow-[0_10px_20px_-10px_rgba(249,115,22,0.5)] transition-all flex justify-center items-center gap-2 shrink-0">
+            <button wire:click="save" wire:loading.attr="disabled" class="px-8 py-3.5 bg-gradient-to-r from-brand-600 to-brand-600 hover:from-brand-500 hover:to-brand-500 text-white font-bold text-sm rounded-xl shadow-[0_10px_20px_-10px_rgba(59,130,246,0.5)] transition-all flex justify-center items-center gap-2 shrink-0">
                 <span wire:loading.remove wire:target="save">ذخیره تمام تنظیمات</span>
                 <span wire:loading wire:target="save" class="flex items-center gap-2">
                     <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"></path></svg>
@@ -45,17 +45,17 @@
             @endphp
 
             @foreach($tabs as $key => $tab)
-                <button type="button" wire:click="$set('activeTab', '{{ $key }}')" class="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-sm font-bold transition-all duration-300 {{ $activeTab === $key ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 'bg-zinc-900/40 text-zinc-400 border border-transparent hover:bg-zinc-800/50 hover:text-white' }}">
+                <button type="button" wire:click="$set('activeTab', '{{ $key }}')" class="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-sm font-bold transition-all duration-300 {{ $activeTab === $key ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'bg-zinc-900/40 text-zinc-400 border border-transparent hover:bg-zinc-800/50 hover:text-white' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $tab['icon'] }}"></path></svg>
                     {{ $tab['title'] }}
                 </button>
             @endforeach
         </div>
 
-        <div class="lg:col-span-3 bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/60 rounded-[2rem] p-8 shadow-xl relative min-h-[400px]">
+        <div class="lg:col-span-3 bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/60 rounded-[1.25rem] p-8 shadow-xl relative min-h-[400px]">
 
-            <div wire:loading wire:target="activeTab, $set('activeTab')" class="absolute inset-0 z-50 flex items-center justify-center bg-zinc-950/50 backdrop-blur-sm rounded-[2rem]">
-                <svg class="w-8 h-8 animate-spin text-orange-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"></path></svg>
+            <div wire:loading wire:target="activeTab, $set('activeTab')" class="absolute inset-0 z-50 flex items-center justify-center bg-zinc-950/50 backdrop-blur-sm rounded-[1.25rem]">
+                <svg class="w-8 h-8 animate-spin text-brand-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"></path></svg>
             </div>
 
             {{-- تب عمومی --}}
@@ -63,13 +63,13 @@
                 <div class="space-y-6 animate-fade-in">
                     <div>
                         <label class="block text-sm font-bold text-zinc-300 mb-2">عنوان سایت (SITE_TITLE)</label>
-                        <input wire:model="site_title" type="text" class="w-full bg-zinc-950 border border-zinc-700/50 text-white rounded-xl p-4 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 transition-all shadow-inner" placeholder="مثلاً: همراه سیمرغ ایران">
+                        <input wire:model="site_title" type="text" class="w-full bg-zinc-950 border border-zinc-700/50 text-white rounded-xl p-4 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500/50 transition-all shadow-inner" placeholder="مثلاً: همراه سیمرغ ایران">
                         @error('site_title') <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
                         <label class="block text-sm font-bold text-zinc-300 mb-2">واترمارک کدهای QR (QR_WATRMARK)</label>
-                        <input wire:model="qr_watermark" type="text" dir="ltr" class="w-full bg-zinc-950 border border-zinc-700/50 text-zinc-300 rounded-xl p-4 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 transition-all shadow-inner" placeholder="cmorgh VPN">
+                        <input wire:model="qr_watermark" type="text" dir="ltr" class="w-full bg-zinc-950 border border-zinc-700/50 text-zinc-300 rounded-xl p-4 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500/50 transition-all shadow-inner" placeholder="cmorgh VPN">
                     </div>
 
                     <div class="pt-6 border-t border-zinc-800/80">
@@ -156,7 +156,7 @@
 
                     <div>
                         <label class="block text-sm font-bold text-zinc-300 mb-2">متن قوانین و مقررات</label>
-                        <textarea wire:model="rules_text" rows="6" class="w-full bg-zinc-950 border border-zinc-700/50 text-zinc-300 rounded-xl p-4 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 transition-all shadow-inner leading-relaxed" placeholder="متن توافقنامه کاربری..."></textarea>
+                        <textarea wire:model="rules_text" rows="6" class="w-full bg-zinc-950 border border-zinc-700/50 text-zinc-300 rounded-xl p-4 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500/50 transition-all shadow-inner leading-relaxed" placeholder="متن توافقنامه کاربری..."></textarea>
                     </div>
                 </div>
             @endif

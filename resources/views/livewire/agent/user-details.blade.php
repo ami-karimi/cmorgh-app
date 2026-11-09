@@ -17,7 +17,7 @@
                             {{ $customer->is_active ? 'فعال' : 'مسدود' }}
                         </span>
                     </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#202938] text-[#94A3B8] border border-[#202938]">
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#243247] text-[#94A3B8] border border-[#243247]">
                         {{ $customer->role === 'customer' ? 'مشتری عادی' : 'زیرنماینده' }}
                     </span>
                 </div>
@@ -31,19 +31,19 @@
 
         <div class="flex items-center gap-2 flex-wrap">
             <a href="{{ route('reseller.customers') }}" wire:navigate
-               class="px-4 py-2.5 rounded-xl bg-[#202938] hover:bg-[#171E2B] text-[#94A3B8] hover:text-[#F8FAFC] text-xs font-bold transition flex items-center gap-2 border border-[#202938]">
+               class="px-4 py-2.5 rounded-xl bg-[#243247] hover:bg-[#17253a] text-[#94A3B8] hover:text-[#F8FAFC] text-xs font-bold transition flex items-center gap-2 border border-[#243247]">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 بازگشت به لیست
             </a>
 
             <button wire:click="openEditModal"
-                    class="px-4 py-2.5 rounded-xl bg-[#202938] hover:bg-[#6366F1] text-[#94A3B8] hover:text-white text-xs font-bold transition flex items-center gap-2">
+                    class="px-4 py-2.5 rounded-xl bg-[#243247] hover:bg-[#3b82f6] text-[#94A3B8] hover:text-white text-xs font-bold transition flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 ویرایش مشتری
             </button>
 
             <a href="{{ route('reseller.accounts.create', ['customer_id' => $customer->id]) }}" wire:navigate
-               class="px-5 py-2.5 rounded-xl bg-[#6366F1] hover:bg-[#4F46E5] text-white text-xs font-bold transition shadow-lg shadow-[#6366F1]/20 flex items-center gap-2">
+               class="px-5 py-2.5 rounded-xl bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-bold transition shadow-lg shadow-[#3b82f6]/20 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 صدور اکانت جدید
             </a>
@@ -72,7 +72,7 @@
     @endphp
 
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div class="bg-[#111722] border border-[#202938] rounded-xl p-4">
+        <div class="bg-[#111c2e] border border-[#243247] rounded-xl p-4">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">موجودی کیف پول</span>
                 <span class="text-xl">💰</span>
@@ -83,7 +83,7 @@
             <span class="text-[10px] text-[#94A3B8]">تومان</span>
         </div>
 
-        <div class="bg-[#111722] border border-[#202938] rounded-xl p-4">
+        <div class="bg-[#111c2e] border border-[#243247] rounded-xl p-4">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">کل سرویس‌ها</span>
                 <span class="text-xl">📡</span>
@@ -92,7 +92,7 @@
             <span class="text-[10px] text-[#94A3B8]">سرویس</span>
         </div>
 
-        <div class="bg-[#111722] border border-[#202938] rounded-xl p-4">
+        <div class="bg-[#111c2e] border border-[#243247] rounded-xl p-4">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">سرویس‌های فعال</span>
                 <span class="text-xl text-[#10B981]">●</span>
@@ -101,7 +101,7 @@
             <span class="text-[10px] text-[#94A3B8]">فعال</span>
         </div>
 
-        <div class="bg-[#111722] border border-[#202938] rounded-xl p-4">
+        <div class="bg-[#111c2e] border border-[#243247] rounded-xl p-4">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">سرویس‌های منقضی</span>
                 <span class="text-xl text-[#EF4444]">✕</span>
@@ -110,7 +110,7 @@
             <span class="text-[10px] text-[#94A3B8]">منقضی</span>
         </div>
 
-        <div class="bg-[#111722] border border-[#202938] rounded-xl p-4">
+        <div class="bg-[#111c2e] border border-[#243247] rounded-xl p-4">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">مجموع خرید</span>
                 <span class="text-xl text-[#F59E0B]">🛒</span>
@@ -128,21 +128,21 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {{-- Left: Customer Information Card --}}
-        <div class="bg-[#111722] border border-[#202938] rounded-2xl p-6 shadow-sm">
+        <div class="bg-[#111c2e] border border-[#243247] rounded-2xl p-6 shadow-sm">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-sm font-bold text-[#F8FAFC]">اطلاعات مشتری</h3>
-                <button wire:click="openEditModal" class="p-2 rounded-lg bg-[#202938] text-[#94A3B8] hover:bg-[#6366F1] hover:text-white transition" title="ویرایش">
+                <button wire:click="openEditModal" class="p-2 rounded-lg bg-[#243247] text-[#94A3B8] hover:bg-[#3b82f6] hover:text-white transition" title="ویرایش">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 </button>
             </div>
 
             <div class="space-y-3 text-sm">
-                <div class="flex justify-between items-center py-2.5 border-b border-[#202938]">
+                <div class="flex justify-between items-center py-2.5 border-b border-[#243247]">
                     <span class="text-xs text-[#94A3B8]">ایجاد کننده</span>
                     <span class="text-xs font-bold text-[#F59E0B]">{{ $creatorName }}</span>
                 </div>
 
-                <div class="flex justify-between items-center py-2.5 border-b border-[#202938]">
+                <div class="flex justify-between items-center py-2.5 border-b border-[#243247]">
                     <span class="text-xs text-[#94A3B8] flex items-center gap-1.5">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                         شماره تماس
@@ -150,7 +150,7 @@
                     <span class="text-xs font-mono text-[#F8FAFC]" dir="ltr">{{ $customer->phone ?? 'ثبت نشده' }}</span>
                 </div>
 
-                <div class="flex justify-between items-center py-2.5 border-b border-[#202938]">
+                <div class="flex justify-between items-center py-2.5 border-b border-[#243247]">
                     <span class="text-xs text-[#94A3B8] flex items-center gap-1.5">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                         آدرس ایمیل
@@ -158,12 +158,12 @@
                     <span class="text-xs font-mono text-[#F8FAFC]" dir="ltr">{{ $customer->email ?? 'ثبت نشده' }}</span>
                 </div>
 
-                <div class="flex justify-between items-center py-2.5 border-b border-[#202938]">
+                <div class="flex justify-between items-center py-2.5 border-b border-[#243247]">
                     <span class="text-xs text-[#94A3B8]">نقش کاربر</span>
                     <span class="text-xs font-bold text-[#F8FAFC]">{{ $customer->role === 'customer' ? 'مشتری عادی' : 'زیرنماینده' }}</span>
                 </div>
 
-                <div class="flex justify-between items-center py-2.5 border-b border-[#202938]">
+                <div class="flex justify-between items-center py-2.5 border-b border-[#243247]">
                     <span class="text-xs text-[#94A3B8]">تاریخ عضویت</span>
                     <span class="text-xs font-mono text-[#F8FAFC]">{{ \Morilog\Jalali\Jalalian::fromCarbon($customer->created_at)->format('Y/m/d') }}</span>
                 </div>
@@ -183,10 +183,10 @@
         </div>
 
         {{-- Right: VPN Services --}}
-        <div class="lg:col-span-2 bg-[#111722] border border-[#202938] rounded-2xl p-6 shadow-sm">
+        <div class="lg:col-span-2 bg-[#111c2e] border border-[#243247] rounded-2xl p-6 shadow-sm">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-[#6366F1]/10 border border-[#6366F1]/20 flex items-center justify-center text-[#6366F1]">
+                    <div class="w-10 h-10 rounded-xl bg-[#3b82f6]/10 border border-[#3b82f6]/20 flex items-center justify-center text-[#3b82f6]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                     <div>
@@ -195,7 +195,7 @@
                     </div>
                 </div>
                 <a href="{{ route('reseller.accounts.create', ['customer_id' => $customer->id]) }}" wire:navigate
-                   class="px-4 py-2 rounded-xl bg-[#6366F1] hover:bg-[#4F46E5] text-white text-xs font-bold transition shadow-lg shadow-[#6366F1]/20 flex items-center gap-2 whitespace-nowrap">
+                   class="px-4 py-2 rounded-xl bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-bold transition shadow-lg shadow-[#3b82f6]/20 flex items-center gap-2 whitespace-nowrap">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     صدور اکانت جدید
                 </a>
@@ -203,7 +203,7 @@
 
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-xs">
-                    <thead class="bg-[#080B12] text-[#94A3B8] font-bold border-b border-[#202938]">
+                    <thead class="bg-[#080f1d] text-[#94A3B8] font-bold border-b border-[#243247]">
                     <tr>
                         <th class="p-4">سرویس</th>
                         <th class="p-4">پلن</th>
@@ -212,7 +212,7 @@
                         <th class="p-4 text-center">عملیات</th>
                     </tr>
                     </thead>
-                    <tbody class="divide-y divide-[#202938] text-[#F8FAFC]">
+                    <tbody class="divide-y divide-[#243247] text-[#F8FAFC]">
                     @forelse($customer->vpnAccounts as $account)
                         @php
                             $isExpired = $account->expire_date && \Carbon\Carbon::parse($account->expire_date)->isPast();
@@ -220,13 +220,13 @@
                             $expColor = $isExpired ? '#EF4444' : ($daysLeft !== null && $daysLeft <= 7 ? '#F59E0B' : '#10B981');
                             $expLabel = $isExpired ? 'منقضی شده' : ($daysLeft !== null ? $daysLeft . ' روز مانده' : 'نامحدود');
                         @endphp
-                        <tr class="hover:bg-[#171E2B]/40 transition">
+                        <tr class="hover:bg-[#17253a]/40 transition">
                             <td class="p-4">
                                 <span class="font-mono font-bold text-[#F8FAFC]" dir="ltr">{{ $account->username }}</span>
                                 <div class="text-[9px] text-[#94A3B8] mt-0.5">{{ strtoupper($account->service_group) }}</div>
                             </td>
                             <td class="p-4">
-                                    <span class="text-[10px] font-bold bg-[#202938] px-2 py-1 rounded text-[#F8FAFC]">
+                                    <span class="text-[10px] font-bold bg-[#243247] px-2 py-1 rounded text-[#F8FAFC]">
                                         {{ $account->group->name ?? 'نامشخص' }}
                                     </span>
                             </td>
@@ -249,7 +249,7 @@
                             </td>
                             <td class="p-4 text-center">
                                 <a href="{{ route('reseller.accounts.show', $account->id) }}" wire:navigate
-                                   class="inline-block px-3 py-1.5 rounded-lg bg-[#202938] hover:bg-[#6366F1] text-[#94A3B8] hover:text-white text-[10px] font-bold transition">
+                                   class="inline-block px-3 py-1.5 rounded-lg bg-[#243247] hover:bg-[#3b82f6] text-[#94A3B8] hover:text-white text-[10px] font-bold transition">
                                     مشاهده
                                 </a>
                             </td>
@@ -258,11 +258,11 @@
                         <tr>
                             <td colspan="5" class="p-12 text-center">
                                 <div class="flex flex-col items-center">
-                                    <div class="w-16 h-16 rounded-full bg-[#202938] text-[#94A3B8] flex items-center justify-center mb-4 text-3xl">📭</div>
+                                    <div class="w-16 h-16 rounded-full bg-[#243247] text-[#94A3B8] flex items-center justify-center mb-4 text-3xl">📭</div>
                                     <h4 class="text-sm font-bold text-[#F8FAFC] mb-1">هنوز سرویسی ثبت نشده است</h4>
                                     <p class="text-xs text-[#94A3B8] mb-4">برای این مشتری اولین سرویس VPN را صادر کنید.</p>
                                     <a href="{{ route('reseller.accounts.create', ['customer_id' => $customer->id]) }}" wire:navigate
-                                       class="text-xs text-[#6366F1] hover:text-[#4F46E5] font-bold transition flex items-center gap-1">
+                                       class="text-xs text-[#3b82f6] hover:text-[#2563eb] font-bold transition flex items-center gap-1">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                         صدور اکانت
                                     </a>
@@ -279,7 +279,7 @@
     {{-- ============================================ --}}
     {{-- 4. FINANCIAL SECTION                         --}}
     {{-- ============================================ --}}
-    <div class="bg-[#111722] border border-[#202938] rounded-2xl p-6 shadow-sm">
+    <div class="bg-[#111c2e] border border-[#243247] rounded-2xl p-6 shadow-sm">
         {{-- Header --}}
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div class="flex items-center gap-4">
@@ -292,7 +292,7 @@
                 </div>
             </div>
             <button wire:click="openTrxModal"
-                    class="px-5 py-2.5 rounded-xl bg-[#202938] hover:bg-[#6366F1] text-[#94A3B8] hover:text-white text-xs font-bold transition flex items-center gap-2 border border-[#202938] hover:border-[#6366F1]">
+                    class="px-5 py-2.5 rounded-xl bg-[#243247] hover:bg-[#3b82f6] text-[#94A3B8] hover:text-white text-xs font-bold transition flex items-center gap-2 border border-[#243247] hover:border-[#3b82f6]">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 ثبت تراکنش دستی
             </button>
@@ -310,17 +310,17 @@
                 ->sum('price');
         @endphp
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div class="bg-[#080B12] border border-[#202938] rounded-xl p-4">
+            <div class="bg-[#080f1d] border border-[#243247] rounded-xl p-4">
                 <span class="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">مجموع واریز</span>
                 <div class="text-lg font-bold text-[#10B981] font-mono mt-1" dir="ltr">{{ number_format($totalPlus) }}</div>
                 <span class="text-[10px] text-[#94A3B8]">تومان</span>
             </div>
-            <div class="bg-[#080B12] border border-[#202938] rounded-xl p-4">
+            <div class="bg-[#080f1d] border border-[#243247] rounded-xl p-4">
                 <span class="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">مجموع برداشت</span>
                 <div class="text-lg font-bold text-[#EF4444] font-mono mt-1" dir="ltr">{{ number_format($totalMinus) }}</div>
                 <span class="text-[10px] text-[#94A3B8]">تومان</span>
             </div>
-            <div class="bg-[#080B12] border border-[#202938] rounded-xl p-4">
+            <div class="bg-[#080f1d] border border-[#243247] rounded-xl p-4">
                 <span class="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">موجودی فعلی</span>
                 <div class="text-lg font-bold text-[#F8FAFC] font-mono mt-1" dir="ltr">{{ number_format($balance) }}</div>
                 <span class="text-[10px] text-[#94A3B8]">تومان</span>
@@ -339,15 +339,15 @@
         <div class="flex flex-wrap items-center gap-3 mb-4">
             <span class="text-xs font-bold text-[#94A3B8]">فیلتر:</span>
             <button wire:click="$set('transactionFilter', 'all')"
-                    class="px-3 py-1.5 rounded-lg text-xs font-medium transition {{ $transactionFilter == 'all' ? 'bg-[#6366F1] text-white' : 'bg-[#202938] text-[#94A3B8] hover:bg-[#171E2B]' }}">
+                    class="px-3 py-1.5 rounded-lg text-xs font-medium transition {{ $transactionFilter == 'all' ? 'bg-[#3b82f6] text-white' : 'bg-[#243247] text-[#94A3B8] hover:bg-[#17253a]' }}">
                 همه
             </button>
             <button wire:click="$set('transactionFilter', 'plus')"
-                    class="px-3 py-1.5 rounded-lg text-xs font-medium transition {{ $transactionFilter == 'plus' ? 'bg-[#10B981] text-white' : 'bg-[#202938] text-[#94A3B8] hover:bg-[#171E2B]' }}">
+                    class="px-3 py-1.5 rounded-lg text-xs font-medium transition {{ $transactionFilter == 'plus' ? 'bg-[#10B981] text-white' : 'bg-[#243247] text-[#94A3B8] hover:bg-[#17253a]' }}">
                 واریز
             </button>
             <button wire:click="$set('transactionFilter', 'minus')"
-                    class="px-3 py-1.5 rounded-lg text-xs font-medium transition {{ $transactionFilter == 'minus' ? 'bg-[#EF4444] text-white' : 'bg-[#202938] text-[#94A3B8] hover:bg-[#171E2B]' }}">
+                    class="px-3 py-1.5 rounded-lg text-xs font-medium transition {{ $transactionFilter == 'minus' ? 'bg-[#EF4444] text-white' : 'bg-[#243247] text-[#94A3B8] hover:bg-[#17253a]' }}">
                 برداشت
             </button>
             <div class="flex-1"></div>
@@ -356,14 +356,14 @@
                 <input wire:model.live.debounce.300ms="transactionSearch"
                        type="text"
                        placeholder="جستجوی شرح..."
-                       class="w-48 bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-lg py-2 pr-9 pl-3 focus:outline-none focus:ring-1 focus:ring-[#6366F1] transition">
+                       class="w-48 bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-lg py-2 pr-9 pl-3 focus:outline-none focus:ring-1 focus:ring-[#3b82f6] transition">
             </div>
         </div>
 
         {{-- Transactions Table --}}
         <div class="overflow-x-auto">
             <table class="w-full text-right text-xs">
-                <thead class="bg-[#080B12] text-[#94A3B8] font-bold border-b border-[#202938]">
+                <thead class="bg-[#080f1d] text-[#94A3B8] font-bold border-b border-[#243247]">
                 <tr>
                     <th class="p-4">شرح تراکنش</th>
                     <th class="p-4">نوع</th>
@@ -371,9 +371,9 @@
                     <th class="p-4">تاریخ ثبت</th>
                 </tr>
                 </thead>
-                <tbody class="divide-y divide-[#202938] text-[#F8FAFC]">
+                <tbody class="divide-y divide-[#243247] text-[#F8FAFC]">
                 @forelse($transactions as $trx)
-                    <tr class="hover:bg-[#171E2B]/40 transition">
+                    <tr class="hover:bg-[#17253a]/40 transition">
                         <td class="p-4 font-medium">{{ $trx->description }}</td>
                         <td class="p-4">
                             @if(in_array($trx->type, ['plus']))
@@ -393,7 +393,7 @@
                     <tr>
                         <td colspan="4" class="p-12 text-center text-[#94A3B8]">
                             <div class="flex flex-col items-center">
-                                <div class="w-16 h-16 rounded-full bg-[#202938] text-[#94A3B8] flex items-center justify-center mb-4 text-3xl">📭</div>
+                                <div class="w-16 h-16 rounded-full bg-[#243247] text-[#94A3B8] flex items-center justify-center mb-4 text-3xl">📭</div>
                                 <h4 class="text-sm font-bold text-[#F8FAFC] mb-1">هیچ تراکنشی ثبت نشده است</h4>
                                 <p class="text-xs text-[#94A3B8]">هنوز هیچ تراکنش مالی برای این مشتری ثبت نشده است.</p>
                             </div>
@@ -406,7 +406,7 @@
 
         {{-- Pagination --}}
         @if($transactions->hasPages())
-            <div class="pt-4 border-t border-[#202938] mt-4">
+            <div class="pt-4 border-t border-[#243247] mt-4">
                 {{ $transactions->links() }}
             </div>
         @endif
@@ -416,15 +416,15 @@
     {{-- 5. EDIT MODAL                                --}}
     {{-- ============================================ --}}
     @if($isEditModalOpen)
-        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#080B12]/90 backdrop-blur-md">
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#080f1d]/90 backdrop-blur-md">
             <div class="fixed inset-0" wire:click="$set('isEditModalOpen', false)"></div>
-            <div class="relative w-full max-w-lg bg-[#111722] border border-[#202938] rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-                <div class="flex items-center justify-between p-5 border-b border-[#202938]">
+            <div class="relative w-full max-w-lg bg-[#111c2e] border border-[#243247] rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center justify-between p-5 border-b border-[#243247]">
                     <h3 class="text-sm font-bold text-[#F8FAFC] flex items-center gap-2">
-                        <svg class="w-5 h-5 text-[#6366F1]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        <svg class="w-5 h-5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         ویرایش مشخصات: {{ $customer->name }}
                     </h3>
-                    <button wire:click="$set('isEditModalOpen', false)" class="p-1.5 rounded-lg bg-[#202938] text-[#94A3B8] hover:text-[#F8FAFC] transition">
+                    <button wire:click="$set('isEditModalOpen', false)" class="p-1.5 rounded-lg bg-[#243247] text-[#94A3B8] hover:text-[#F8FAFC] transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -433,12 +433,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-[#94A3B8] mb-1.5">نام و نام خانوادگی <span class="text-[#EF4444]">*</span></label>
-                            <input wire:model="editName" type="text" class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#6366F1] transition">
+                            <input wire:model="editName" type="text" class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#3b82f6] transition">
                             @error('editName') <span class="text-[#EF4444] text-[10px] mt-1 block">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-[#94A3B8] mb-1.5">نقش کاربر</label>
-                            <select wire:model="editRole" class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#6366F1] transition">
+                            <select wire:model="editRole" class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#3b82f6] transition">
                                 <option value="customer">مشتری عادی</option>
                                 <option value="sub_agent">زیرنماینده</option>
                             </select>
@@ -448,11 +448,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-[#94A3B8] mb-1.5">شماره تماس</label>
-                            <input wire:model="editPhone" type="text" dir="ltr" class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#6366F1] transition">
+                            <input wire:model="editPhone" type="text" dir="ltr" class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#3b82f6] transition">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-[#94A3B8] mb-1.5">آدرس ایمیل</label>
-                            <input wire:model="editEmail" type="email" dir="ltr" class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#6366F1] transition">
+                            <input wire:model="editEmail" type="email" dir="ltr" class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#3b82f6] transition">
                         </div>
                     </div>
 
@@ -464,7 +464,7 @@
                             <input wire:model="editPassword"
                                    type="password"
                                    placeholder="رمز جدید..."
-                                   class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#6366F1] transition"
+                                   class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#3b82f6] transition"
                                    dir="ltr">
                             <button type="button"
                                     x-data="{ show: false }"
@@ -477,11 +477,11 @@
                         @error('editPassword') <span class="text-[#EF4444] text-[10px] mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
-                    <div class="flex items-center justify-end gap-3 pt-6 border-t border-[#202938]">
-                        <button type="button" wire:click="$set('isEditModalOpen', false)" class="px-5 py-2.5 rounded-xl bg-[#202938] hover:bg-[#171E2B] text-[#F8FAFC] text-sm font-bold transition">
+                    <div class="flex items-center justify-end gap-3 pt-6 border-t border-[#243247]">
+                        <button type="button" wire:click="$set('isEditModalOpen', false)" class="px-5 py-2.5 rounded-xl bg-[#243247] hover:bg-[#17253a] text-[#F8FAFC] text-sm font-bold transition">
                             انصراف
                         </button>
-                        <button type="submit" wire:loading.attr="disabled" class="px-6 py-2.5 rounded-xl bg-[#6366F1] hover:bg-[#4F46E5] text-white text-sm font-bold shadow-lg shadow-[#6366F1]/25 transition flex items-center gap-2">
+                        <button type="submit" wire:loading.attr="disabled" class="px-6 py-2.5 rounded-xl bg-[#3b82f6] hover:bg-[#2563eb] text-white text-sm font-bold shadow-lg shadow-[#3b82f6]/25 transition flex items-center gap-2">
                             <svg wire:loading wire:target="updateProfile" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"/></svg>
                             <span wire:loading.remove wire:target="updateProfile">ذخیره تغییرات</span>
                             <span wire:loading wire:target="updateProfile">در حال ذخیره...</span>
@@ -496,15 +496,15 @@
     {{-- 6. TRANSACTION MODAL                         --}}
     {{-- ============================================ --}}
     @if($isTrxModalOpen)
-        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#080B12]/90 backdrop-blur-md">
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#080f1d]/90 backdrop-blur-md">
             <div class="fixed inset-0" wire:click="$set('isTrxModalOpen', false)"></div>
-            <div class="relative w-full max-w-md bg-[#111722] border border-[#202938] rounded-2xl shadow-2xl">
-                <div class="flex items-center justify-between p-5 border-b border-[#202938]">
+            <div class="relative w-full max-w-md bg-[#111c2e] border border-[#243247] rounded-2xl shadow-2xl">
+                <div class="flex items-center justify-between p-5 border-b border-[#243247]">
                     <h3 class="text-sm font-bold text-[#F8FAFC] flex items-center gap-2">
                         <svg class="w-5 h-5 text-[#F59E0B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                         ثبت تراکنش برای: {{ $customer->name }}
                     </h3>
-                    <button wire:click="$set('isTrxModalOpen', false)" class="p-1.5 rounded-lg bg-[#202938] text-[#94A3B8] hover:text-[#F8FAFC] transition">
+                    <button wire:click="$set('isTrxModalOpen', false)" class="p-1.5 rounded-lg bg-[#243247] text-[#94A3B8] hover:text-[#F8FAFC] transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -523,7 +523,7 @@
 
                     <div>
                         <label class="block text-xs font-bold text-[#94A3B8] mb-1.5">نوع تراکنش</label>
-                        <select wire:model="newType" class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#6366F1] transition">
+                        <select wire:model="newType" class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#3b82f6] transition">
                             <option value="plus">افزایش موجودی کاربر (+)</option>
                             <option value="minus">کسر موجودی کاربر (-)</option>
                         </select>
@@ -531,21 +531,21 @@
 
                     <div>
                         <label class="block text-xs font-bold text-[#94A3B8] mb-1.5">مبلغ (تومان)</label>
-                        <input wire:model="newPrice" type="number" dir="ltr" class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#6366F1] transition">
+                        <input wire:model="newPrice" type="number" dir="ltr" class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#3b82f6] transition">
                         @error('newPrice') <span class="text-[#EF4444] text-[10px] mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-[#94A3B8] mb-1.5">شرح تراکنش</label>
-                        <input wire:model="newDescription" type="text" placeholder="بابت..." class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#6366F1] transition">
+                        <input wire:model="newDescription" type="text" placeholder="بابت..." class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#3b82f6] transition">
                         @error('newDescription') <span class="text-[#EF4444] text-[10px] mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
-                    <div class="flex items-center justify-end gap-3 pt-6 border-t border-[#202938]">
-                        <button type="button" wire:click="$set('isTrxModalOpen', false)" class="px-5 py-2.5 rounded-xl bg-[#202938] hover:bg-[#171E2B] text-[#F8FAFC] text-sm font-bold transition">
+                    <div class="flex items-center justify-end gap-3 pt-6 border-t border-[#243247]">
+                        <button type="button" wire:click="$set('isTrxModalOpen', false)" class="px-5 py-2.5 rounded-xl bg-[#243247] hover:bg-[#17253a] text-[#F8FAFC] text-sm font-bold transition">
                             انصراف
                         </button>
-                        <button type="submit" wire:loading.attr="disabled" class="px-6 py-2.5 rounded-xl bg-[#6366F1] hover:bg-[#4F46E5] text-white text-sm font-bold shadow-lg shadow-[#6366F1]/25 transition flex items-center gap-2">
+                        <button type="submit" wire:loading.attr="disabled" class="px-6 py-2.5 rounded-xl bg-[#3b82f6] hover:bg-[#2563eb] text-white text-sm font-bold shadow-lg shadow-[#3b82f6]/25 transition flex items-center gap-2">
                             <svg wire:loading wire:target="addTransaction" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"/></svg>
                             <span wire:loading.remove wire:target="addTransaction">ثبت نهایی</span>
                             <span wire:loading wire:target="addTransaction">در حال ثبت...</span>

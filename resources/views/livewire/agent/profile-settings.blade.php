@@ -10,9 +10,9 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <div class="lg:col-span-1 space-y-6">
-            <div class="bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800/80 rounded-3xl p-6 shadow-sm">
+            <div class="bg-white dark:bg-[#111c2e] border border-zinc-200 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm">
                 <div class="flex items-center gap-3 mb-6">
-                    <div class="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-500 flex items-center justify-center">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     </div>
                     <div>
@@ -31,19 +31,19 @@
                 <form wire:submit.prevent="updatePassword" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-zinc-600 dark:text-zinc-400 mb-1.5">رمز عبور فعلی</label>
-                        <input wire:model="current_password" type="password" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50 font-mono-digit" dir="ltr">
+                        <input wire:model="current_password" type="password" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50 font-mono-digit" dir="ltr">
                         @error('current_password') <span class="text-rose-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-zinc-600 dark:text-zinc-400 mb-1.5">رمز عبور جدید</label>
-                        <input wire:model="password" type="password" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50 font-mono-digit" dir="ltr">
+                        <input wire:model="password" type="password" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50 font-mono-digit" dir="ltr">
                         @error('password') <span class="text-rose-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-zinc-600 dark:text-zinc-400 mb-1.5">تکرار رمز عبور جدید</label>
-                        <input wire:model="password_confirmation" type="password" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50 font-mono-digit" dir="ltr">
+                        <input wire:model="password_confirmation" type="password" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50 font-mono-digit" dir="ltr">
                     </div>
 
                     <button type="submit" class="w-full mt-2 px-5 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 dark:text-zinc-900 text-white text-xs font-bold transition shadow-sm">
@@ -54,7 +54,7 @@
         </div>
 
         <div class="lg:col-span-2 space-y-6">
-            <div class="bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800/80 rounded-3xl p-6 shadow-sm">
+            <div class="bg-white dark:bg-[#111c2e] border border-zinc-200 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm">
 
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div class="flex items-center gap-3">

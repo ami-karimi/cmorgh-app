@@ -4,7 +4,7 @@
     {{-- ============================================ --}}
     {{-- 1. WELCOME HEADER + QUICK ACTIONS            --}}
     {{-- ============================================ --}}
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#111722] rounded-2xl p-6 border border-[#202938] shadow-sm">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#111c2e] rounded-2xl p-6 border border-[#243247] shadow-sm">
         <div>
             <h2 class="text-2xl md:text-3xl font-bold text-[#F8FAFC] tracking-tight">
                 خوش آمدید، {{ auth()->user()->name ?? 'همکار گرامی' }} 👋
@@ -21,7 +21,7 @@
                     شارژ کیف پول
                 </a>
             @endif
-            <a href="{{ route('reseller.accounts.create') }}" wire:navigate class="px-5 py-3 rounded-xl bg-[#6366F1] hover:bg-[#4F46E5] text-white font-bold text-sm shadow-lg shadow-[#6366F1]/25 transition-all hover:-translate-y-0.5 flex items-center gap-2">
+            <a href="{{ route('reseller.accounts.create') }}" wire:navigate class="px-5 py-3 rounded-xl bg-[#3b82f6] hover:bg-[#2563eb] text-white font-bold text-sm shadow-lg shadow-[#3b82f6]/25 transition-all hover:-translate-y-0.5 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 صدور اکانت جدید
             </a>
@@ -72,10 +72,10 @@
     {{-- ============================================ --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {{-- Balance --}}
-        <div class="p-5 rounded-2xl bg-[#111722] border border-[#202938] shadow-sm hover:border-[#6366F1]/30 transition-all group">
+        <div class="p-5 rounded-2xl bg-[#111c2e] border border-[#243247] shadow-sm hover:border-[#3b82f6]/30 transition-all group">
             <div class="flex items-center justify-between mb-1">
                 <span class="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">موجودی کیف پول</span>
-                <div class="w-8 h-8 rounded-lg bg-[#6366F1]/10 text-[#6366F1] flex items-center justify-center">
+                <div class="w-8 h-8 rounded-lg bg-[#3b82f6]/10 text-[#3b82f6] flex items-center justify-center">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                 </div>
             </div>
@@ -85,13 +85,13 @@
                 </span>
                 <span class="text-xs font-medium text-[#94A3B8]">تومان</span>
             </div>
-            <div class="mt-2 pt-3 border-t border-[#202938]/50">
-                <a href="{{ route('reseller.financial') }}" wire:navigate class="text-[11px] text-[#6366F1] hover:text-[#4F46E5] transition-colors font-bold">مشاهده کیف پول &larr;</a>
+            <div class="mt-2 pt-3 border-t border-[#243247]/50">
+                <a href="{{ route('reseller.financial') }}" wire:navigate class="text-[11px] text-[#3b82f6] hover:text-[#2563eb] transition-colors font-bold">مشاهده کیف پول &larr;</a>
             </div>
         </div>
 
         {{-- Debt --}}
-        <div class="p-5 rounded-2xl bg-[#111722] border border-[#202938] shadow-sm hover:border-[#202938]/80 transition-all group relative overflow-hidden">
+        <div class="p-5 rounded-2xl bg-[#111c2e] border border-[#243247] shadow-sm hover:border-[#243247]/80 transition-all group relative overflow-hidden">
             @if(auth()->user()->debt_balance > 0)
                 <div class="absolute -right-10 -bottom-10 w-24 h-24 bg-[#EF4444]/10 rounded-full blur-2xl pointer-events-none"></div>
             @endif
@@ -107,7 +107,7 @@
                 </span>
                 <span class="text-xs font-medium text-[#94A3B8]">تومان</span>
             </div>
-            <div class="mt-2 pt-3 border-t border-[#202938]/50 relative z-10">
+            <div class="mt-2 pt-3 border-t border-[#243247]/50 relative z-10">
                 <span class="text-[11px] font-bold text-[#94A3B8]">
                     {{ auth()->user()->debt_balance > 0 ? 'وضعیت بدهکار' : 'وضعیت تسویه' }}
                 </span>
@@ -115,7 +115,7 @@
         </div>
 
         {{-- Customers --}}
-        <div class="p-5 rounded-2xl bg-[#111722] border border-[#202938] shadow-sm hover:border-[#202938]/80 transition-all">
+        <div class="p-5 rounded-2xl bg-[#111c2e] border border-[#243247] shadow-sm hover:border-[#243247]/80 transition-all">
             <div class="flex items-center justify-between mb-1">
                 <span class="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">مشتریان</span>
                 <div class="w-8 h-8 rounded-lg bg-[#3B82F6]/10 text-[#3B82F6] flex items-center justify-center">
@@ -126,13 +126,13 @@
                 <span class="text-2xl font-bold font-mono text-[#F8FAFC]">{{ $totalCustomers }}</span>
                 <span class="text-xs font-medium text-[#94A3B8]">نفر</span>
             </div>
-            <div class="mt-2 pt-3 border-t border-[#202938]/50">
+            <div class="mt-2 pt-3 border-t border-[#243247]/50">
                 <span class="text-[11px] font-bold text-[#94A3B8]">مشتری فعال شما</span>
             </div>
         </div>
 
         {{-- Active Accounts --}}
-        <div class="p-5 rounded-2xl bg-[#111722] border border-[#202938] shadow-sm hover:border-[#10B981]/30 transition-all">
+        <div class="p-5 rounded-2xl bg-[#111c2e] border border-[#243247] shadow-sm hover:border-[#10B981]/30 transition-all">
             <div class="flex items-center justify-between mb-1">
                 <span class="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">اکانت‌های فعال</span>
                 <div class="w-8 h-8 rounded-lg bg-[#10B981]/10 text-[#10B981] flex items-center justify-center">
@@ -143,7 +143,7 @@
                 <span class="text-2xl font-bold font-mono text-[#10B981]">{{ $activeAccounts }}</span>
                 <span class="text-xs font-medium text-[#94A3B8]">از {{ $totalAccounts }} اکانت</span>
             </div>
-            <div class="mt-2 pt-3 border-t border-[#202938]/50">
+            <div class="mt-2 pt-3 border-t border-[#243247]/50">
                 <span class="text-[11px] font-bold text-[#94A3B8]">سرویس‌های در حال استفاده</span>
             </div>
         </div>
@@ -156,14 +156,14 @@
 
         {{-- Chart: Performance Overview --}}
         {{-- Chart: Performance Overview --}}
-        <div class="lg:col-span-2 bg-[#111722] border border-[#202938] rounded-2xl p-6 shadow-sm flex flex-col h-full relative overflow-hidden">
+        <div class="lg:col-span-2 bg-[#111c2e] border border-[#243247] rounded-2xl p-6 shadow-sm flex flex-col h-full relative overflow-hidden">
             <!-- یک هاله نور بسیار ملایم پس‌زمینه -->
-            <div class="absolute top-0 right-1/2 w-64 h-64 bg-[#6366F1]/5 rounded-full blur-[80px] pointer-events-none"></div>
+            <div class="absolute top-0 right-1/2 w-64 h-64 bg-[#3b82f6]/5 rounded-full blur-[80px] pointer-events-none"></div>
 
             <div class="flex items-center justify-between mb-6 relative z-10">
                 <h3 class="text-base font-bold text-[#F8FAFC]">مقایسه عملکرد فروش</h3>
                 <div class="flex items-center gap-2">
-                    <span class="px-3 py-1.5 rounded-lg bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/20 text-[11px] font-bold">۳۰ روز اخیر</span>
+                    <span class="px-3 py-1.5 rounded-lg bg-[#3b82f6]/10 text-[#3b82f6] border border-[#3b82f6]/20 text-[11px] font-bold">۳۰ روز اخیر</span>
                 </div>
             </div>
             <div class="flex-1 w-full h-[240px] relative z-10"
@@ -173,8 +173,8 @@
 
                         // گرادیانت خط این ماه (رنگ نیلی اصلی)
                         const gradientCurrent = ctx.createLinearGradient(0, 0, 0, 300);
-                        gradientCurrent.addColorStop(0, 'rgba(99, 102, 241, 0.3)');
-                        gradientCurrent.addColorStop(1, 'rgba(99, 102, 241, 0)');
+                        gradientCurrent.addColorStop(0, 'rgba(59,130,246, 0.3)');
+                        gradientCurrent.addColorStop(1, 'rgba(59,130,246, 0)');
 
                         // گرادیانت خط ماه قبل (رنگ خاکستری ملایم)
                         const gradientPrevious = ctx.createLinearGradient(0, 0, 0, 300);
@@ -189,11 +189,11 @@
                                     {
                                         label: '۳۰ روز اخیر',
                                         data: @js($currentMonthSales),
-                                        borderColor: '#6366F1',
+                                        borderColor: '#3b82f6',
                                         backgroundColor: gradientCurrent,
                                         borderWidth: 2,
-                                        pointBackgroundColor: '#111722',
-                                        pointBorderColor: '#6366F1',
+                                        pointBackgroundColor: '#111c2e',
+                                        pointBorderColor: '#3b82f6',
                                         pointBorderWidth: 2,
                                         pointRadius: 0, // مخفی بودن نقاط در حالت عادی برای تمیزی بیشتر
                                         pointHoverRadius: 5,
@@ -207,7 +207,7 @@
                                         backgroundColor: gradientPrevious,
                                         borderWidth: 2,
                                         borderDash: [5, 5], // خط‌چین بودن ماه قبل برای تمایز
-                                        pointBackgroundColor: '#111722',
+                                        pointBackgroundColor: '#111c2e',
                                         pointBorderColor: '#475569',
                                         pointBorderWidth: 2,
                                         pointRadius: 0,
@@ -230,19 +230,19 @@
                                         align: 'end',
                                         labels: {
                                             color: '#94A3B8',
-                                            font: { family: 'Vazirmatn', size: 11 },
+                                            font: { family: 'IRANSans', size: 11 },
                                             usePointStyle: true,
                                             boxWidth: 8
                                         }
                                     },
                                     tooltip: {
-                                        backgroundColor: '#171E2B',
+                                        backgroundColor: '#17253a',
                                         titleColor: '#F8FAFC',
                                         bodyColor: '#94A3B8',
-                                        borderColor: '#202938',
+                                        borderColor: '#243247',
                                         borderWidth: 1,
-                                        titleFont: { family: 'Vazirmatn' },
-                                        bodyFont: { family: 'Vazirmatn' },
+                                        titleFont: { family: 'IRANSans' },
+                                        bodyFont: { family: 'IRANSans' },
                                         padding: 12,
                                         boxPadding: 6,
                                         callbacks: {
@@ -263,7 +263,7 @@
                                         grid: { color: 'rgba(32, 41, 56, 0.4)', drawBorder: false },
                                         ticks: {
                                             color: '#64748B',
-                                            font: { family: 'Vazirmatn', size: 10 },
+                                            font: { family: 'IRANSans', size: 10 },
                                             maxTicksLimit: 8 // جلوگیری از شلوغی محور X
                                         }
                                     },
@@ -272,7 +272,7 @@
                                         grid: { color: 'rgba(32, 41, 56, 0.4)', drawBorder: false },
                                         ticks: {
                                             color: '#64748B',
-                                            font: { family: 'JetBrains Mono', size: 10 },
+                                            font: { family: 'IRANSans', size: 10 },
                                             callback: function(value) {
                                                 if(value === 0) return '0';
                                                 return (value / 1000) + 'k'; // نمایش خواناتر (مثلاً 50k به جای 50000)
@@ -290,28 +290,28 @@
         </div>
 
         {{-- Quick Actions --}}
-        <div class="bg-[#111722] border border-[#202938] rounded-2xl p-6 shadow-sm flex flex-col h-full">
+        <div class="bg-[#111c2e] border border-[#243247] rounded-2xl p-6 shadow-sm flex flex-col h-full">
             <h3 class="text-base font-bold text-[#F8FAFC] mb-5">عملیات سریع</h3>
             <div class="grid grid-cols-2 gap-3 flex-1">
-                <a href="{{ route('reseller.accounts.create') }}" wire:navigate class="p-4 rounded-xl bg-[#171E2B] border border-[#202938] hover:border-[#6366F1]/40 transition-all text-center group flex flex-col justify-center">
-                    <div class="w-10 h-10 rounded-xl bg-[#6366F1]/10 text-[#6366F1] flex items-center justify-center mx-auto mb-2.5 group-hover:bg-[#6366F1] group-hover:text-white transition-all shadow-sm">
+                <a href="{{ route('reseller.accounts.create') }}" wire:navigate class="p-4 rounded-xl bg-[#17253a] border border-[#243247] hover:border-[#3b82f6]/40 transition-all text-center group flex flex-col justify-center">
+                    <div class="w-10 h-10 rounded-xl bg-[#3b82f6]/10 text-[#3b82f6] flex items-center justify-center mx-auto mb-2.5 group-hover:bg-[#3b82f6] group-hover:text-white transition-all shadow-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                     </div>
                     <span class="text-xs font-bold text-[#F8FAFC]">صدور اکانت</span>
                 </a>
-                <a href="{{ route('reseller.customers') }}" wire:navigate class="p-4 rounded-xl bg-[#171E2B] border border-[#202938] hover:border-[#10B981]/40 transition-all text-center group flex flex-col justify-center">
+                <a href="{{ route('reseller.customers') }}" wire:navigate class="p-4 rounded-xl bg-[#17253a] border border-[#243247] hover:border-[#10B981]/40 transition-all text-center group flex flex-col justify-center">
                     <div class="w-10 h-10 rounded-xl bg-[#10B981]/10 text-[#10B981] flex items-center justify-center mx-auto mb-2.5 group-hover:bg-[#10B981] group-hover:text-white transition-all shadow-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m-3-3v3m6-3v3m-9 3H4m10-8a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     </div>
                     <span class="text-xs font-bold text-[#F8FAFC]">مشتریان</span>
                 </a>
-                <a href="{{ route('reseller.financial') }}" wire:navigate class="p-4 rounded-xl bg-[#171E2B] border border-[#202938] hover:border-[#F59E0B]/40 transition-all text-center group flex flex-col justify-center">
+                <a href="{{ route('reseller.financial') }}" wire:navigate class="p-4 rounded-xl bg-[#17253a] border border-[#243247] hover:border-[#F59E0B]/40 transition-all text-center group flex flex-col justify-center">
                     <div class="w-10 h-10 rounded-xl bg-[#F59E0B]/10 text-[#F59E0B] flex items-center justify-center mx-auto mb-2.5 group-hover:bg-[#F59E0B] group-hover:text-white transition-all shadow-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <span class="text-xs font-bold text-[#F8FAFC]">شارژ کیف پول</span>
                 </a>
-                <a href="{{ route('reseller.store.orders') }}" wire:navigate class="p-4 rounded-xl bg-[#171E2B] border border-[#202938] hover:border-[#3B82F6]/40 transition-all text-center group flex flex-col justify-center">
+                <a href="{{ route('reseller.store.orders') }}" wire:navigate class="p-4 rounded-xl bg-[#17253a] border border-[#243247] hover:border-[#3B82F6]/40 transition-all text-center group flex flex-col justify-center">
                     <div class="w-10 h-10 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] flex items-center justify-center mx-auto mb-2.5 group-hover:bg-[#3B82F6] group-hover:text-white transition-all shadow-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     </div>
@@ -326,10 +326,10 @@
     {{-- ============================================ --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {{-- Expiring Accounts --}}
-        <div class="bg-[#111722] border border-[#202938] rounded-2xl p-6 shadow-sm flex flex-col max-h-[450px]">
+        <div class="bg-[#111c2e] border border-[#243247] rounded-2xl p-6 shadow-sm flex flex-col max-h-[450px]">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-base font-bold text-[#F8FAFC]">اکانت‌های رو به انقضا</h3>
-                <span class="text-[11px] font-bold text-[#94A3B8] bg-[#171E2B] px-3 py-1.5 rounded-lg border border-[#202938]">۷ روز آینده</span>
+                <span class="text-[11px] font-bold text-[#94A3B8] bg-[#17253a] px-3 py-1.5 rounded-lg border border-[#243247]">۷ روز آینده</span>
             </div>
 
             <div class="space-y-3 overflow-y-auto pr-1">
@@ -338,7 +338,7 @@
                         $daysLeft = \Carbon\Carbon::parse($acc->expire_date)->diffInDays(now());
                         $statusColor = $daysLeft > 7 ? '#10B981' : ($daysLeft > 3 ? '#F59E0B' : '#EF4444');
                     @endphp
-                    <div class="flex items-center justify-between p-4 rounded-xl bg-[#171E2B] border border-[#202938] hover:border-[#6366F1]/30 transition-all">
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-[#17253a] border border-[#243247] hover:border-[#3b82f6]/30 transition-all">
                         <div class="flex items-center gap-3.5">
                             <div class="w-2.5 h-2.5 rounded-full shadow-sm" style="background-color: {{ $statusColor }}; box-shadow: 0 0 8px {{ $statusColor }}80;"></div>
                             <div>
@@ -353,7 +353,7 @@
                                 </div>
                             </div>
                         </div>
-                        <a href="{{ route('reseller.accounts.show', ['id' => $acc->id]) }}" wire:navigate class="px-4 py-2 rounded-xl bg-[#202938] hover:bg-[#6366F1] border border-[#202938] text-[#94A3B8] hover:text-white text-[11px] font-bold transition-all shadow-sm">
+                        <a href="{{ route('reseller.accounts.show', ['id' => $acc->id]) }}" wire:navigate class="px-4 py-2 rounded-xl bg-[#243247] hover:bg-[#3b82f6] border border-[#243247] text-[#94A3B8] hover:text-white text-[11px] font-bold transition-all shadow-sm">
                             تمدید سرویس
                         </a>
                     </div>
@@ -370,10 +370,10 @@
         </div>
 
         {{-- Recent Transactions --}}
-        <div class="bg-[#111722] border border-[#202938] rounded-2xl p-6 shadow-sm flex flex-col max-h-[450px]">
+        <div class="bg-[#111c2e] border border-[#243247] rounded-2xl p-6 shadow-sm flex flex-col max-h-[450px]">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-base font-bold text-[#F8FAFC]">آخرین تراکنش‌های مالی</h3>
-                <span class="text-[11px] font-bold text-[#94A3B8] bg-[#171E2B] px-3 py-1.5 rounded-lg border border-[#202938]">۵ تراکنش اخیر</span>
+                <span class="text-[11px] font-bold text-[#94A3B8] bg-[#17253a] px-3 py-1.5 rounded-lg border border-[#243247]">۵ تراکنش اخیر</span>
             </div>
 
             <div class="space-y-3 overflow-y-auto pr-1">
@@ -383,7 +383,7 @@
                         $txColor = $isCredit ? '#10B981' : '#94A3B8';
                         $txIcon = $isCredit ? '+' : '-';
                     @endphp
-                    <div class="flex items-center justify-between p-4 rounded-xl bg-[#171E2B] border border-[#202938] hover:border-[#202938]/80 transition-all">
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-[#17253a] border border-[#243247] hover:border-[#243247]/80 transition-all">
                         <div class="flex items-center gap-3.5">
                             <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm" style="background-color: {{ $txColor }}15; color: {{ $txColor }};">
                                 {{ $txIcon }}
@@ -417,11 +417,11 @@
     {{-- ============================================ --}}
     {{-- 6. AVAILABLE SERVICES                        --}}
     {{-- ============================================ --}}
-    <div class="bg-[#111722] border border-[#202938] rounded-2xl p-6 shadow-sm">
+    <div class="bg-[#111c2e] border border-[#243247] rounded-2xl p-6 shadow-sm">
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h3 class="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
-                    <svg class="w-5 h-5 text-[#6366F1]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <svg class="w-5 h-5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     تعرفه سرویس‌های قابل فروش
                 </h3>
                 <p class="text-[11px] text-[#94A3B8] mt-1.5 font-medium">
@@ -444,7 +444,7 @@
                     }
                     $hasDiscount = $discountPercent > 0;
                 @endphp
-                <div class="p-5 rounded-2xl bg-[#171E2B] border border-[#202938] hover:border-[#6366F1]/30 transition-all hover:-translate-y-0.5 flex flex-col justify-between h-full group">
+                <div class="p-5 rounded-2xl bg-[#17253a] border border-[#243247] hover:border-[#3b82f6]/30 transition-all hover:-translate-y-0.5 flex flex-col justify-between h-full group">
                     <div>
                         <div class="flex items-start justify-between mb-4">
                             <span class="font-bold text-sm text-[#F8FAFC] leading-snug">{{ $group->name }}</span>
@@ -458,7 +458,7 @@
                         @endif
                     </div>
 
-                    <div class="mt-auto pt-4 border-t border-[#202938]">
+                    <div class="mt-auto pt-4 border-t border-[#243247]">
                         @if($hasDiscount)
                             <div class="flex justify-between items-center mb-1">
                                 <span class="text-[10px] text-[#94A3B8]">قیمت پایه</span>
@@ -472,7 +472,7 @@
 
                         <div class="flex items-end justify-between">
                             <span class="text-[10px] font-bold text-[#94A3B8]">{{ $hasDiscount ? 'با تخفیف' : '' }}</span>
-                            <div class="text-xl font-black text-[#6366F1] font-mono tracking-tight group-hover:text-[#4F46E5] transition-colors">
+                            <div class="text-xl font-black text-[#3b82f6] font-mono tracking-tight group-hover:text-[#2563eb] transition-colors">
                                 {{ number_format(round($group->getFinalPriceFor(auth()->user()))) }}
                                 <span class="text-[10px] font-medium text-[#94A3B8] font-sans">تومان</span>
                             </div>
@@ -480,8 +480,8 @@
                     </div>
                 </div>
             @empty
-                <div class="col-span-full py-16 flex flex-col items-center justify-center bg-[#171E2B] rounded-2xl border border-dashed border-[#202938]">
-                    <div class="w-14 h-14 rounded-full bg-[#94A3B8]/10 text-[#94A3B8] flex items-center justify-center mb-4 border border-[#202938]/50">
+                <div class="col-span-full py-16 flex flex-col items-center justify-center bg-[#17253a] rounded-2xl border border-dashed border-[#243247]">
+                    <div class="w-14 h-14 rounded-full bg-[#94A3B8]/10 text-[#94A3B8] flex items-center justify-center mb-4 border border-[#243247]/50">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                     </div>
                     <h4 class="text-sm font-bold text-[#F8FAFC]">هیچ سرویس فعالی وجود ندارد</h4>

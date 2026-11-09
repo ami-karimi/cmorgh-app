@@ -17,11 +17,11 @@
         @endphp
 
         <div class="relative overflow-hidden bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-[2.5rem] p-6 shadow-2xl space-y-5">
-            <div class="absolute top-0 right-0 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute top-0 right-0 w-48 h-48 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
             <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-5">
                 <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-2xl bg-zinc-800 border border-zinc-700/50 flex items-center justify-center text-orange-400 font-black text-xl shadow-inner shrink-0">
+                    <div class="w-14 h-14 rounded-2xl bg-zinc-800 border border-zinc-700/50 flex items-center justify-center text-brand-400 font-black text-xl shadow-inner shrink-0">
                         🔑
                     </div>
                     <div>
@@ -30,7 +30,7 @@
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <span class="text-[11px] font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-lg">
+                            <span class="text-[11px] font-bold text-brand-400 bg-brand-500/10 border border-brand-500/20 px-2.5 py-0.5 rounded-lg">
                                 📦 {{ $groupName }}
                             </span>
                             <span class="text-[10px] font-extrabold text-zinc-500 uppercase font-mono">
@@ -98,7 +98,7 @@
         @if($account->service_group === 'wireguard')
             <div class="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-[2.5rem] p-6 shadow-2xl space-y-4">
                 <h2 class="text-sm font-bold text-white flex items-center gap-2">
-                    <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                    <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                     دانلود کانفیگ و بارکد اتصال WireGuard
                 </h2>
 
@@ -153,7 +153,7 @@
                                 </div>
 
 
-                                <a  href="{{ route('download.wg.config', ['profile' => $wg->profile_name]) }}" download="{{ $wg->profile_name }}.conf" class="py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold text-center transition flex items-center justify-center gap-1.5 shadow-lg shadow-orange-600/20">
+                                <a  href="{{ route('download.wg.config', ['profile' => $wg->profile_name]) }}" download="{{ $wg->profile_name }}.conf" class="py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold text-center transition flex items-center justify-center gap-1.5 shadow-lg shadow-brand-600/20">
                                     📥 دانلود فایل Conf
                                 </a>
                             </div>

@@ -5,11 +5,11 @@
            @keydown.escape="open = false"
            type="text"
            placeholder="جستجو در کاربران، اکانت‌ها و..."
-           class="w-full bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-900 dark:text-white rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all font-mono-digit placeholder:font-sans shadow-inner">
+           class="w-full bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-900 dark:text-white rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all font-mono-digit placeholder:font-sans shadow-inner">
 
     <div class="absolute right-0 top-0 h-full w-10 flex items-center justify-center text-zinc-400">
         <svg wire:loading.remove wire:target="search" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        <svg wire:loading wire:target="search" class="w-4 h-4 animate-spin text-orange-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        <svg wire:loading wire:target="search" class="w-4 h-4 animate-spin text-brand-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
     </div>
 
     @if(strlen(trim($search)) >= 2)
@@ -20,7 +20,7 @@
              x-transition:leave="transition ease-in duration-100"
              x-transition:leave-start="opacity-100 scale-100"
              x-transition:leave-end="opacity-0 scale-95"
-             class="absolute top-full mt-2 w-full md:w-[28rem] lg:w-[32rem] right-0 bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
+             class="absolute top-full mt-2 w-full md:w-[28rem] lg:w-[32rem] right-0 bg-white dark:bg-[#111c2e] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
 
             @if($users->isEmpty() && $resellers->isEmpty() && $accounts->isEmpty())
                 <div class="p-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
@@ -30,7 +30,7 @@
                 <div class="max-h-[70vh] overflow-y-auto custom-scrollbar">
 
                     @if($resellers->count() > 0)
-                        <div class="bg-zinc-50 dark:bg-zinc-900/80 px-3 py-1.5 text-[10px] font-black text-orange-500 uppercase tracking-wider border-b border-zinc-100 dark:border-zinc-800/50 flex items-center gap-1.5">
+                        <div class="bg-zinc-50 dark:bg-zinc-900/80 px-3 py-1.5 text-[10px] font-black text-brand-500 uppercase tracking-wider border-b border-zinc-100 dark:border-zinc-800/50 flex items-center gap-1.5">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h5m-5 0V11m0 0h5m-5 0h-5"></path></svg>
                             نمایندگان سیستم
                         </div>
@@ -38,15 +38,15 @@
                             @foreach($resellers as $reseller)
                                 <a href="{{ route('admin.managers.edit', $reseller->id) }}" wire:navigate class="flex items-center justify-between p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition group">
                                     <div class="flex items-center gap-3 min-w-0">
-                                        <div class="w-8 h-8 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center text-xs font-bold shrink-0">
+                                        <div class="w-8 h-8 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center text-xs font-bold shrink-0">
                                             {{ mb_substr($reseller->name ?? 'N', 0, 1) }}
                                         </div>
                                         <div>
-                                            <p class="text-xs font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-orange-500 transition truncate">{{ $reseller->name }}</p>
+                                            <p class="text-xs font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-brand-500 transition truncate">{{ $reseller->name }}</p>
                                             <p class="text-[10px] text-zinc-500 font-mono-digit mt-0.5 truncate">{{ $reseller->phone ?? $reseller->email }}</p>
                                         </div>
                                     </div>
-                                    <span class="shrink-0 text-[9px] px-2 py-0.5 rounded font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400">
+                                    <span class="shrink-0 text-[9px] px-2 py-0.5 rounded font-bold bg-brand-500/10 text-brand-600 dark:text-brand-400">
                                         {{ $reseller->role === 'sub_agent' ? 'زیرنماینده' : 'نماینده' }}
                                     </span>
                                 </a>

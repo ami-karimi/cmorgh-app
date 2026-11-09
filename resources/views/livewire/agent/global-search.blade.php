@@ -4,15 +4,15 @@
            @focus="open = true"
            type="text"
            placeholder="جستجوی مشتری یا اکانت..."
-           class="w-full bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-900 dark:text-white rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all font-mono-digit placeholder:font-sans">
+           class="w-full bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-900 dark:text-white rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all font-mono-digit placeholder:font-sans">
 
     <div class="absolute right-0 top-0 h-full w-10 flex items-center justify-center text-zinc-400">
         <svg wire:loading.remove wire:target="search" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        <svg wire:loading wire:target="search" class="w-4 h-4 animate-spin text-orange-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        <svg wire:loading wire:target="search" class="w-4 h-4 animate-spin text-brand-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
     </div>
 
     @if(strlen($search) >= 2)
-        <div x-show="open" x-transition class="absolute top-full mt-2 w-full md:w-[28rem] right-0 bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl z-50 overflow-hidden">
+        <div x-show="open" x-transition class="absolute top-full mt-2 w-full md:w-[28rem] right-0 bg-white dark:bg-[#111c2e] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl z-50 overflow-hidden">
 
             @if(count($customers) === 0 && count($accounts) === 0)
                 <div class="p-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
@@ -26,7 +26,7 @@
                         <div class="divide-y divide-zinc-100 dark:divide-zinc-800/50">
                             @foreach($customers as $customer)
                                 <a href="{{ route('reseller.users.show', $customer->id) }}" wire:navigate class="flex items-center gap-3 p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition">
-                                    <div class="w-8 h-8 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center text-xs font-bold shrink-0">
+                                    <div class="w-8 h-8 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center text-xs font-bold shrink-0">
                                         {{ mb_substr($customer->name, 0, 1) }}
                                     </div>
                                     <div>

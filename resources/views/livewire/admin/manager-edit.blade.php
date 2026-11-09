@@ -1,6 +1,6 @@
 <div x-data="{ openAddTrx: false }">
     <div class="mb-6 flex justify-start">
-        <a href="{{ route('admin.managers.list') }}" wire:navigate class="inline-flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-orange-500 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/80 px-4 py-2 rounded-xl transition-all shadow-md group">
+        <a href="{{ route('admin.managers.list') }}" wire:navigate class="inline-flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-brand-500 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/80 px-4 py-2 rounded-xl transition-all shadow-md group">
             <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
@@ -8,8 +8,8 @@
         </a>
     </div>
 
-    <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/60 rounded-3xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-inner relative overflow-hidden">
-        <div class="absolute -right-20 -top-20 w-64 h-64 bg-orange-500/5 rounded-full blur-[60px]"></div>
+    <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/60 rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-inner relative overflow-hidden">
+        <div class="absolute -right-20 -top-20 w-64 h-64 bg-brand-500/5 rounded-full blur-[60px]"></div>
 
         <div class="flex items-center gap-5 relative z-10">
             <div class="relative">
@@ -68,7 +68,7 @@
         <div class="space-y-6">
             <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-6 shadow-2xl">
                 <h2 class="text-base font-bold text-white mb-6 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                     ویرایش اطلاعات هویتی
                 </h2>
                 @if (session()->has('profile_message'))
@@ -77,30 +77,30 @@
                 <form wire:submit.prevent="updateProfile" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-2">نام و نام خانوادگی</label>
-                        <input wire:model="name" type="text" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-orange-500/50 block p-3 transition shadow-inner text-sm">
+                        <input wire:model="name" type="text" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-brand-500/50 block p-3 transition shadow-inner text-sm">
                         @error('name') <span class="text-red-500 text-[10px] mt-1 block font-bold">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-2">شماره تماس (اجباری)</label>
-                        <input wire:model="phone" type="text" dir="ltr" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-orange-500/50 block p-3 transition shadow-inner font-mono text-sm">
+                        <input wire:model="phone" type="text" dir="ltr" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-brand-500/50 block p-3 transition shadow-inner font-mono text-sm">
                         @error('phone') <span class="text-red-500 text-[10px] mt-1 block font-bold">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-2">آدرس ایمیل</label>
-                        <input wire:model="email" type="email" dir="ltr" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-orange-500/50 block p-3 transition shadow-inner font-mono text-sm">
+                        <input wire:model="email" type="email" dir="ltr" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-brand-500/50 block p-3 transition shadow-inner font-mono text-sm">
                         @error('email') <span class="text-red-500 text-[10px] mt-1 block font-bold">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="pt-2 border-t border-zinc-800/80">
                         <label class="block text-xs font-bold text-zinc-400 mb-2">کلمه عبور جدید (اختیاری)</label>
-                        <input wire:model="password" type="password" dir="ltr" placeholder="••••••••" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-orange-500/50 block p-3 transition shadow-inner text-sm">
+                        <input wire:model="password" type="password" dir="ltr" placeholder="••••••••" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-brand-500/50 block p-3 transition shadow-inner text-sm">
                         @error('password') <span class="text-red-500 text-[10px] mt-1 block font-bold">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="pt-2">
-                        <button type="submit" wire:loading.attr="disabled" class="w-full py-3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                        <button type="submit" wire:loading.attr="disabled" class="w-full py-3 bg-gradient-to-r from-brand-600 to-brand-600 hover:from-brand-500 hover:to-brand-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
                             <span wire:loading.remove wire:target="updateProfile">ذخیره مشخصات همکار</span>
                             <span wire:loading wire:target="updateProfile" class="animate-pulse">درحال پردازش...</span>
                         </button>
@@ -110,7 +110,7 @@
 
             <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-6 shadow-xl">
                 <h2 class="text-sm font-bold text-white mb-4 uppercase tracking-wider flex items-center gap-2">
-                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                     شبکه فروش
                 </h2>
 
@@ -122,7 +122,7 @@
                         <div>
                             <p class="text-xs text-zinc-500 font-bold mb-1">نماینده بالادستی</p>
                             @if($parentAgent)
-                                <a href="{{ route('admin.managers.edit', $parentAgent->id) }}" wire:navigate class="text-sm font-bold text-orange-400 hover:text-orange-300 transition">{{ $parentAgent->name }}</a>
+                                <a href="{{ route('admin.managers.edit', $parentAgent->id) }}" wire:navigate class="text-sm font-bold text-brand-400 hover:text-brand-300 transition">{{ $parentAgent->name }}</a>
                             @else
                                 <span class="text-sm text-zinc-400">نامشخص</span>
                             @endif
@@ -134,7 +134,7 @@
                             <p class="text-xs text-zinc-500 font-bold mb-1">تعداد زیر نمایندگان فعال</p>
                             <p class="text-lg font-black text-white mt-0.5">{{ $subAgentsCount }} <span class="text-xs text-zinc-500 font-medium">نفر</span></p>
                         </div>
-                        <div class="p-2 bg-orange-500/10 text-orange-500 rounded-lg">
+                        <div class="p-2 bg-brand-500/10 text-brand-500 rounded-lg">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         </div>
                     </div>
@@ -148,7 +148,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h2 class="text-base font-bold text-white flex items-center gap-2">
-                            <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                            <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
                             پیکربندی فروشگاه و دامنه
                         </h2>
                         <p class="text-xs text-zinc-500 mt-1">مدیریت اطلاعات ظاهری فروشگاه و وضعیت دامنه اختصاصی همکار</p>
@@ -199,16 +199,16 @@
 
                         <div>
                             <label class="block text-[11px] font-bold text-zinc-400 mb-1.5">عنوان فروشگاه (Title)</label>
-                            <input wire:model="store_title" type="text" placeholder="مثلا: فروشگاه اختصاصی علی" class="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl text-white text-xs p-3 focus:ring-2 focus:ring-orange-500/50 outline-none">
+                            <input wire:model="store_title" type="text" placeholder="مثلا: فروشگاه اختصاصی علی" class="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl text-white text-xs p-3 focus:ring-2 focus:ring-brand-500/50 outline-none">
                         </div>
 
                         <div>
                             <label class="block text-[11px] font-bold text-zinc-400 mb-1.5">آیدی پشتیبانی تلگرام (بدون @)</label>
-                            <input wire:model="store_support_id" type="text" dir="ltr" placeholder="my_support" class="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl text-white font-mono text-xs p-3 focus:ring-2 focus:ring-orange-500/50 outline-none">
+                            <input wire:model="store_support_id" type="text" dir="ltr" placeholder="my_support" class="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl text-white font-mono text-xs p-3 focus:ring-2 focus:ring-brand-500/50 outline-none">
                         </div>
 
                         <div class="pt-2 flex items-center gap-2">
-                            <button wire:click="updateStoreInfo" class="flex-1 py-2.5 bg-zinc-800 hover:bg-orange-500 hover:text-white text-zinc-300 rounded-xl text-xs font-bold transition shadow-md">
+                            <button wire:click="updateStoreInfo" class="flex-1 py-2.5 bg-zinc-800 hover:bg-brand-500 hover:text-white text-zinc-300 rounded-xl text-xs font-bold transition shadow-md">
                                 ذخیره اطلاعات
                             </button>
                             <button wire:click="toggleStoreStatus" class="flex-1 py-2.5 rounded-xl font-bold text-xs border transition {{ $store_is_active ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white border-rose-500/20' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white border-emerald-500/20' }}">
@@ -222,14 +222,14 @@
 
                         <div>
                             <label class="block text-[11px] font-bold text-zinc-400 mb-1.5">نام برند (Brand Name)</label>
-                            <input wire:model="brand_name" type="text" placeholder="نام برند در پنل" class="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl text-white text-xs p-3 focus:ring-2 focus:ring-orange-500/50 outline-none">
+                            <input wire:model="brand_name" type="text" placeholder="نام برند در پنل" class="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl text-white text-xs p-3 focus:ring-2 focus:ring-brand-500/50 outline-none">
                         </div>
 
                         <div>
                             <label class="block text-[11px] font-bold text-zinc-400 mb-1.5">آدرس دامنه اختصاصی</label>
                             <div class="relative">
-                                <input wire:model="custom_domain" type="text" dir="ltr" placeholder="shop.example.com" class="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl text-white font-mono text-xs p-3 focus:ring-2 focus:ring-orange-500/50 outline-none">
-                                <button wire:click="updateStoreDomain" class="absolute right-1 top-1 bottom-1 px-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-[10px] font-bold transition">
+                                <input wire:model="custom_domain" type="text" dir="ltr" placeholder="shop.example.com" class="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl text-white font-mono text-xs p-3 focus:ring-2 focus:ring-brand-500/50 outline-none">
+                                <button wire:click="updateStoreDomain" class="absolute right-1 top-1 bottom-1 px-3 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-[10px] font-bold transition">
                                     ثبت
                                 </button>
                             </div>
@@ -256,7 +256,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                            <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             مدیریت تراکنش‌ها و گردش مالی
                         </h2>
                         <p class="text-xs text-zinc-500 mt-1">امکان واریز، برداشت، فیلتر و بررسی تاریخچه مالی</p>
@@ -277,7 +277,7 @@
                     <form wire:submit.prevent="addTransaction" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                         <div>
                             <label class="block text-[11px] font-bold text-zinc-500 mb-1.5">نوع تراکنش</label>
-                            <select wire:model="newType" class="w-full bg-zinc-900 border border-zinc-700 text-zinc-300 rounded-lg text-xs p-2.5 focus:ring-1 focus:ring-orange-500">
+                            <select wire:model="newType" class="w-full bg-zinc-900 border border-zinc-700 text-zinc-300 rounded-lg text-xs p-2.5 focus:ring-1 focus:ring-brand-500">
                                 <option value="plus">واریز / افزایش موجودی (plus)</option>
                                 <option value="minus">برداشت / کاهش موجودی (minus)</option>
                                 <option value="plus_amn">افزایش اعتبار اختصاصی (plus_amn)</option>
@@ -286,29 +286,29 @@
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-zinc-500 mb-1.5">مبلغ تراکنش (تومان)</label>
-                            <input wire:model="newPrice" type="number" placeholder="مثلا 50000" class="w-full bg-zinc-900 border border-zinc-700 text-white placeholder-zinc-600 rounded-lg text-xs p-2.5 focus:ring-1 focus:ring-orange-500">
+                            <input wire:model="newPrice" type="number" placeholder="مثلا 50000" class="w-full bg-zinc-900 border border-zinc-700 text-white placeholder-zinc-600 rounded-lg text-xs p-2.5 focus:ring-1 focus:ring-brand-500">
                             @error('newPrice') <span class="text-red-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-zinc-500 mb-1.5">توضیحات / بابت چه چیزی</label>
-                            <input wire:model="newDescription" type="text" placeholder="شارژ پنل نمایندگی..." class="w-full bg-zinc-900 border border-zinc-700 text-white placeholder-zinc-600 rounded-lg text-xs p-2.5 focus:ring-1 focus:ring-orange-500">
+                            <input wire:model="newDescription" type="text" placeholder="شارژ پنل نمایندگی..." class="w-full bg-zinc-900 border border-zinc-700 text-white placeholder-zinc-600 rounded-lg text-xs p-2.5 focus:ring-1 focus:ring-brand-500">
                             @error('newDescription') <span class="text-red-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                         </div>
                         <div class="md:col-span-3 text-left pt-2">
-                            <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-xs rounded-lg shadow-lg transition-all">ثبت نهایی تراکنش</button>
+                            <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-brand-600 to-brand-600 hover:from-brand-500 hover:to-brand-500 text-white font-bold text-xs rounded-lg shadow-lg transition-all">ثبت نهایی تراکنش</button>
                         </div>
                     </form>
                 </div>
 
                 <div class="flex flex-col md:flex-row items-center gap-3 bg-zinc-950/40 p-3 rounded-xl border border-zinc-800/60 shadow-inner">
                     <div class="relative w-full md:flex-1">
-                        <input wire:model.live.debounce.300ms="trxSearch" type="text" class="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs rounded-lg pr-8 p-2.5 placeholder-zinc-600 focus:ring-1 focus:ring-orange-500" placeholder="جستجو در شرح تراکنش‌ها...">
+                        <input wire:model.live.debounce.300ms="trxSearch" type="text" class="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs rounded-lg pr-8 p-2.5 placeholder-zinc-600 focus:ring-1 focus:ring-brand-500" placeholder="جستجو در شرح تراکنش‌ها...">
                         <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-zinc-500">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </div>
                     </div>
                     <div class="w-full md:w-44">
-                        <select wire:model.live="trxType" class="w-full bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs rounded-lg p-2.5 cursor-pointer focus:ring-1 focus:ring-orange-500">
+                        <select wire:model.live="trxType" class="w-full bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs rounded-lg p-2.5 cursor-pointer focus:ring-1 focus:ring-brand-500">
                             <option value="">همه تراکنش‌ها</option>
                             <option value="plus">واریزها (plus)</option>
                             <option value="minus">برداشت‌ها (minus)</option>
@@ -336,10 +336,10 @@
                                 <tr class="hover:bg-zinc-800/30 transition-colors {{ $editingTrxId === $trx->id ? 'bg-zinc-800/50' : '' }}">
                                     @if($editingTrxId === $trx->id)
                                         <td class="p-2">
-                                            <input wire:model="editDescription" type="text" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-md text-xs p-1.5 focus:ring-1 focus:ring-orange-500">
+                                            <input wire:model="editDescription" type="text" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-md text-xs p-1.5 focus:ring-1 focus:ring-brand-500">
                                         </td>
                                         <td class="p-2">
-                                            <select wire:model="editType" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-md text-xs p-1.5 focus:ring-1 focus:ring-orange-500">
+                                            <select wire:model="editType" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-md text-xs p-1.5 focus:ring-1 focus:ring-brand-500">
                                                 <option value="plus">بستانکار (plus)</option>
                                                 <option value="minus">بدهکار (minus)</option>
                                                 <option value="plus_amn">بستانکار اعتبار</option>
@@ -347,14 +347,14 @@
                                             </select>
                                         </td>
                                         <td class="p-2">
-                                            <select wire:model="editApproved" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-md text-xs p-1.5 focus:ring-1 focus:ring-orange-500">
+                                            <select wire:model="editApproved" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-md text-xs p-1.5 focus:ring-1 focus:ring-brand-500">
                                                 <option value="1">تایید شده</option>
                                                 <option value="0">رد شده / معلق</option>
                                             </select>
                                         </td>
                                         <td class="p-4 text-zinc-500 font-mono text-[10px]">{{ \Morilog\Jalali\Jalalian::fromCarbon($trx->created_at)->format('Y/m/d H:i') }}</td>
                                         <td class="p-2 text-left">
-                                            <input wire:model="editPrice" type="number" dir="ltr" class="w-full text-left bg-zinc-950 border border-zinc-700 text-white rounded-md text-xs p-1.5 focus:ring-1 focus:ring-orange-500">
+                                            <input wire:model="editPrice" type="number" dir="ltr" class="w-full text-left bg-zinc-950 border border-zinc-700 text-white rounded-md text-xs p-1.5 focus:ring-1 focus:ring-brand-500">
                                         </td>
                                         <td class="p-2 text-center">
                                             <div class="flex items-center justify-center gap-1">
@@ -387,7 +387,7 @@
                                             {{ in_array($trx->type, ['plus', 'plus_amn']) ? '+' : '-' }}{{ number_format($trx->price) }}
                                         </td>
                                         <td class="p-4 text-center">
-                                            <button wire:click="editTransaction({{ $trx->id }})" title="ویرایش تراکنش" class="p-1.5 bg-zinc-800 text-zinc-400 hover:text-orange-400 rounded-md border border-zinc-700/50 transition">
+                                            <button wire:click="editTransaction({{ $trx->id }})" title="ویرایش تراکنش" class="p-1.5 bg-zinc-800 text-zinc-400 hover:text-brand-400 rounded-md border border-zinc-700/50 transition">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                             </button>
                                         </td>
@@ -411,7 +411,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div>
                         <h2 class="text-base font-bold text-white flex items-center gap-2">
-                            <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             تنظیمات تخفیف و کارمزد زیر‌نمایندگان
                         </h2>
                         <p class="text-xs text-zinc-500 mt-1">تعیین درصد تخفیف خرید این همکار و درصد مارک‌آ‌پ روی قیمت فروش به زیرنمایندگانش</p>
@@ -429,7 +429,7 @@
                         <div>
                             <label class="block text-xs font-bold text-zinc-400 mb-2">درصد تخفیف روی گروه‌ها (%)</label>
                             <div class="relative">
-                                <input wire:model="discount_percent" type="number" step="0.1" min="0" max="100" dir="ltr" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-orange-500/50 block p-3.5 pl-10 transition font-mono text-base font-bold">
+                                <input wire:model="discount_percent" type="number" step="0.1" min="0" max="100" dir="ltr" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-brand-500/50 block p-3.5 pl-10 transition font-mono text-base font-bold">
                                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500 font-bold">%</div>
                             </div>
                             @error('discount_percent') <span class="text-red-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
@@ -438,14 +438,14 @@
                         <div>
                             <label class="block text-xs font-bold text-zinc-400 mb-2">درصد سود روی زیر‌نمایندگان (Markup %)</label>
                             <div class="relative">
-                                <input wire:model="sub_agent_markup" type="number" step="0.1" min="0" max="500" dir="ltr" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-orange-500/50 block p-3.5 pl-10 transition font-mono text-base font-bold">
+                                <input wire:model="sub_agent_markup" type="number" step="0.1" min="0" max="500" dir="ltr" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white focus:ring-2 focus:ring-brand-500/50 block p-3.5 pl-10 transition font-mono text-base font-bold">
                                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500 font-bold">%</div>
                             </div>
                             @error('sub_agent_markup') <span class="text-red-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="md:col-span-2 pt-2">
-                            <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all">
+                            <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-brand-600 to-brand-600 hover:from-brand-500 hover:to-brand-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all">
                                 بروزرسانی درصد تخفیف و کارمزد
                             </button>
                         </div>
@@ -457,7 +457,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div>
                         <h2 class="text-base font-bold text-white flex items-center gap-2">
-                            <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                             مدیریت دسترسی و نمایش گروه‌های سرویس
                         </h2>
                         <p class="text-xs text-zinc-500 mt-1">گروه‌هایی که غیرفعال یا مخفی شوند، در پنل این نماینده نمایش داده نخواهند شد.</p>
@@ -501,7 +501,7 @@
                                     </div>
 
                                     @if($discountPercent > 0)
-                                        <div class="text-[11px] text-orange-400 font-mono">
+                                        <div class="text-[11px] text-brand-400 font-mono">
                                             با احتساب {{ $discountPercent }}% تخفیف:
                                             <span class="font-bold text-emerald-400 text-xs">{{ number_format(round($finalPrice)) }} تومان</span>
                                         </div>

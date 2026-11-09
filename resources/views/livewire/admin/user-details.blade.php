@@ -21,7 +21,7 @@
 
         <div class="lg:col-span-1 space-y-6">
             <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-orange-600 to-red-600"></div>
+                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-brand-600 to-brand-600"></div>
 
                 <div class="flex flex-col items-center text-center mt-2">
                     <img class="w-24 h-24 rounded-full object-cover border-4 border-zinc-800 shadow-lg mb-4" src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=27272a&color=f97316&size=128" alt="Avatar">
@@ -58,7 +58,7 @@
                 <h3 class="text-sm font-bold text-white mb-4">خلاصه سرویس‌ها</h3>
                 <div class="grid grid-cols-2 gap-4 text-center">
                     <div class="bg-zinc-950/50 border border-zinc-800 rounded-xl p-3">
-                        <span class="block text-2xl font-black text-orange-500 mb-1">{{ $user->vpnAccounts->count() }}</span>
+                        <span class="block text-2xl font-black text-brand-500 mb-1">{{ $user->vpnAccounts->count() }}</span>
                         <span class="text-xs text-zinc-500">کل اکانت‌ها</span>
                     </div>
                     <div class="bg-zinc-950/50 border border-zinc-800 rounded-xl p-3">
@@ -89,7 +89,7 @@
                         @forelse($user->vpnAccounts as $account)
                             <tr class="hover:bg-zinc-800/20 transition-colors">
                                 <td class="p-4">
-                                    <div class="font-bold text-orange-400 font-mono text-base" dir="ltr">{{ $account->username }}</div>
+                                    <div class="font-bold text-brand-400 font-mono text-base" dir="ltr">{{ $account->username }}</div>
                                     <div class="text-[11px] text-zinc-500 mt-1">تعداد کاربر مجاز: {{ $account->multi_login }}</div>
                                 </td>
                                 <td class="p-4">
@@ -245,7 +245,7 @@
                     <form wire:submit.prevent="saveTransaction" class="space-y-4">
                         <div>
                             <label class="block text-xs text-zinc-400 mb-1">نوع تراکنش <span class="text-red-500">*</span></label>
-                            <select wire:model="txType" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm rounded-xl p-2.5 focus:ring-orange-500">
+                            <select wire:model="txType" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm rounded-xl p-2.5 focus:ring-brand-500">
                                 <option value="plus">افزایش موجودی (شارژ حساب)</option>
                                 <option value="plus_amn">شارژ امن</option>
                                 <option value="minus">کسر از موجودی</option>
@@ -255,13 +255,13 @@
 
                         <div>
                             <label class="block text-xs text-zinc-400 mb-1">مبلغ (تومان) <span class="text-red-500">*</span></label>
-                            <input wire:model="txPrice" type="number" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm rounded-xl p-2.5 focus:ring-orange-500" dir="ltr">
+                            <input wire:model="txPrice" type="number" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm rounded-xl p-2.5 focus:ring-brand-500" dir="ltr">
                             @error('txPrice') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label class="block text-xs text-zinc-400 mb-1">توضیحات (اختیاری)</label>
-                            <textarea wire:model="txDesc" rows="2" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm rounded-xl p-2.5 focus:ring-orange-500" placeholder="بابت..."></textarea>
+                            <textarea wire:model="txDesc" rows="2" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm rounded-xl p-2.5 focus:ring-brand-500" placeholder="بابت..."></textarea>
                         </div>
 
                         <div class="flex items-center mt-2">
@@ -274,7 +274,7 @@
 
                         <div class="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800 mt-6">
                             <button type="button" wire:click="$set('isTxModalOpen', false)" class="px-5 py-2.5 text-sm font-medium text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-700 rounded-xl transition">لغو</button>
-                            <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-orange-600 hover:bg-orange-500 rounded-xl shadow-lg transition">ذخیره تراکنش</button>
+                            <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-brand-600 hover:bg-brand-500 rounded-xl shadow-lg transition">ذخیره تراکنش</button>
                         </div>
                     </form>
                 </div>

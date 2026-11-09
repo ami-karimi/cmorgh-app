@@ -63,7 +63,7 @@
 
         <div class="lg:col-span-1 space-y-6">
 
-            <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 shadow-xl space-y-5">
+            <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 shadow-xl space-y-5">
                 <div class="border-b border-zinc-800/80 pb-3 flex items-center gap-2">
                     <h2 class="text-sm font-black text-white">مالکیت و کسر هزینه</h2>
                 </div>
@@ -117,7 +117,7 @@
             </div>
 
             @if($creationType === 'single')
-                <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 shadow-xl space-y-5 animate-fade-in">
+                <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 shadow-xl space-y-5 animate-fade-in">
                     <div class="border-b border-zinc-800/80 pb-3 flex items-center gap-2">
                         <h2 class="text-sm font-black text-white">کاربر نهایی (مشتری)</h2>
                     </div>
@@ -160,13 +160,13 @@
                             </div>
                             <ul class="overflow-y-auto p-1 custom-scrollbar">
                                 <template x-for="opt in staticOptions" :key="opt.id">
-                                    <li @click="$wire.set('customer_id', opt.id); open = false" class="px-3 py-2 text-xs font-bold text-orange-400 bg-orange-500/5 hover:bg-orange-500/10 mb-1 rounded-lg cursor-pointer transition" x-text="opt.name"></li>
+                                    <li @click="$wire.set('customer_id', opt.id); open = false" class="px-3 py-2 text-xs font-bold text-brand-400 bg-brand-500/5 hover:bg-brand-500/10 mb-1 rounded-lg cursor-pointer transition" x-text="opt.name"></li>
                                 </template>
                                 <div class="px-3 py-1 text-[10px] text-zinc-500 border-t border-zinc-700 mt-1">مشتریان ثبت شده:</div>
                                 <template x-for="option in filteredDbOptions" :key="option.id">
                                     <li @click="$wire.set('customer_id', option.id); open = false" class="px-3 py-2 hover:bg-zinc-700 rounded-lg cursor-pointer transition flex items-center justify-between gap-2">
                                         <span class="text-[11px] font-mono text-zinc-200 truncate" x-text="option.name"></span>
-                                        <span class="text-[9px] px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 font-bold shrink-0" x-text="'نماینده: ' + option.agent"></span>
+                                        <span class="text-[9px] px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 font-bold shrink-0" x-text="'نماینده: ' + option.agent"></span>
                                     </li>
                                 </template>
                             </ul>
@@ -192,7 +192,7 @@
 
         <div class="lg:col-span-2 space-y-6">
 
-            <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
+            <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 md:p-8 shadow-xl space-y-6">
                 <div>
                     <label class="block text-xs font-bold text-zinc-400 mb-3">پروتکل ارتباطی:</label>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -222,8 +222,8 @@
 
                     @if($service_group === 'wireguard')
                         <div>
-                            <label class="block text-xs font-bold text-purple-400 mb-2">سرور وایرگارد</label>
-                            <select wire:model="wg_server_id" class="w-full bg-zinc-900 border border-purple-500/30 rounded-xl text-white p-3.5 text-sm focus:ring-1 focus:ring-purple-500 outline-none">
+                            <label class="block text-xs font-bold text-brand-400 mb-2">سرور وایرگارد</label>
+                            <select wire:model="wg_server_id" class="w-full bg-zinc-900 border border-brand-500/30 rounded-xl text-white p-3.5 text-sm focus:ring-1 focus:ring-brand-500 outline-none">
                                 <option value="auto">تخصیص خودکار (خلوت‌ترین)</option>
                                 @foreach($allWgServers as $srv)
                                     <option value="{{ $srv->id }}">{{ $srv->name }}</option>
@@ -248,7 +248,7 @@
                         </div>
                         <div>
                             <p class="text-[10px] text-zinc-500 font-bold mb-1">تخفیف نماینده انتخابی:</p>
-                            <p class="text-sm font-mono text-orange-400">%{{ $agentDiscount }}</p>
+                            <p class="text-sm font-mono text-brand-400">%{{ $agentDiscount }}</p>
                         </div>
                         <div class="bg-zinc-950/50 p-2 rounded-xl border border-zinc-800">
                             <p class="text-[10px] text-zinc-400 font-bold mb-1">قیمت فروش به مشتری:</p>

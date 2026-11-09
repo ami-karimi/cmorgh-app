@@ -24,7 +24,7 @@
         </div>
 
         <div class="bg-zinc-950/50 border border-zinc-800/80 rounded-2xl p-4 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400">
+            <div class="w-12 h-12 rounded-xl bg-brand-500/10 flex items-center justify-center text-brand-400">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
             </div>
             <div>
@@ -37,9 +37,9 @@
 
     {{-- Sub Tabs --}}
     <div class="flex gap-2 border-b border-zinc-800 pb-3">
-        <button wire:click="$set('activeSubTab', 'health')" class="px-4 py-2 text-xs font-bold rounded-xl transition {{ $activeSubTab === 'health' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 'text-zinc-400 hover:text-white' }}">🔍 سلامت سیستم</button>
-        <button wire:click="$set('activeSubTab', 'cleanup')" class="px-4 py-2 text-xs font-bold rounded-xl transition {{ $activeSubTab === 'cleanup' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 'text-zinc-400 hover:text-white' }}">🧹 پاکسازی</button>
-        <button wire:click="$set('activeSubTab', 'logs')" class="px-4 py-2 text-xs font-bold rounded-xl transition {{ $activeSubTab === 'logs' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 'text-zinc-400 hover:text-white' }}">📋 لاگ‌ها</button>
+        <button wire:click="$set('activeSubTab', 'health')" class="px-4 py-2 text-xs font-bold rounded-xl transition {{ $activeSubTab === 'health' ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-zinc-400 hover:text-white' }}">🔍 سلامت سیستم</button>
+        <button wire:click="$set('activeSubTab', 'cleanup')" class="px-4 py-2 text-xs font-bold rounded-xl transition {{ $activeSubTab === 'cleanup' ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-zinc-400 hover:text-white' }}">🧹 پاکسازی</button>
+        <button wire:click="$set('activeSubTab', 'logs')" class="px-4 py-2 text-xs font-bold rounded-xl transition {{ $activeSubTab === 'logs' ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-zinc-400 hover:text-white' }}">📋 لاگ‌ها</button>
     </div>
 
     {{-- Health Sub Tab --}}
@@ -55,7 +55,7 @@
                     @if($healthIssues->whereIn('issue_type', ['orphan_peer_only', 'orphan_full', 'orphan_peer_config', 'config_without_account'])->where('status', 'open')->count() > 0)
                         <button wire:click="cleanupOrphanQueuesByServer"
                                 wire:loading.attr="disabled"
-                                class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-purple-500/20 flex items-center gap-2">
+                                class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-brand-500/20 flex items-center gap-2">
                             <span wire:loading.remove>🧹 پاکسازی Queueهای اورفان (گروهی)</span>
                             <span wire:loading>⏳</span>
                         </button>
@@ -63,7 +63,7 @@
 
                     <button wire:click="runHealthCheck"
                             wire:loading.attr="disabled"
-                            class="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-orange-500/20 flex items-center gap-2">
+                            class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-brand-500/20 flex items-center gap-2">
                         <span wire:loading.remove wire:target="runHealthCheck">🚀 شروع بررسی کامل</span>
                         <span wire:loading wire:target="runHealthCheck">⏳ در حال بررسی...</span>
                     </button>
@@ -90,14 +90,14 @@
                     <span class="text-xs font-bold text-zinc-400 ml-1">فیلتر:</span>
 
                     {{-- فیلتر سرویس --}}
-                    <select wire:model.live="filterService" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-orange-500">
+                    <select wire:model.live="filterService" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-brand-500">
                         <option value="all">همه سرویس‌ها</option>
                         <option value="wireguard">WireGuard</option>
                         <option value="mikrotik">MikroTik</option>
                     </select>
 
                     {{-- فیلتر نوع Issue --}}
-                    <select wire:model.live="filterIssueType" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-orange-500">
+                    <select wire:model.live="filterIssueType" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-brand-500">
                         <option value="all">همه انواع</option>
                         <option value="orphan_peer_only">Orphan Peer Only</option>
                         <option value="orphan_peer_config">Orphan Peer + Config</option>
@@ -111,7 +111,7 @@
                     </select>
 
                     {{-- فیلتر شدت --}}
-                    <select wire:model.live="filterSeverity" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-orange-500">
+                    <select wire:model.live="filterSeverity" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-brand-500">
                         <option value="all">همه شدت‌ها</option>
                         <option value="critical">⚠️ حیاتی</option>
                         <option value="warning">⚡ هشدار</option>
@@ -119,7 +119,7 @@
                     </select>
 
                     {{-- فیلتر وضعیت --}}
-                    <select wire:model.live="filterStatus" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-orange-500">
+                    <select wire:model.live="filterStatus" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-brand-500">
                         <option value="open">باز</option>
                         <option value="resolved">حل شده</option>
                         <option value="ignored">نادیده گرفته</option>
@@ -127,7 +127,7 @@
                     </select>
 
                     {{-- فیلتر سرور --}}
-                    <select wire:model.live="filterServerId" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-orange-500">
+                    <select wire:model.live="filterServerId" class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-brand-500">
                         <option value="all">همه سرورها</option>
                         @foreach($servers as $id => $name)
                             <option value="{{ $id }}">{{ $name }}</option>
@@ -139,12 +139,12 @@
                         <input wire:model.live.debounce.300ms="filterSearch"
                                type="text"
                                placeholder="جستجوی نام کاربری..."
-                               class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 pr-8 focus:ring-1 focus:ring-orange-500 w-36">
+                               class="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5 pr-8 focus:ring-1 focus:ring-brand-500 w-36">
                         <svg class="w-3.5 h-3.5 text-zinc-500 absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
 
                     {{-- دکمه پاک کردن فیلترها --}}
-                    <button wire:click="resetFilters" class="text-xs text-orange-400 hover:text-orange-300 transition font-bold px-2 py-1">
+                    <button wire:click="resetFilters" class="text-xs text-brand-400 hover:text-brand-300 transition font-bold px-2 py-1">
                         ✕ پاک کردن همه
                     </button>
                 </div>
@@ -205,10 +205,10 @@
                                         <span class="px-2 py-1 rounded-full text-[10px] font-bold
                                             {{ $issue->issue_type === 'missing_peer' ? 'bg-rose-500/20 text-rose-400' : '' }}
                                         {{ $issue->issue_type === 'orphan_peer_config' ? 'bg-amber-500/20 text-amber-400' : '' }}
-                                        {{ $issue->issue_type === 'account_without_service' ? 'bg-orange-500/20 text-orange-400' : '' }}
+                                        {{ $issue->issue_type === 'account_without_service' ? 'bg-brand-500/20 text-brand-400' : '' }}
                                         {{ $issue->issue_type === 'orphan_full' ? 'bg-red-500/20 text-red-400' : '' }}
                                         {{ $issue->issue_type === 'orphan_peer_only' ? 'bg-amber-500/20 text-amber-400' : '' }}
-                                        {{ $issue->issue_type === 'config_without_account' ? 'bg-purple-500/20 text-purple-400' : '' }}
+                                        {{ $issue->issue_type === 'config_without_account' ? 'bg-brand-500/20 text-brand-400' : '' }}
                                         {{ $issue->issue_type === 'speed_mismatch' ? 'bg-blue-500/20 text-blue-400' : '' }}">
                                             {{ $issue->issue_type }}
                                         </span>
@@ -260,7 +260,7 @@
                                                 @if($issue->issue_type === 'speed_mismatch')
                                                     <button wire:click="handleWireguardAction({{ $issue->id }}, 'sync_speed')"
                                                             wire:loading.attr="disabled"
-                                                            class="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white text-[9px] font-bold rounded-lg transition">
+                                                            class="px-2.5 py-1 bg-brand-600 hover:bg-brand-500 text-white text-[9px] font-bold rounded-lg transition">
                                                         ⚡ همگام‌سازی
                                                     </button>
                                                 @endif
@@ -351,7 +351,7 @@
                         <table class="w-full text-right text-xs">
                             <thead class="bg-zinc-900/50 text-zinc-400 border-b border-zinc-800">
                             <tr>
-                                <th class="p-2"><input type="checkbox" wire:model="selectedUsers" value="{{ $expiredUsers->first()->id ?? '' }}" class="rounded border-zinc-700 bg-zinc-900 text-orange-500"></th>
+                                <th class="p-2"><input type="checkbox" wire:model="selectedUsers" value="{{ $expiredUsers->first()->id ?? '' }}" class="rounded border-zinc-700 bg-zinc-900 text-brand-500"></th>
                                 <th class="p-2">کاربر</th>
                                 <th class="p-2">سرویس</th>
                                 <th class="p-2">تاریخ انقضا</th>
@@ -374,7 +374,7 @@
                                     $reasonText = implode(' - ', $reason);
                                 @endphp
                                 <tr class="hover:bg-zinc-900/30 transition">
-                                    <td class="p-2"><input type="checkbox" wire:model="selectedUsers" value="{{ $account->id }}" class="rounded border-zinc-700 bg-zinc-900 text-orange-500"></td>
+                                    <td class="p-2"><input type="checkbox" wire:model="selectedUsers" value="{{ $account->id }}" class="rounded border-zinc-700 bg-zinc-900 text-brand-500"></td>
                                     <td class="p-2 font-mono text-white">{{ $account->username }}</td>
                                     <td class="p-2 text-zinc-400">{{ $account->service_group }}</td>
                                     <td class="p-2 text-zinc-400">{{ $expireDate ? $expireDate->toDateString() : '-' }}</td>

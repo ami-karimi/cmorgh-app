@@ -1,32 +1,32 @@
-<div class="min-h-screen w-full flex items-center justify-center p-4 md:p-6 lg:p-8 bg-zinc-950 text-zinc-100 selection:bg-orange-500/30 font-sans relative overflow-hidden" dir="rtl">
+<div class="min-h-[70dvh] w-full flex items-center justify-center p-4 md:p-6 lg:p-8 bg-zinc-950 text-zinc-100 selection:bg-brand-500/30 font-sans relative overflow-hidden" dir="rtl">
 
     <!-- Ambient Premium Background -->
     <div class="absolute inset-0 pointer-events-none overflow-hidden">
         <!-- Subtle Grid -->
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
         <!-- Glows -->
-        <div class="absolute top-[-15%] right-[-10%] w-[500px] h-[500px] bg-orange-600/10 rounded-full blur-[120px] mix-blend-screen animate-pulse" style="animation-duration: 8s;"></div>
-        <div class="absolute bottom-[-15%] left-[-10%] w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[100px] mix-blend-screen animate-pulse" style="animation-duration: 12s;"></div>
+        <div class="absolute top-[-15%] right-[-10%] w-[500px] h-[500px] bg-brand-600/10 rounded-full blur-[120px] mix-blend-screen animate-pulse" style="animation-duration: 8s;"></div>
+        <div class="absolute bottom-[-15%] left-[-10%] w-[400px] h-[400px] bg-brand-600/5 rounded-full blur-[100px] mix-blend-screen animate-pulse" style="animation-duration: 12s;"></div>
     </div>
 
     <!-- Main Authentication Card -->
-    <div class="w-full max-w-5xl bg-zinc-900/60 backdrop-blur-2xl rounded-[2rem] border border-white/5 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col lg:flex-row relative z-10">
+    <div class="w-full max-w-5xl bg-zinc-900/60 backdrop-blur-2xl rounded-[1.25rem] border border-white/5 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col lg:flex-row relative z-10">
 
         <!-- Left Side: Premium Branding & Hero (Desktop Only) -->
         <div class="hidden lg:flex lg:w-5/12 bg-zinc-950/40 p-12 flex-col justify-between relative overflow-hidden border-l border-white/5">
             <!-- Glass Overlay -->
-            <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-br from-brand-500/5 via-transparent to-transparent"></div>
 
             <div class="relative z-10">
                 <!-- Badge -->
-                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-bold uppercase tracking-widest w-max mb-6 shadow-[0_0_15px_rgba(249,115,22,0.1)]">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-[10px] font-bold uppercase tracking-widest w-max mb-6 shadow-[0_0_15px_rgba(59,130,246,0.1)]">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    Premium Gaming Network
+                    مدیریت اشتراک اینترنت
                 </div>
 
                 <h2 class="text-3xl xl:text-4xl font-black text-white leading-[1.4] mb-4 tracking-tight">
                     اتصال سریع‌تر،<br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-l from-orange-400 to-red-500">تجربه‌ای بدون مرز</span>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-l from-brand-300 to-brand-500">تجربه‌ای بدون مرز</span>
                 </h2>
                 <p class="text-zinc-400 text-sm leading-relaxed font-medium">
                     به شبکه اختصاصی ما متصل شوید و تجربه‌ای پایدار، سریع و بهینه برای بازی و اینترنت را احساس کنید.
@@ -46,8 +46,8 @@
 
                     <!-- Nodes -->
                     <!-- User -->
-                    <circle cx="40" cy="75" r="5" fill="#f97316" class="animate-pulse" />
-                    <circle cx="40" cy="75" r="12" fill="#f97316" fill-opacity="0.2" class="animate-ping" style="animation-duration: 3s;" />
+                    <circle cx="40" cy="75" r="5" fill="#3b82f6" class="animate-pulse" />
+                    <circle cx="40" cy="75" r="12" fill="#3b82f6" fill-opacity="0.2" class="animate-ping" style="animation-duration: 3s;" />
                     <!-- Cloud Intermediaries -->
                     <circle cx="120" cy="35" r="4" fill="#52525b" />
                     <circle cx="120" cy="115" r="4" fill="#52525b" />
@@ -66,7 +66,7 @@
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" style="animation-duration: 2s;"></span>
                       <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
                     </span>
-                    شبکه در وضعیت پایدار
+                    مدیریت سرویس از یک پنل
                 </div>
             </div>
         </div>
@@ -76,10 +76,10 @@
 
             <!-- Mobile Brand Header -->
             <div class="lg:hidden flex flex-col items-center mb-10 text-center">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(249,115,22,0.15)]">
-                    <svg class="w-7 h-7 text-orange-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500/10 to-brand-500/10 border border-brand-500/20 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(59,130,246,0.15)]">
+                    <svg class="w-7 h-7 text-brand-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 </div>
-                <h1 class="text-xl font-black text-white tracking-tight">Premium Network</h1>
+                <h1 class="text-xl font-bold text-white tracking-tight">{{ $brand_name ?? 'همراه سیمرغ' }}</h1>
             </div>
 
             <!-- Form Header -->
@@ -106,12 +106,12 @@
                 <!-- STEP 1: Check Identifier -->
                 @if($step === 'check_identifier')
                     <div>
-                        <label class="block text-xs font-bold text-zinc-400 mb-2 pl-1">ایمیل یا شماره موبایل</label>
+                        <label for="auth-identifier" class="block text-xs font-bold text-zinc-400 mb-2 pl-1">ایمیل یا شماره موبایل</label>
                         <div class="relative group">
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-zinc-500 group-focus-within:text-orange-500 transition-colors">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-zinc-500 group-focus-within:text-brand-500 transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                             </div>
-                            <input wire:model="identifier" type="text" dir="ltr" class="block w-full pr-12 pl-4 py-3.5 bg-zinc-950/50 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:bg-zinc-900/80 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-500/10 transition-all duration-300 text-sm font-medium shadow-inner" placeholder="name@example.com">
+                            <input wire:model="identifier" id="auth-identifier" autocomplete="username" aria-label="ایمیل یا شماره موبایل" type="text" dir="ltr" class="block w-full pr-12 pl-4 py-3.5 bg-zinc-950/50 border border-zinc-800 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:bg-zinc-900/80 focus:border-brand-500/50 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300 text-sm font-medium shadow-inner" placeholder="09xxxxxxxxx یا name@example.com">
                         </div>
                         @error('identifier')
                         <div class="flex items-center gap-1.5 mt-2 text-red-400 text-[11px] font-bold px-1">
@@ -121,7 +121,7 @@
                         @enderror
                     </div>
 
-                    <button type="submit" wire:loading.attr="disabled" class="w-full py-3.5 mt-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 transition-all duration-300 shadow-[0_8px_20px_-6px_rgba(249,115,22,0.4)] hover:shadow-[0_12px_25px_-8px_rgba(249,115,22,0.6)] hover:-translate-y-0.5 flex justify-center items-center gap-2">
+                    <button type="submit" wire:loading.attr="disabled" class="w-full py-3.5 mt-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-400 hover:to-brand-500 transition-all duration-300 shadow-[0_8px_20px_-6px_rgba(59,130,246,0.4)] hover:shadow-[0_12px_25px_-8px_rgba(59,130,246,0.6)] hover:-translate-y-0.5 flex justify-center items-center gap-2">
                         <span wire:loading.remove wire:target="submitForm">ادامه</span>
                         <span wire:loading wire:target="submitForm" class="flex items-center gap-2">
                             <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"></path></svg>
@@ -154,13 +154,13 @@
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-2 pl-1">رمز عبور</label>
                         <div class="relative group" x-data="{ show: false }">
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-zinc-500 group-focus-within:text-orange-500 transition-colors">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-zinc-500 group-focus-within:text-brand-500 transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
-                            <input wire:model="password" :type="show ? 'text' : 'password'" dir="ltr" class="block w-full pr-12 pl-12 py-3.5 bg-zinc-950/50 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:bg-zinc-900/80 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-500/10 transition-all duration-300 text-sm font-medium tracking-widest shadow-inner" placeholder="••••••••">
+                            <input wire:model="password" autocomplete="current-password" aria-label="رمز عبور" :type="show ? 'text' : 'password'" dir="ltr" class="block w-full pr-12 pl-12 py-3.5 bg-zinc-950/50 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:bg-zinc-900/80 focus:border-brand-500/50 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300 text-sm font-medium tracking-widest shadow-inner" placeholder="••••••••">
 
                             <!-- Toggle Button -->
-                            <button type="button" @click="show = !show" class="absolute inset-y-0 left-0 flex items-center pl-4 text-zinc-500 hover:text-zinc-300 focus:outline-none transition-colors">
+                            <button type="button" aria-label="نمایش یا پنهان کردن رمز عبور" :aria-pressed="show" @click="show = !show" class="absolute inset-y-0 left-0 flex items-center pl-4 text-zinc-500 hover:text-zinc-300 focus:outline-none transition-colors">
                                 <svg x-show="!show" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                 <svg x-show="show" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
                             </button>
@@ -176,15 +176,15 @@
                     <div class="flex items-center justify-between px-1">
                         <div class="flex items-center gap-2">
                             <div class="relative flex items-center">
-                                <input wire:model="remember" id="remember" type="checkbox" class="peer appearance-none w-4 h-4 border border-zinc-700 rounded bg-zinc-950/50 checked:bg-orange-500 checked:border-orange-500 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:ring-offset-1 focus:ring-offset-zinc-900">
+                                <input wire:model="remember" id="remember" type="checkbox" class="peer appearance-none w-4 h-4 border border-zinc-700 rounded bg-zinc-950/50 checked:bg-brand-500 checked:border-brand-500 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:ring-offset-1 focus:ring-offset-zinc-900">
                                 <svg class="absolute inset-0 w-4 h-4 text-white pointer-events-none opacity-0 peer-checked:opacity-100 p-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                             </div>
                             <label for="remember" class="text-[13px] font-medium text-zinc-400 cursor-pointer hover:text-zinc-300 transition-colors">مرا به خاطر بسپار</label>
                         </div>
-                        <a href="#" class="text-[13px] font-bold text-zinc-400 hover:text-orange-400 transition-colors">فراموشی رمز؟</a>
+                        <span class="text-xs text-zinc-500">ورود پیامکی برای شماره موبایل</span>
                     </div>
 
-                    <button type="submit" wire:loading.attr="disabled" class="w-full py-3.5 mt-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 transition-all duration-300 shadow-[0_8px_20px_-6px_rgba(249,115,22,0.4)] hover:shadow-[0_12px_25px_-8px_rgba(249,115,22,0.6)] hover:-translate-y-0.5 flex justify-center items-center gap-2">
+                    <button type="submit" wire:loading.attr="disabled" class="w-full py-3.5 mt-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-400 hover:to-brand-500 transition-all duration-300 shadow-[0_8px_20px_-6px_rgba(59,130,246,0.4)] hover:shadow-[0_12px_25px_-8px_rgba(59,130,246,0.6)] hover:-translate-y-0.5 flex justify-center items-center gap-2">
                         <span wire:loading.remove wire:target="submitForm">ورود به پنل</span>
                         <span wire:loading wire:target="submitForm" class="flex items-center gap-2">
                             <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"></path></svg>
@@ -196,10 +196,10 @@
                         <div class="text-center pt-5 border-t border-white/5 mt-5">
                             <button type="button" wire:click.prevent="requestLoginOtp" wire:loading.attr="disabled" class="text-[13px] font-medium text-zinc-400 hover:text-white transition-colors group flex justify-center items-center w-full gap-2">
                                 <span wire:loading.remove wire:target="requestLoginOtp" class="flex justify-center items-center w-full gap-2">
-                                    ورود سریع با <span class="font-bold text-orange-500 group-hover:text-orange-400 transition-colors">کد یکبار مصرف (OTP)</span>
-                                    <svg class="w-4 h-4 text-orange-500 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                                    ورود سریع با <span class="font-bold text-brand-500 group-hover:text-brand-400 transition-colors">کد یکبار مصرف (OTP)</span>
+                                    <svg class="w-4 h-4 text-brand-500 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                                 </span>
-                                <span wire:loading wire:target="requestLoginOtp" class="flex justify-center items-center w-full gap-2 text-orange-500">
+                                <span wire:loading wire:target="requestLoginOtp" class="flex justify-center items-center w-full gap-2 text-brand-500">
                                     <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4-4H4z"></path></svg>
                                     درحال ارسال پیامک...
                                 </span>
@@ -261,7 +261,7 @@
                         <!-- OTP Inputs -->
                         <div dir="ltr" class="flex justify-center gap-3 sm:gap-4 mb-2">
                             @for($i = 0; $i < 5; $i++)
-                                <input type="text" inputmode="numeric" x-ref="box_{{ $i }}" x-model="otpArray[{{ $i }}]" @input="onInput({{ $i }}, $event)" @keydown="onKeydown({{ $i }}, $event)" @paste.prevent="onPaste($event)" class="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-black bg-zinc-950/50 border border-zinc-800 rounded-xl text-white focus:outline-none focus:bg-zinc-900/80 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-500/10 focus:scale-[1.02] transition-all duration-200 shadow-inner" placeholder="-">
+                                <input type="text" inputmode="numeric" x-ref="box_{{ $i }}" x-model="otpArray[{{ $i }}]" @input="onInput({{ $i }}, $event)" @keydown="onKeydown({{ $i }}, $event)" @paste.prevent="onPaste($event)" class="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-black bg-zinc-950/50 border border-zinc-800 rounded-xl text-white focus:outline-none focus:bg-zinc-900/80 focus:border-brand-500/50 focus:ring-4 focus:ring-brand-500/10 focus:scale-[1.02] transition-all duration-200 shadow-inner" placeholder="-">
                             @endfor
                         </div>
 
@@ -277,11 +277,11 @@
                             <template x-if="timer > 0">
                                 <span class="text-xs font-medium text-zinc-500 flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    ارسال مجدد کد تا <span class="text-orange-400 font-bold ml-1" x-text="timer < 10 ? '00:0' + timer : '00:' + timer"></span>
+                                    ارسال مجدد کد تا <span class="text-brand-400 font-bold ml-1" x-text="timer < 10 ? '00:0' + timer : '00:' + timer"></span>
                                 </span>
                             </template>
                             <template x-if="timer === 0">
-                                <button type="button" @click="resend()" class="text-xs font-bold text-orange-500 hover:text-orange-400 transition-colors flex items-center gap-1">
+                                <button type="button" @click="resend()" class="text-xs font-bold text-brand-500 hover:text-brand-400 transition-colors flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                                     ارسال مجدد کد
                                 </button>
@@ -319,7 +319,7 @@
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-zinc-500 group-focus-within:text-emerald-500 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                                 </div>
-                                <input wire:model="name" type="text" class="block w-full pr-11 pl-4 py-3 bg-zinc-950/50 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:bg-zinc-900/80 focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300 text-sm font-medium shadow-inner" placeholder="نام و نام خانوادگی">
+                                <input wire:model="name" autocomplete="name" aria-label="نام و نام خانوادگی" type="text" class="block w-full pr-11 pl-4 py-3 bg-zinc-950/50 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:bg-zinc-900/80 focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300 text-sm font-medium shadow-inner" placeholder="نام و نام خانوادگی">
                             </div>
                             @error('name') <span class="text-red-400 text-[11px] mt-1.5 block font-bold px-1">{{ $message }}</span> @enderror
                         </div>
@@ -330,7 +330,7 @@
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-zinc-500 group-focus-within:text-emerald-500 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                                 </div>
-                                <input wire:model="email" type="email" dir="ltr" class="block w-full pr-11 pl-4 py-3 bg-zinc-950/50 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:bg-zinc-900/80 focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300 text-sm font-medium shadow-inner" placeholder="ایمیل (اختیاری)">
+                                <input wire:model="email" autocomplete="email" aria-label="ایمیل" type="email" dir="ltr" class="block w-full pr-11 pl-4 py-3 bg-zinc-950/50 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:bg-zinc-900/80 focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300 text-sm font-medium shadow-inner" placeholder="ایمیل (اختیاری)">
                             </div>
                             @error('email') <span class="text-red-400 text-[11px] mt-1.5 block font-bold px-1">{{ $message }}</span> @enderror
                         </div>

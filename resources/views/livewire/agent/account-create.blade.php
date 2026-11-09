@@ -23,23 +23,23 @@
         <div class="lg:col-span-2 space-y-6">
 
             <div class="bg-zinc-900/40 p-2 rounded-2xl border border-zinc-800/80 flex gap-2">
-                <button wire:click="setCreationType('single')" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all flex justify-center items-center gap-2 {{ $creationType === 'single' ? 'bg-orange-500 text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50' }}">
+                <button wire:click="setCreationType('single')" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all flex justify-center items-center gap-2 {{ $creationType === 'single' ? 'bg-brand-500 text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50' }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                     اکانت تکی (سفارشی)
                 </button>
-                <button wire:click="setCreationType('bulk')" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all flex justify-center items-center gap-2 {{ $creationType === 'bulk' ? 'bg-orange-500 text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50' }}">
+                <button wire:click="setCreationType('bulk')" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all flex justify-center items-center gap-2 {{ $creationType === 'bulk' ? 'bg-brand-500 text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50' }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                     صدور گروهی (Bulk)
                 </button>
             </div>
 
-            <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+            <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-6 shadow-xl relative overflow-hidden">
                 <form wire:submit.prevent="createAccounts" class="space-y-8 relative z-10">
 
                     <div class="space-y-3">
                         <label class="block text-xs font-bold text-zinc-400">انتخاب پروتکل اتصال <span class="text-red-500">*</span></label>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <button type="button" wire:click="setServiceGroup('wireguard')" class="flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-200 {{ $service_group === 'wireguard' ? 'bg-purple-500/10 border-purple-500 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.15)]' : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300' }}">
+                            <button type="button" wire:click="setServiceGroup('wireguard')" class="flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-200 {{ $service_group === 'wireguard' ? 'bg-brand-500/10 border-brand-500 text-brand-400 shadow-[0_0_15px_rgba(168,85,247,0.15)]' : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300' }}">
                                 <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                                 <span class="text-xs font-bold uppercase tracking-wider">WireGuard</span>
                             </button>
@@ -51,31 +51,31 @@
                     </div>
 
                     @if($service_group === 'wireguard')
-                        <div class="p-4 mt-4 bg-purple-500/5 border border-purple-500/20 rounded-2xl animate-fade-in space-y-3">
-                            <div class="flex items-center justify-between text-purple-400 mb-1">
+                        <div class="p-4 mt-4 bg-brand-500/5 border border-brand-500/20 rounded-2xl animate-fade-in space-y-3">
+                            <div class="flex items-center justify-between text-brand-400 mb-1">
                                 <div class="flex items-center gap-2">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>
                                     <span class="text-xs font-bold">انتخاب سرور مقصد (Node Selection)</span>
                                 </div>
-                                <span class="text-[10px] bg-purple-500/10 px-2 py-0.5 rounded-full text-purple-300 font-mono">WireGuard Nodes</span>
+                                <span class="text-[10px] bg-brand-500/10 px-2 py-0.5 rounded-full text-brand-300 font-mono">WireGuard Nodes</span>
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
-                                <div wire:click="$set('selectedWgServer', 'auto')" class="cursor-pointer p-3.5 rounded-xl border transition-all flex flex-col justify-between {{ $selectedWgServer === 'auto' ? 'bg-purple-500/20 border-purple-500 text-white shadow-sm' : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700' }}">
+                                <div wire:click="$set('selectedWgServer', 'auto')" class="cursor-pointer p-3.5 rounded-xl border transition-all flex flex-col justify-between {{ $selectedWgServer === 'auto' ? 'bg-brand-500/20 border-brand-500 text-white shadow-sm' : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700' }}">
                                     <div class="flex items-center justify-between mb-2">
                                         <div class="flex items-center gap-2.5">
-                                            <div class="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400 text-xs font-bold">🤖</div>
+                                            <div class="w-7 h-7 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-400 text-xs font-bold">🤖</div>
                                             <div>
                                                 <span class="block text-xs font-bold">انتخاب هوشمند (Auto)</span>
                                                 <span class="text-[9px] text-zinc-500">توزیع بار روی خلوت‌ترین سرور</span>
                                             </div>
                                         </div>
                                         @if($selectedWgServer === 'auto')
-                                            <div class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></div>
+                                            <div class="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></div>
                                         @endif
                                     </div>
-                                    <span class="text-[10px] text-purple-300/80 bg-purple-500/10 px-2 py-1 rounded-lg text-center font-medium">سیستم به صورت خودکار بهترین سرور را انتخاب می‌کند</span>
+                                    <span class="text-[10px] text-brand-300/80 bg-brand-500/10 px-2 py-1 rounded-lg text-center font-medium">سیستم به صورت خودکار بهترین سرور را انتخاب می‌کند</span>
                                 </div>
 
                                 @foreach($wgServers as $server)
@@ -83,7 +83,7 @@
                                         // رنگ‌بندی پروگرس‌بار بر اساس میزان پر بودن سرور
                                         $barColor = $server->usage_percent > 85 ? 'bg-red-500' : ($server->usage_percent > 60 ? 'bg-amber-500' : 'bg-emerald-500');
                                     @endphp
-                                    <div wire:click="$set('selectedWgServer', {{ $server->id }})" class="cursor-pointer p-3.5 rounded-xl border transition-all flex flex-col justify-between {{ $selectedWgServer == $server->id ? 'bg-purple-500/20 border-purple-500 text-white shadow-sm' : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700' }}">
+                                    <div wire:click="$set('selectedWgServer', {{ $server->id }})" class="cursor-pointer p-3.5 rounded-xl border transition-all flex flex-col justify-between {{ $selectedWgServer == $server->id ? 'bg-brand-500/20 border-brand-500 text-white shadow-sm' : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700' }}">
 
                                         <div class="flex items-center justify-between mb-2">
                                             <div class="flex items-center gap-2.5 truncate">
@@ -120,7 +120,7 @@
                             <label class="text-xs font-bold text-zinc-400">گروه‌ها و تعرفه‌های مجاز <span class="text-red-500">*</span></label>
                             <div class="relative w-full sm:w-64">
                                 <svg class="w-4 h-4 absolute right-3 top-2.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                                <input wire:model.live.debounce.300ms="searchPlan" type="text" placeholder="جستجوی نام تعرفه..." class="w-full bg-zinc-950 border border-zinc-800 text-white text-xs rounded-xl py-2.5 pr-9 pl-3 focus:ring-1 focus:ring-orange-500 transition-all">
+                                <input wire:model.live.debounce.300ms="searchPlan" type="text" placeholder="جستجوی نام تعرفه..." class="w-full bg-zinc-950 border border-zinc-800 text-white text-xs rounded-xl py-2.5 pr-9 pl-3 focus:ring-1 focus:ring-brand-500 transition-all">
                             </div>
                         </div>
 
@@ -129,11 +129,11 @@
                                 @php
                                     $basePrice = $group->price_reseler ?? $group->price ?? 0;
                                 @endphp
-                                <div wire:click="$set('group_id', {{ $group->id }})" class="cursor-pointer flex flex-col p-4 rounded-2xl border transition-all duration-200 {{ $group_id == $group->id ? 'bg-orange-500/10 border-orange-500 ring-1 ring-orange-500' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700' }}">
+                                <div wire:click="$set('group_id', {{ $group->id }})" class="cursor-pointer flex flex-col p-4 rounded-2xl border transition-all duration-200 {{ $group_id == $group->id ? 'bg-brand-500/10 border-brand-500 ring-1 ring-brand-500' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700' }}">
                                     <div class="flex justify-between items-start mb-2">
-                                        <span class="text-sm font-bold {{ $group_id == $group->id ? 'text-orange-400' : 'text-zinc-200' }}">{{ $group->name }}</span>
+                                        <span class="text-sm font-bold {{ $group_id == $group->id ? 'text-brand-400' : 'text-zinc-200' }}">{{ $group->name }}</span>
                                         @if($group_id == $group->id)
-                                            <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                         @endif
                                     </div>
                                     <div class="mt-auto pt-2 flex justify-between items-end">
@@ -173,7 +173,7 @@
 
 
                                     <div @click="open = !open"
-                                         class="w-full bg-zinc-900 border border-zinc-700 text-white text-xs rounded-xl p-3 cursor-pointer flex items-center justify-between focus:ring-1 focus:ring-orange-500 transition">
+                                         class="w-full bg-zinc-900 border border-zinc-700 text-white text-xs rounded-xl p-3 cursor-pointer flex items-center justify-between focus:ring-1 focus:ring-brand-500 transition">
                                         <span x-text="selectedName"></span>
                                         <svg class="w-4 h-4 text-zinc-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                     </div>
@@ -187,7 +187,7 @@
                                             <input type="text"
                                                    x-model="search"
                                                    placeholder="جستجوی نام یا شماره تماس..."
-                                                   class="w-full bg-zinc-950 border border-zinc-800 text-white text-xs rounded-lg p-2.5 pr-8 focus:outline-none focus:border-orange-500 font-sans"
+                                                   class="w-full bg-zinc-950 border border-zinc-800 text-white text-xs rounded-lg p-2.5 pr-8 focus:outline-none focus:border-brand-500 font-sans"
                                                    @click.stop>
                                             <svg class="w-4 h-4 text-zinc-500 absolute right-2.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                         </div>
@@ -196,13 +196,13 @@
 
                                             <div @click="selectedName = '➕ ثبت مشتری جدید (پیش‌فرض)'; selectedVal = 'new'; $wire.set('customer_id', 'new'); open = false; search = ''"
                                                  x-show="search === '' || 'ثبت مشتری جدید'.includes(search.toLowerCase())"
-                                                 class="p-2 rounded-lg text-xs cursor-pointer hover:bg-orange-500/10 hover:text-orange-400 text-zinc-200 transition flex items-center justify-between">
+                                                 class="p-2 rounded-lg text-xs cursor-pointer hover:bg-brand-500/10 hover:text-brand-400 text-zinc-200 transition flex items-center justify-between">
                                                 <span>➕ ثبت مشتری جدید (پیش‌فرض)</span>
                                             </div>
 
                                             <div @click="selectedName = 'ثبت به نام خودم (آرشیو اکانت‌های بدون مشتری)'; selectedVal = 'me'; $wire.set('customer_id', 'me'); open = false; search = ''"
                                                  x-show="search === '' || 'ثبت به نام خودم آرشیو اکانت‌های بدون مشتری'.toLowerCase().includes(search.toLowerCase())"
-                                                 class="p-2 rounded-lg text-xs cursor-pointer hover:bg-orange-500/10 hover:text-orange-400 text-zinc-200 transition flex items-center justify-between">
+                                                 class="p-2 rounded-lg text-xs cursor-pointer hover:bg-brand-500/10 hover:text-brand-400 text-zinc-200 transition flex items-center justify-between">
                                                 <span>🗂️ ثبت به نام خودم (آرشیو اکانت‌های بدون مشتری)</span>
                                             </div>
 
@@ -226,22 +226,22 @@
                             </div>
 
                             @if($customer_id === 'new')
-                                <div class="p-4 bg-orange-500/5 border border-orange-500/20 rounded-xl space-y-4 mb-4">
-                                    <h4 class="text-[11px] font-black text-orange-400 mb-2">مشخصات مشتری جدید</h4>
+                                <div class="p-4 bg-brand-500/5 border border-brand-500/20 rounded-xl space-y-4 mb-4">
+                                    <h4 class="text-[11px] font-black text-brand-400 mb-2">مشخصات مشتری جدید</h4>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label class="block text-[10px] font-bold text-zinc-400 mb-1">نام و نام خانوادگی <span class="text-red-500">*</span></label>
-                                            <input wire:model="newCustomerName" type="text" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-lg text-xs p-2.5 focus:ring-1 focus:ring-orange-500">
+                                            <input wire:model="newCustomerName" type="text" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-lg text-xs p-2.5 focus:ring-1 focus:ring-brand-500">
                                             @error('newCustomerName') <span class="text-red-500 text-[9px] mt-1 block">{{ $message }}</span> @enderror
                                         </div>
                                         <div>
                                             <label class="block text-[10px] font-bold text-zinc-400 mb-1">شماره تماس (اختیاری)</label>
-                                            <input wire:model="newCustomerPhone" type="text" dir="ltr" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-lg text-xs p-2.5 font-mono focus:ring-1 focus:ring-orange-500">
+                                            <input wire:model="newCustomerPhone" type="text" dir="ltr" class="w-full bg-zinc-950 border border-zinc-700 text-white rounded-lg text-xs p-2.5 font-mono focus:ring-1 focus:ring-brand-500">
                                         </div>
                                         <div class="md:col-span-2">
                                             <label class="block text-[10px] font-bold text-zinc-400 mb-1">آدرس ایمیل (اختیاری)</label>
                                             <div class="flex gap-2">
-                                                <input wire:model="newCustomerEmail" type="email" dir="ltr" class="flex-1 bg-zinc-950 border border-zinc-700 text-white rounded-lg text-xs p-2.5 font-mono focus:ring-1 focus:ring-orange-500">
+                                                <input wire:model="newCustomerEmail" type="email" dir="ltr" class="flex-1 bg-zinc-950 border border-zinc-700 text-white rounded-lg text-xs p-2.5 font-mono focus:ring-1 focus:ring-brand-500">
                                                 <button type="button" wire:click="generateRandomEmail" class="px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-[10px] font-bold transition whitespace-nowrap">تولید ایمیل رندوم 🎲</button>
                                             </div>
                                         </div>
@@ -253,19 +253,19 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-zinc-800/80">
                                     <div>
                                         <label class="block text-[11px] font-bold text-zinc-500 mb-1.5">نام کاربری اکانت (Username)</label>
-                                        <input wire:model="username" type="text" dir="ltr" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-xl text-sm p-3 font-mono focus:ring-1 focus:ring-orange-500">
+                                        <input wire:model="username" type="text" dir="ltr" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-xl text-sm p-3 font-mono focus:ring-1 focus:ring-brand-500">
                                         @error('username') <span class="text-red-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
                                         <label class="block text-[11px] font-bold text-zinc-500 mb-1.5">کلمه عبور (Password)</label>
-                                        <input wire:model="password" type="text" dir="ltr" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-xl text-sm p-3 font-mono focus:ring-1 focus:ring-orange-500">
+                                        <input wire:model="password" type="text" dir="ltr" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-xl text-sm p-3 font-mono focus:ring-1 focus:ring-brand-500">
                                         @error('password') <span class="text-red-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
                                 <button type="button" wire:click="generateRandomCredentials" class="text-[10px] text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 rounded-lg transition mt-3">تولید یوزر و پسورد تصادفی 🎲</button>
                             @else
-                                <div class="p-4 bg-purple-500/10 border border-purple-500/20 rounded-xl mt-4">
-                                    <p class="text-[11px] text-purple-400 font-bold flex items-center gap-2">
+                                <div class="p-4 bg-brand-500/10 border border-brand-500/20 rounded-xl mt-4">
+                                    <p class="text-[11px] text-brand-400 font-bold flex items-center gap-2">
                                         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                         در پروتکل WireGuard، اتصال از طریق کلیدها (Keys) برقرار می‌شود. نام کاربری و مشخصات سرور به صورت خودکار توسط سیستم در پس‌زمینه ایجاد خواهد شد.
                                     </p>
@@ -276,8 +276,8 @@
 
                     @if($creationType === 'bulk')
                         <div class="p-5 bg-zinc-950/50 rounded-2xl border border-zinc-800 space-y-4 animate-fade-in" wire:key="bulk-form">
-                            <div class="bg-orange-500/10 border border-orange-500/20 p-4 rounded-xl mb-4">
-                                <p class="text-[11px] text-orange-400 font-bold leading-relaxed text-justify">
+                            <div class="bg-brand-500/10 border border-brand-500/20 p-4 rounded-xl mb-4">
+                                <p class="text-[11px] text-brand-400 font-bold leading-relaxed text-justify">
                                     در ساخت گروهی، سیستم به صورت خودکار به تعداد مشخص‌شده، نام کاربری و کلمه عبور تصادفی تولید می‌کند. این اکانت‌ها مستقیماً در لیست اکانت‌های شخصی شما قرار می‌گیرند.
                                 </p>
                             </div>
@@ -285,19 +285,19 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-[11px] font-bold text-zinc-500 mb-1.5">تعداد اکانت جهت صدور</label>
-                                    <input wire:model.live="bulkCount" type="number" min="2" max="100" dir="ltr" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-xl text-lg p-3 font-mono focus:ring-1 focus:ring-orange-500">
+                                    <input wire:model.live="bulkCount" type="number" min="2" max="100" dir="ltr" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-xl text-lg p-3 font-mono focus:ring-1 focus:ring-brand-500">
                                     @error('bulkCount') <span class="text-red-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-bold text-zinc-500 mb-1.5">پیشوند نام کاربری (اختیاری)</label>
-                                    <input wire:model="prefix" type="text" placeholder="مثال: vip_" dir="ltr" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-xl text-sm p-3 font-mono focus:ring-1 focus:ring-orange-500">
+                                    <input wire:model="prefix" type="text" placeholder="مثال: vip_" dir="ltr" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-xl text-sm p-3 font-mono focus:ring-1 focus:ring-brand-500">
                                 </div>
                             </div>
                         </div>
                     @endif
 
                     <div class="pt-2 text-left">
-                        <button type="submit" class="px-8 py-3 w-full md:w-auto bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 text-white font-bold text-sm rounded-xl shadow-[0_5px_15px_-5px_rgba(249,115,22,0.4)] transition-all">
+                        <button type="submit" class="px-8 py-3 w-full md:w-auto bg-gradient-to-r from-brand-600 to-amber-500 hover:from-brand-500 text-white font-bold text-sm rounded-xl shadow-[0_5px_15px_-5px_rgba(59,130,246,0.4)] transition-all">
                             تایید، صدور و کسر هزینه
                         </button>
                     </div>
@@ -307,7 +307,7 @@
 
         <div class="space-y-6">
 
-            <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 shadow-xl">
+            <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-6 shadow-xl">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-emerald-400">💳</div>
                     <span class="text-sm font-bold text-zinc-300">موجودی کیف پول شما</span>
@@ -317,9 +317,9 @@
                 </div>
             </div>
 
-            <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+            <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
                 <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     فاکتور نهایی صدور
                 </h3>
 
@@ -360,7 +360,7 @@
 
                 <div class="flex justify-between items-end mb-4">
                     <span class="text-sm font-bold text-white">جمع کل پرداخت:</span>
-                    <span class="text-2xl font-black {{ $isSufficient ? 'text-orange-400' : 'text-red-500' }} font-mono">{{ number_format($totalCost) }}</span>
+                    <span class="text-2xl font-black {{ $isSufficient ? 'text-brand-400' : 'text-red-500' }} font-mono">{{ number_format($totalCost) }}</span>
                 </div>
 
                 @if(!$group)
@@ -406,7 +406,7 @@
                     @foreach($createdAccountsList as $acc)
                         <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 space-y-3 relative overflow-hidden">
                             <div class="flex justify-between items-center border-b border-zinc-800/80 pb-2">
-                                <span class="text-xs font-bold text-orange-400 font-mono">{{ $acc['group_name'] }}</span>
+                                <span class="text-xs font-bold text-brand-400 font-mono">{{ $acc['group_name'] }}</span>
                                 <span class="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 font-mono uppercase border border-zinc-800">{{ $acc['service_group'] }}</span>
                             </div>
 
@@ -423,7 +423,7 @@
 
                             @if($acc['id'])
                                 <div class="pt-1 text-left">
-                                    <a href="{{ route('reseller.accounts.show', $acc['id']) }}" wire:navigate class="inline-flex items-center gap-1.5 text-[11px] font-bold text-orange-400 hover:text-orange-300 transition-colors">
+                                    <a href="{{ route('reseller.accounts.show', $acc['id']) }}" wire:navigate class="inline-flex items-center gap-1.5 text-[11px] font-bold text-brand-400 hover:text-brand-300 transition-colors">
                                         مشاهده و مدیریت کامل این اکانت
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                                     </a>
@@ -436,7 +436,7 @@
                 <div class="px-7 py-5 border-t border-zinc-800/80 bg-zinc-900/80 space-y-3">
                     <p class="text-[11px] text-zinc-400 font-bold text-center">اکنون تمایل دارید چه عملیاتی انجام دهید؟</p>
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <button wire:click="resetFormAndCloseModal" class="flex-1 py-3 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all text-center">
+                        <button wire:click="resetFormAndCloseModal" class="flex-1 py-3 bg-gradient-to-r from-brand-600 to-amber-500 hover:from-brand-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all text-center">
                             ➕ ساخت اکانت جدید
                         </button>
                         <a href="{{ route('reseller.accounts.index') }}" wire:navigate class="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-xs rounded-xl border border-zinc-700/50 transition-all text-center">

@@ -1,4 +1,4 @@
-<div class="bg-[#111722] border border-[#202938] rounded-xl p-4 space-y-3">
+<div class="bg-[#111c2e] border border-[#243247] rounded-xl p-4 space-y-3">
     <div class="flex flex-wrap items-center gap-3">
         <div class="flex-1 min-w-[200px]">
             <div class="relative">
@@ -6,11 +6,11 @@
                 <input wire:model.live.debounce.300ms="filters.search"
                        type="text"
                        placeholder="جستجوی نام، شناسه، مبلغ..."
-                       class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-sm rounded-xl pr-9 pl-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
+                       class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-sm rounded-xl pr-9 pl-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
             </div>
         </div>
 
-        <select wire:model.live="filters.status" class="bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
+        <select wire:model.live="filters.status" class="bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
             <option value="">همه وضعیت‌ها</option>
             <option value="pending">در انتظار</option>
             <option value="paid">پرداخت شده</option>
@@ -21,7 +21,7 @@
         </select>
 
 
-        <select wire:model.live="filters.match_status" class="bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
+        <select wire:model.live="filters.match_status" class="bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
             <option value="">همه تطبیق‌ها</option>
             <option value="pending">در انتظار</option>
             <option value="matched">تطبیق شده</option>
@@ -32,37 +32,37 @@
         <input wire:model.live.debounce.300ms="filters.amount_min"
                type="number"
                placeholder="حداقل مبلغ"
-               class="w-28 bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
+               class="w-28 bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
         <input wire:model.live.debounce.300ms="filters.amount_max"
                type="number"
                placeholder="حداکثر مبلغ"
-               class="w-28 bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
+               class="w-28 bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
 
         <div>
             <input wire:model.live="filters.date_from"
                    type="text"
                    placeholder="1405/06/01"
-                   class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition font-mono"
+                   class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition font-mono"
                    dir="ltr">
         </div>
         <div>
             <input wire:model.live="filters.date_to"
                    type="text"
                    placeholder="1405/06/30"
-                   class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition font-mono"
+                   class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition font-mono"
                    dir="ltr">
         </div>
 
         <label class="flex items-center gap-1.5 text-xs text-[#94A3B8] cursor-pointer">
-            <input wire:model.live="filters.today" type="checkbox" class="w-4 h-4 rounded border-[#202938] bg-[#080B12] text-[#F59E0B] focus:ring-[#F59E0B]">
+            <input wire:model.live="filters.today" type="checkbox" class="w-4 h-4 rounded border-[#243247] bg-[#080f1d] text-[#F59E0B] focus:ring-[#F59E0B]">
             امروز
         </label>
         <label class="flex items-center gap-1.5 text-xs text-[#94A3B8] cursor-pointer">
-            <input wire:model.live="filters.unmatched_only" type="checkbox" class="w-4 h-4 rounded border-[#202938] bg-[#080B12] text-[#F59E0B] focus:ring-[#F59E0B]">
+            <input wire:model.live="filters.unmatched_only" type="checkbox" class="w-4 h-4 rounded border-[#243247] bg-[#080f1d] text-[#F59E0B] focus:ring-[#F59E0B]">
             فقط بدون تطبیق
         </label>
 
-        <button wire:click="resetFilters" class="px-4 py-2.5 rounded-xl bg-[#202938] text-[#94A3B8] hover:text-[#F8FAFC] text-xs transition">
+        <button wire:click="resetFilters" class="px-4 py-2.5 rounded-xl bg-[#243247] text-[#94A3B8] hover:text-[#F8FAFC] text-xs transition">
             بازنشانی
         </button>
     </div>

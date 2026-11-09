@@ -6,7 +6,7 @@
         </div>
 
         @if(!$isFormOpen)
-            <button wire:click="$set('isFormOpen', true)" class="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all">
+            <button wire:click="$set('isFormOpen', true)" class="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-brand-600 to-brand-600 hover:from-brand-500 hover:to-brand-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 افزودن سرور جدید
             </button>
@@ -22,11 +22,11 @@
     @if($isFormOpen)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-sm transition-opacity animate-fade-in">
 
-            <div class="relative w-full max-w-5xl bg-zinc-950 border border-zinc-800/80 rounded-3xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden">
+            <div class="relative w-full max-w-5xl bg-zinc-950 border border-zinc-800/80 rounded-2xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden">
 
                 <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800/80 bg-zinc-900/50">
                     <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                        <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>
+                        <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>
                         {{ $serverId ? 'ویرایش پیکربندی سرور' : 'راه‌اندازی سرور جدید' }}
                     </h2>
 
@@ -40,12 +40,12 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-zinc-900/30 p-5 rounded-2xl border border-zinc-800/50">
                             <div class="md:col-span-2">
-                                <label class="block text-xs font-bold text-orange-500 mb-4">پروتکل‌های فعال روی این سرور (با انتخاب هر مورد، تنظیمات آن باز می‌شود)</label>
+                                <label class="block text-xs font-bold text-brand-500 mb-4">پروتکل‌های فعال روی این سرور (با انتخاب هر مورد، تنظیمات آن باز می‌شود)</label>
                                 <div class="flex flex-wrap gap-3" dir="ltr">
                                     @foreach(['l2tp' => 'L2TP / IPsec', 'v2ray' => 'V2Ray / Xray', 'openvpn' => 'OpenVPN', 'wireguard' => 'WireGuard'] as $val => $label)
                                         <label class="relative flex items-center justify-center cursor-pointer">
                                             <input type="checkbox" wire:model.live="server_type" value="{{ $val }}" class="peer sr-only">
-                                            <div class="px-4 py-2 bg-zinc-950 text-zinc-500 text-xs font-bold rounded-lg border border-zinc-800 peer-checked:bg-orange-500/10 peer-checked:text-orange-500 peer-checked:border-orange-500/50 transition-all shadow-md">
+                                            <div class="px-4 py-2 bg-zinc-950 text-zinc-500 text-xs font-bold rounded-lg border border-zinc-800 peer-checked:bg-brand-500/10 peer-checked:text-brand-500 peer-checked:border-brand-500/50 transition-all shadow-md">
                                                 {{ $label }}
                                             </div>
                                         </label>
@@ -56,16 +56,16 @@
 
                             <div>
                                 <label class="block text-xs font-bold text-zinc-400 mb-2">نام نمایشی سرور</label>
-                                <input wire:model="name" type="text" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-white p-3 focus:ring-1 focus:ring-orange-500">
+                                <input wire:model="name" type="text" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-white p-3 focus:ring-1 focus:ring-brand-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-zinc-400 mb-2">آی‌پی سرور (IP Address)</label>
-                                <input wire:model="ipaddress" type="text" dir="ltr" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-white p-3 focus:ring-1 focus:ring-orange-500 font-mono">
+                                <input wire:model="ipaddress" type="text" dir="ltr" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-white p-3 focus:ring-1 focus:ring-brand-500 font-mono">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-bold text-zinc-400 mb-2">موقعیت مکانی (Location)</label>
-                                <input wire:model="server_location" type="text" placeholder="مثلا: آلمان - فرانکفورت" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-white p-3 focus:ring-1 focus:ring-orange-500">
+                                <input wire:model="server_location" type="text" placeholder="مثلا: آلمان - فرانکفورت" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-white p-3 focus:ring-1 focus:ring-brand-500">
                             </div>
 
                             <div>
@@ -84,7 +84,7 @@
                                     سرور فعال و در دسترس باشد
                                 </label>
                                 <label class="flex items-center gap-2 text-sm font-bold text-zinc-300 cursor-pointer">
-                                    <input type="checkbox" wire:model="in_app" class="rounded border-zinc-700 bg-zinc-950 text-orange-500 focus:ring-orange-500 w-5 h-5 transition">
+                                    <input type="checkbox" wire:model="in_app" class="rounded border-zinc-700 bg-zinc-950 text-brand-500 focus:ring-brand-500 w-5 h-5 transition">
                                     نمایش این سرور در اپلیکیشن
                                 </label>
                             </div>
@@ -157,22 +157,22 @@
                         @endif
 
                         @if(is_array($server_type) && in_array('wireguard', $server_type))
-                            <div class="bg-zinc-900/30 p-5 rounded-2xl border border-purple-900/30 transition-all animate-fade-in">
-                                <h3 class="text-sm font-bold text-purple-400 mb-5 flex items-center gap-2">
+                            <div class="bg-zinc-900/30 p-5 rounded-2xl border border-brand-900/30 transition-all animate-fade-in">
+                                <h3 class="text-sm font-bold text-brand-400 mb-5 flex items-center gap-2">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                                     پیکربندی سرور WireGuard
                                 </h3>
 
                                 <div>
                                     <label class="block text-xs font-bold text-zinc-400 mb-2">فایل کانفیگ یا کلیدهای اختصاصی (فیلد config)</label>
-                                    <textarea wire:model="config" dir="ltr" rows="5" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-zinc-300 p-3 font-mono text-xs focus:ring-1 focus:ring-purple-500"></textarea>
+                                    <textarea wire:model="config" dir="ltr" rows="5" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl text-zinc-300 p-3 font-mono text-xs focus:ring-1 focus:ring-brand-500"></textarea>
                                 </div>
                             </div>
                         @endif
 
                         @if(is_array($server_type) && in_array('openvpn', $server_type))
-                            <div class="bg-zinc-900/30 p-5 rounded-2xl border border-orange-900/30 transition-all animate-fade-in">
-                                <h3 class="text-sm font-bold text-orange-500 mb-5 flex items-center gap-2">
+                            <div class="bg-zinc-900/30 p-5 rounded-2xl border border-brand-900/30 transition-all animate-fade-in">
+                                <h3 class="text-sm font-bold text-brand-500 mb-5 flex items-center gap-2">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                                     پیکربندی OpenVPN
                                 </h3>
@@ -180,7 +180,7 @@
                                 <div>
                                     <label class="block text-xs font-bold text-zinc-400 mb-2">آپلود فایل پروفایل (.ovpn)</label>
                                     <div class="flex items-center gap-4">
-                                        <input wire:model="openvpn_file" type="file" accept=".ovpn,.txt" class="w-full text-xs text-zinc-500 file:mr-4 file:py-3 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-orange-500/10 file:text-orange-500 hover:file:bg-orange-500 hover:file:text-white transition cursor-pointer">
+                                        <input wire:model="openvpn_file" type="file" accept=".ovpn,.txt" class="w-full text-xs text-zinc-500 file:mr-4 file:py-3 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-brand-500/10 file:text-brand-500 hover:file:bg-brand-500 hover:file:text-white transition cursor-pointer">
                                     </div>
                                 </div>
                             </div>
@@ -193,7 +193,7 @@
                     <button wire:click="resetForm" class="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-sm rounded-xl transition-all">
                         انصراف
                     </button>
-                    <button wire:click="save" class="px-8 py-2.5 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all">
+                    <button wire:click="save" class="px-8 py-2.5 bg-gradient-to-r from-brand-600 to-brand-600 hover:from-brand-500 hover:to-brand-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all">
                         ذخیره تنظیمات سرور
                     </button>
                 </div>
@@ -234,7 +234,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="p-5 font-mono text-orange-400" dir="ltr">{{ $srv->ipaddress }}</td>
+                        <td class="p-5 font-mono text-brand-400" dir="ltr">{{ $srv->ipaddress }}</td>
                         <td class="p-5">
                             <div class="flex flex-wrap gap-1.5" dir="ltr">
                                 @php
@@ -265,7 +265,7 @@
                             </div>
                         </td>
                         <td class="p-5 text-center">
-                            <button wire:click="edit({{ $srv->id }})" title="ویرایش پیکربندی" class="p-2 bg-zinc-800 text-zinc-400 hover:text-orange-400 rounded-lg border border-zinc-700/50 transition">
+                            <button wire:click="edit({{ $srv->id }})" title="ویرایش پیکربندی" class="p-2 bg-zinc-800 text-zinc-400 hover:text-brand-400 rounded-lg border border-zinc-700/50 transition">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                             </button>
                         </td>

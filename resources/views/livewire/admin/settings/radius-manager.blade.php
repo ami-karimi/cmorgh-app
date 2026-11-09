@@ -74,7 +74,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
             توقف
         </button>
-        <button wire:click="executeAction('restart')" wire:loading.attr="disabled" class="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-orange-500/20 flex items-center gap-2">
+        <button wire:click="executeAction('restart')" wire:loading.attr="disabled" class="px-6 py-3 bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-brand-500/20 flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             ری‌استارت
         </button>
@@ -96,7 +96,7 @@
                 </p>
                 <div class="flex items-center justify-end gap-3">
                     <button wire:click="$set('showConfirmModal', false)" class="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-bold rounded-xl transition">انصراف</button>
-                    <button wire:click="confirmAction" wire:loading.attr="disabled" class="px-5 py-2.5 {{ $action === 'stop' ? 'bg-rose-600 hover:bg-rose-500' : 'bg-orange-600 hover:bg-orange-500' }} text-white text-sm font-bold rounded-xl transition shadow-lg flex items-center gap-2">
+                    <button wire:click="confirmAction" wire:loading.attr="disabled" class="px-5 py-2.5 {{ $action === 'stop' ? 'bg-rose-600 hover:bg-rose-500' : 'bg-brand-600 hover:bg-brand-500' }} text-white text-sm font-bold rounded-xl transition shadow-lg flex items-center gap-2">
                         <span wire:loading.remove>تأیید</span>
                         <span wire:loading>⏳</span>
                     </button>

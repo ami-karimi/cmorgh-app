@@ -7,7 +7,7 @@
         </div>
 
         <!-- دکمه ایجاد تراکنش جدید -->
-        <button wire:click="create" class="px-5 py-3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+        <button wire:click="create" class="px-5 py-3 bg-gradient-to-r from-brand-600 to-brand-600 hover:from-brand-500 hover:to-brand-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             ثبت تراکنش دستی جدید
         </button>
@@ -54,7 +54,7 @@
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-orange-600 to-red-600 rounded-2xl p-5 flex flex-col justify-center items-center shadow-lg shadow-orange-500/20 relative overflow-hidden">
+        <div class="bg-gradient-to-br from-brand-600 to-brand-600 rounded-2xl p-5 flex flex-col justify-center items-center shadow-lg shadow-brand-500/20 relative overflow-hidden">
             <svg class="w-24 h-24 absolute -right-4 -bottom-4 text-white/10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.97-1.3-3.15-3.61-3.15V7h-1.62v1.51c-1.89.28-3.19 1.4-3.19 3.01 0 1.83 1.54 2.65 3.91 3.24 1.87.47 2.45 1.13 2.45 1.9 0 .9-.85 1.52-2.22 1.52-1.64 0-2.32-.82-2.37-1.84H7.29c.07 2.21 1.56 3.32 3.82 3.32V21h1.62v-1.46c2.08-.26 3.44-1.45 3.44-3.23 0-2.07-1.75-2.73-3.86-3.17z"/></svg>
             <h3 class="text-white font-black text-lg z-10">مدیریت مالی</h3>
             <p class="text-white/80 text-xs mt-1 z-10">ترازنامه شفاف سیستم</p>
@@ -64,11 +64,11 @@
     <!-- کادر جستجو و فیلترها -->
     <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/60 p-4 rounded-2xl flex flex-col md:flex-row items-center gap-4 shadow-inner">
         <div class="relative w-full md:flex-1">
-            <input wire:model.live.debounce.300ms="search" type="text" class="w-full bg-zinc-950/60 border border-zinc-800 text-zinc-300 text-sm rounded-xl focus:ring-2 focus:ring-orange-500/50 block p-3 transition outline-none" placeholder="جستجو در کد پیگیری، نام یا شماره کاربر...">
+            <input wire:model.live.debounce.300ms="search" type="text" class="w-full bg-zinc-950/60 border border-zinc-800 text-zinc-300 text-sm rounded-xl focus:ring-2 focus:ring-brand-500/50 block p-3 transition outline-none" placeholder="جستجو در کد پیگیری، نام یا شماره کاربر...">
         </div>
 
         <div class="flex flex-wrap md:flex-nowrap items-center gap-2 w-full md:w-auto">
-            <select wire:model.live="dateFilter" class="bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs rounded-xl p-3 focus:ring-orange-500 outline-none w-full md:w-auto font-bold">
+            <select wire:model.live="dateFilter" class="bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs rounded-xl p-3 focus:ring-brand-500 outline-none w-full md:w-auto font-bold">
                 <option value="all">📅 تمام تاریخ‌ها</option>
                 <option value="today">امروز</option>
                 <option value="yesterday">دیروز</option>
@@ -76,14 +76,14 @@
                 <option value="this_month">این ماه</option>
             </select>
 
-            <select wire:model.live="statusFilter" class="bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs rounded-xl p-3 focus:ring-orange-500 outline-none w-full md:w-auto font-bold">
+            <select wire:model.live="statusFilter" class="bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs rounded-xl p-3 focus:ring-brand-500 outline-none w-full md:w-auto font-bold">
                 <option value="">🔘 همه وضعیت‌ها</option>
                 <option value="0">⏳ در انتظار تایید</option>
                 <option value="1">✅ تایید شده</option>
                 <option value="2">❌ رد شده</option>
             </select>
 
-            <select wire:model.live="typeFilter" class="bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs rounded-xl p-3 focus:ring-orange-500 outline-none w-full md:w-auto font-bold">
+            <select wire:model.live="typeFilter" class="bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs rounded-xl p-3 focus:ring-brand-500 outline-none w-full md:w-auto font-bold">
                 <option value="">💸 همه تراکنش‌ها</option>
                 <option value="plus">افزایش موجودی (plus)</option>
                 <option value="minus">کسر موجودی (minus)</option>
@@ -166,13 +166,13 @@
                         <td class="p-4 text-center">
                             <div class="flex items-center justify-center gap-1.5">
                                 @if($trx->attachment)
-                                    <button wire:click="viewReceipt({{ $trx->id }})" class="p-2 bg-zinc-800 hover:bg-zinc-700 text-orange-400 rounded-lg transition shadow-sm" title="بررسی فیش">
+                                    <button wire:click="viewReceipt({{ $trx->id }})" class="p-2 bg-zinc-800 hover:bg-zinc-700 text-brand-400 rounded-lg transition shadow-sm" title="بررسی فیش">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                     </button>
                             @endif
 
                             <!-- دکمه ویرایش کامل -->
-                                <button wire:click="edit({{ $trx->id }})" class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-orange-400 rounded-lg transition shadow-sm" title="ویرایش کامل">
+                                <button wire:click="edit({{ $trx->id }})" class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-brand-400 rounded-lg transition shadow-sm" title="ویرایش کامل">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </button>
 
@@ -195,13 +195,13 @@
     <!-- 🔍 مودال بررسی سریع فیش واریزی -->
     @if($isReceiptModalOpen && $selectedTrx)
         <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-            <div class="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden">
+            <div class="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
                 <div class="p-5 border-b border-zinc-800 flex justify-between items-center bg-zinc-950">
                     <h3 class="text-sm font-black text-white">بررسی فیش واریزی</h3>
                     <button wire:click="$set('isReceiptModalOpen', false)" class="text-zinc-500 hover:text-rose-500 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                 </div>
 
-                <div class="p-4 bg-[#09090b] flex justify-center">
+                <div class="p-4 bg-[#080f1d] flex justify-center">
                     <a href="{{ url('storage/'.$selectedTrx->attachment)  }}" target="_blank" title="مشاهده تصویر اصلی">
                         <img src="{{ url('storage/'.$selectedTrx->attachment)  }}" class="max-h-72 rounded-xl border border-zinc-800 object-contain hover:scale-105 transition duration-300">
                     </a>
@@ -209,7 +209,7 @@
 
                 <div class="p-6 space-y-4">
                     <div class="bg-zinc-800/40 p-4 rounded-xl border border-zinc-700/50 text-sm space-y-2">
-                        <div class="flex justify-between"><span class="text-zinc-400 text-xs">مبلغ:</span><span class="font-black text-orange-400 font-mono-digit">{{ number_format($selectedTrx->price) }} تومان</span></div>
+                        <div class="flex justify-between"><span class="text-zinc-400 text-xs">مبلغ:</span><span class="font-black text-brand-400 font-mono-digit">{{ number_format($selectedTrx->price) }} تومان</span></div>
                         <div class="flex justify-between"><span class="text-zinc-400 text-xs">کاربر هدف:</span><span class="font-bold text-white">{{ \App\Models\User::find($selectedTrx->for)?->name ?? 'حذف شده' }}</span></div>
                     </div>
 
@@ -225,7 +225,7 @@
                     @endif
 
                     <div class="pt-2 text-center">
-                        <button wire:click="edit({{ $selectedTrx->id }}); $set('isReceiptModalOpen', false);" class="text-xs text-orange-400 hover:underline">ویرایش جزئیات این تراکنش (مبلغ، کاربر، ایجادکننده)</button>
+                        <button wire:click="edit({{ $selectedTrx->id }}); $set('isReceiptModalOpen', false);" class="text-xs text-brand-400 hover:underline">ویرایش جزئیات این تراکنش (مبلغ، کاربر، ایجادکننده)</button>
                     </div>
                 </div>
             </div>
@@ -235,7 +235,7 @@
 <!-- 📝 مودال ایجاد و ویرایش کامل تراکنش (CRUD) -->
     @if($isFormOpen)
         <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
-            <div class="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden my-8">
+            <div class="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden my-8">
                 <div class="p-5 border-b border-zinc-800 flex justify-between items-center bg-zinc-950">
                     <h3 class="text-sm font-black text-white">{{ $trxId ? 'ویرایش کامل تراکنش #' . $trxId : 'ثبت تراکنش دستی جدید' }}</h3>
                     <button wire:click="resetForm" class="text-zinc-500 hover:text-rose-500 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
@@ -248,12 +248,12 @@
                         <label class="block text-xs font-bold text-zinc-400 mb-1.5">کاربر هدف (صاحب کیف پول) <span class="text-rose-500">*</span></label>
 
                         @if($selectedForUserName)
-                            <div class="flex items-center justify-between p-3 bg-zinc-950 border border-orange-500/50 rounded-xl">
-                                <span class="text-sm font-bold text-orange-400">{{ $selectedForUserName }}</span>
+                            <div class="flex items-center justify-between p-3 bg-zinc-950 border border-brand-500/50 rounded-xl">
+                                <span class="text-sm font-bold text-brand-400">{{ $selectedForUserName }}</span>
                                 <button type="button" wire:click="$set('for', null); $set('selectedForUserName', '')" class="text-xs text-rose-500 hover:underline">تغییر کاربر</button>
                             </div>
                         @else
-                            <input wire:model.live.debounce.200ms="searchForUser" @focus="open = true" type="text" class="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl p-3 text-sm focus:ring-orange-500 outline-none" placeholder="برای جستجو نام یا شماره موبایل را تایپ کنید...">
+                            <input wire:model.live.debounce.200ms="searchForUser" @focus="open = true" type="text" class="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl p-3 text-sm focus:ring-brand-500 outline-none" placeholder="برای جستجو نام یا شماره موبایل را تایپ کنید...">
                         @endif
 
                         @if(!empty($searchedForUsers))
@@ -274,12 +274,12 @@
                         <label class="block text-xs font-bold text-zinc-400 mb-1.5">ایجادکننده تراکنش <span class="text-rose-500">*</span></label>
 
                         @if($selectedCreatorUserName)
-                            <div class="flex items-center justify-between p-3 bg-zinc-950 border border-orange-500/50 rounded-xl">
-                                <span class="text-sm font-bold text-orange-400">{{ $selectedCreatorUserName }}</span>
+                            <div class="flex items-center justify-between p-3 bg-zinc-950 border border-brand-500/50 rounded-xl">
+                                <span class="text-sm font-bold text-brand-400">{{ $selectedCreatorUserName }}</span>
                                 <button type="button" wire:click="$set('creator', null); $set('selectedCreatorUserName', '')" class="text-xs text-rose-500 hover:underline">تغییر ایجادکننده</button>
                             </div>
                         @else
-                            <input wire:model.live.debounce.200ms="searchCreatorUser" @focus="open = true" type="text" class="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl p-3 text-sm focus:ring-orange-500 outline-none" placeholder="جستجوی نماینده یا مدیر...">
+                            <input wire:model.live.debounce.200ms="searchCreatorUser" @focus="open = true" type="text" class="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl p-3 text-sm focus:ring-brand-500 outline-none" placeholder="جستجوی نماینده یا مدیر...">
                         @endif
 
                         @if(!empty($searchedCreatorUsers))
@@ -287,7 +287,7 @@
                                 @foreach($searchedCreatorUsers as $u)
                                     <button type="button" wire:click="selectCreatorUser({{ $u->id }}, '{{ $u->name }}', '{{ $u->role }}')" @click="open = false" class="w-full text-right p-3 hover:bg-zinc-800 transition flex justify-between items-center text-xs">
                                         <span class="font-bold text-white">{{ $u->name }}</span>
-                                        <span class="text-orange-400 text-[10px]">({{ $u->role }})</span>
+                                        <span class="text-brand-400 text-[10px]">({{ $u->role }})</span>
                                     </button>
                                 @endforeach
                             </div>
@@ -299,14 +299,14 @@
                         <!-- مبلغ -->
                         <div>
                             <label class="block text-xs font-bold text-zinc-400 mb-1.5">مبلغ (تومان) <span class="text-rose-500">*</span></label>
-                            <input wire:model="price" type="number" class="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl p-3 text-sm focus:ring-orange-500 outline-none font-mono-digit" placeholder="100000">
+                            <input wire:model="price" type="number" class="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl p-3 text-sm focus:ring-brand-500 outline-none font-mono-digit" placeholder="100000">
                             @error('price') <span class="text-rose-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                         </div>
 
                         <!-- نوع تراکنش -->
                         <div>
                             <label class="block text-xs font-bold text-zinc-400 mb-1.5">نوع تراکنش <span class="text-rose-500">*</span></label>
-                            <select wire:model="type" class="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl p-3 text-sm focus:ring-orange-500 outline-none font-bold">
+                            <select wire:model="type" class="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl p-3 text-sm focus:ring-brand-500 outline-none font-bold">
                                 <option value="plus">➕ افزایش موجودی (plus)</option>
                                 <option value="minus">➖ کسر موجودی (minus)</option>
                                 <option value="plus_amn">🛡️ شارژ امنیتی (plus_amn)</option>
@@ -318,7 +318,7 @@
                     <!-- وضعیت تایید -->
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-1.5">وضعیت تایید <span class="text-rose-500">*</span></label>
-                        <select wire:model="approved" class="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl p-3 text-sm focus:ring-orange-500 outline-none font-bold">
+                        <select wire:model="approved" class="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl p-3 text-sm focus:ring-brand-500 outline-none font-bold">
                             <option value="1">✅ تایید شده (اعمال در موجودی)</option>
                             <option value="0">⏳ در انتظار بررسی</option>
                             <option value="2">❌ رد شده</option>
@@ -328,13 +328,13 @@
                     <!-- توضیحات -->
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-1.5">توضیحات تراکنش</label>
-                        <input wire:model="description" type="text" class="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl p-3 text-sm focus:ring-orange-500 outline-none" placeholder="علت واریز یا کسر...">
+                        <input wire:model="description" type="text" class="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl p-3 text-sm focus:ring-brand-500 outline-none" placeholder="علت واریز یا کسر...">
                     </div>
 
                     <!-- تصویر فیش / فایل ضمائم -->
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-1.5">تصویر فیش واریزی / ضمیمه</label>
-                        <input wire:model="attachment" type="file" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-400 rounded-xl p-2 text-xs focus:ring-orange-500 outline-none file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-zinc-800 file:text-white cursor-pointer">
+                        <input wire:model="attachment" type="file" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-400 rounded-xl p-2 text-xs focus:ring-brand-500 outline-none file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-zinc-800 file:text-white cursor-pointer">
                         @if($existingAttachment)
                             <p class="text-[10px] text-emerald-400 mt-1">یک ضمیمه قبلاً آپلود شده است. (انتخاب فایل جدید آن را جایگزین می‌کند)</p>
                         @endif
@@ -343,7 +343,7 @@
 
                     <div class="flex gap-3 pt-4 border-t border-zinc-800">
                         <button type="button" wire:click="resetForm" class="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-bold rounded-xl transition">لغو</button>
-                        <button type="submit" class="flex-1 py-3 bg-orange-600 hover:bg-orange-500 text-white text-sm font-black rounded-xl transition shadow-lg shadow-orange-500/20">
+                        <button type="submit" class="flex-1 py-3 bg-brand-600 hover:bg-brand-500 text-white text-sm font-black rounded-xl transition shadow-lg shadow-brand-500/20">
                             {{ $trxId ? 'ثبت تغییرات تراکنش' : 'ایجاد تراکنش' }}
                         </button>
                     </div>

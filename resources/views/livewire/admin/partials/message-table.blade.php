@@ -1,7 +1,7 @@
-<div class="bg-[#111722] border border-[#202938] rounded-xl overflow-hidden">
+<div class="bg-[#111c2e] border border-[#243247] rounded-xl overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-right text-xs">
-            <thead class="bg-[#080B12] border-b border-[#202938]">
+            <thead class="bg-[#080f1d] border-b border-[#243247]">
             <tr>
                 <th class="p-3 rounded-r-xl">شناسه</th>
                 <th class="p-3">شماره حساب</th>
@@ -12,9 +12,9 @@
                 <th class="p-3 rounded-l-xl">عملیات</th>
             </tr>
             </thead>
-            <tbody class="divide-y divide-[#202938]">
+            <tbody class="divide-y divide-[#243247]">
             @forelse($messages as $message)
-                <tr class="hover:bg-[#171E2B]/40 transition">
+                <tr class="hover:bg-[#17253a]/40 transition">
                     <td class="p-3 font-mono text-[#F8FAFC]">#{{ $message->id }}</td>
                     <td class="p-3 font-mono text-[#F8FAFC]">{{ $message->account_number }}</td>
                     <td class="p-3 font-mono font-bold text-[#F59E0B]">{{ number_format($message->deposit_amount) }}</td>
@@ -37,11 +37,11 @@
                     </td>
                     <td class="p-3">
                         <div class="flex items-center gap-1.5">
-                            <button wire:click="showMessageDetail({{ $message->id }})" class="p-1.5 rounded-lg bg-[#202938] hover:bg-[#3B82F6] text-[#94A3B8] hover:text-white transition">
+                            <button wire:click="showMessageDetail({{ $message->id }})" class="p-1.5 rounded-lg bg-[#243247] hover:bg-[#3B82F6] text-[#94A3B8] hover:text-white transition">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             </button>
                             @if(!$message->processed)
-                                <button wire:click="reprocessMessage({{ $message->id }})" class="p-1.5 rounded-lg bg-[#202938] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition">
+                                <button wire:click="reprocessMessage({{ $message->id }})" class="p-1.5 rounded-lg bg-[#243247] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                 </button>
                             @endif
@@ -56,7 +56,7 @@
             </tbody>
         </table>
     </div>
-    <div class="p-3 border-t border-[#202938]">
+    <div class="p-3 border-t border-[#243247]">
         {{ $messages->links() }}
     </div>
 </div>

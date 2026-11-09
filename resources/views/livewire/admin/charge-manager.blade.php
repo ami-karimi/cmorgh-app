@@ -6,7 +6,7 @@
         </div>
 
         @if(!$isFormOpen)
-            <button wire:click="$set('isFormOpen', true)" class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-sm rounded-xl shadow-[0_10px_20px_-10px_rgba(249,115,22,0.4)] transition-all">
+            <button wire:click="$set('isFormOpen', true)" class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-brand-600 to-brand-600 hover:from-brand-500 hover:to-brand-500 text-white font-bold text-sm rounded-xl shadow-[0_10px_20px_-10px_rgba(59,130,246,0.4)] transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 ایجاد بسته شارژ جدید
             </button>
@@ -20,9 +20,9 @@
     @endif
 
     @if($isFormOpen)
-        <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/60 rounded-3xl p-6 md:p-8 mb-8 shadow-2xl relative overflow-hidden transition-all duration-300">
+        <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/60 rounded-2xl p-6 md:p-8 mb-8 shadow-2xl relative overflow-hidden transition-all duration-300">
             <h2 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 {{ $chargeId ? 'ویرایش تنظیمات بسته' : 'پیکربندی بسته جدید' }}
             </h2>
 
@@ -30,12 +30,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div class="md:col-span-2">
                         <label class="block text-xs font-bold text-zinc-400 mb-2">نام بسته شارژ</label>
-                        <input wire:model="name" type="text" placeholder="مثال: بسته یک‌ماهه 50 گیگ" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white p-3.5 focus:ring-1 focus:ring-orange-500">
+                        <input wire:model="name" type="text" placeholder="مثال: بسته یک‌ماهه 50 گیگ" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white p-3.5 focus:ring-1 focus:ring-brand-500">
                         @error('name') <span class="text-red-500 text-[10px] mt-1">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-2">وضعیت</label>
-                        <select wire:model="status" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white p-3.5 focus:ring-1 focus:ring-orange-500">
+                        <select wire:model="status" class="w-full bg-zinc-950/60 border border-zinc-700/80 rounded-xl text-white p-3.5 focus:ring-1 focus:ring-brand-500">
                             <option value="1">فعال (قابل فروش)</option>
                             <option value="0">غیرفعال (آرشیو)</option>
                         </select>
@@ -54,20 +54,20 @@
                                 </button>
                             @endif
 
-                            <h4 class="text-xs font-bold text-orange-500 mb-4 uppercase tracking-wider">بازه زمانی #{{ $index + 1 }}</h4>
+                            <h4 class="text-xs font-bold text-brand-500 mb-4 uppercase tracking-wider">بازه زمانی #{{ $index + 1 }}</h4>
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
                                 <div>
                                     <label class="block text-xs font-bold text-zinc-400 mb-2">محدودیت حجم (Bytes)</label>
-                                    <input wire:model="roles.{{ $index }}.max_bandwidth" type="number" dir="ltr" class="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl text-white p-3 focus:ring-1 focus:ring-orange-500">
+                                    <input wire:model="roles.{{ $index }}.max_bandwidth" type="number" dir="ltr" class="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl text-white p-3 focus:ring-1 focus:ring-brand-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-zinc-400 mb-2">سرعت مجاز (Kbps)</label>
-                                    <input wire:model="roles.{{ $index }}.rate_limit" type="number" dir="ltr" class="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl text-white p-3 focus:ring-1 focus:ring-orange-500">
+                                    <input wire:model="roles.{{ $index }}.rate_limit" type="number" dir="ltr" class="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl text-white p-3 focus:ring-1 focus:ring-brand-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-zinc-400 mb-2">RAS Access</label>
-                                    <input wire:model="roles.{{ $index }}.ras_access" type="text" dir="ltr" class="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl text-zinc-400 p-3 focus:ring-1 focus:ring-orange-500">
+                                    <input wire:model="roles.{{ $index }}.ras_access" type="text" dir="ltr" class="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl text-zinc-400 p-3 focus:ring-1 focus:ring-brand-500">
                                 </div>
                             </div>
 
@@ -76,7 +76,7 @@
                                 @foreach(['Saturday' => 'شنبه', 'Sunday' => 'یکشنبه', 'Monday' => 'دوشنبه', 'Tuesday' => 'سه‌شنبه', 'Wednesday' => 'چهارشنبه', 'Thursday' => 'پنج‌شنبه', 'Friday' => 'جمعه'] as $en => $fa)
                                     <label class="relative flex items-center justify-center cursor-pointer">
                                         <input type="checkbox" wire:model="roles.{{ $index }}.access_days" value="{{ $en }}" class="peer sr-only">
-                                        <div class="px-3 py-1.5 bg-zinc-900 text-zinc-500 text-[11px] font-bold rounded-lg border border-zinc-800 peer-checked:bg-orange-500/10 peer-checked:text-orange-500 peer-checked:border-orange-500/50 transition-all">
+                                        <div class="px-3 py-1.5 bg-zinc-900 text-zinc-500 text-[11px] font-bold rounded-lg border border-zinc-800 peer-checked:bg-brand-500/10 peer-checked:text-brand-500 peer-checked:border-brand-500/50 transition-all">
                                             {{ $fa }}
                                         </div>
                                     </label>
@@ -87,24 +87,24 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5 w-full md:w-1/2">
                                 <div>
                                     <label class="block text-[11px] font-bold text-zinc-500 mb-1.5">از ساعت</label>
-                                    <input wire:model="roles.{{ $index }}.start_at" type="time" step="1" dir="ltr" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white p-2.5 focus:ring-1 focus:ring-orange-500 font-mono">
+                                    <input wire:model="roles.{{ $index }}.start_at" type="time" step="1" dir="ltr" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white p-2.5 focus:ring-1 focus:ring-brand-500 font-mono">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-bold text-zinc-500 mb-1.5">تا ساعت</label>
-                                    <input wire:model="roles.{{ $index }}.end_at" type="time" step="1" dir="ltr" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white p-2.5 focus:ring-1 focus:ring-orange-500 font-mono">
+                                    <input wire:model="roles.{{ $index }}.end_at" type="time" step="1" dir="ltr" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white p-2.5 focus:ring-1 focus:ring-brand-500 font-mono">
                                 </div>
                             </div>
                         </div>
                     @endforeach
 
-                    <button type="button" wire:click="addRole" class="inline-flex items-center gap-2 px-4 py-2 bg-zinc-800/80 hover:bg-zinc-700 text-orange-400 hover:text-white font-bold text-xs rounded-xl border border-zinc-700/50 transition-all">
+                    <button type="button" wire:click="addRole" class="inline-flex items-center gap-2 px-4 py-2 bg-zinc-800/80 hover:bg-zinc-700 text-brand-400 hover:text-white font-bold text-xs rounded-xl border border-zinc-700/50 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         افزودن بازه زمانی / قانون جدید
                     </button>
                 </div>
 
                 <div class="flex gap-3 pt-6 border-t border-zinc-800/80">
-                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold text-sm rounded-xl shadow-[0_10px_20px_-10px_rgba(249,115,22,0.4)] transition-all">
+                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-brand-600 to-brand-600 hover:from-brand-500 hover:to-brand-500 text-white font-bold text-sm rounded-xl shadow-[0_10px_20px_-10px_rgba(59,130,246,0.4)] transition-all">
                         ذخیره تنظیمات بسته
                     </button>
                     <button type="button" wire:click="resetForm" class="px-8 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-sm rounded-xl border border-zinc-700/50 transition-all">
@@ -141,7 +141,7 @@
                             <div class="space-y-1">
                                 @foreach($charge->roles as $index => $rl)
                                     <div class="text-[10px] text-zinc-500 font-mono" dir="ltr">
-                                        <span class="text-orange-500/80 mr-1">#{{ $index+1 }}</span>
+                                        <span class="text-brand-500/80 mr-1">#{{ $index+1 }}</span>
                                         {{ substr($rl->start_at, 0, 5) }}-{{ substr($rl->end_at, 0, 5) }}
                                         <span class="mx-1">|</span>
                                         {{ $rl->rate_limit }}K
@@ -158,7 +158,7 @@
                         </td>
                         <td class="p-5 text-center">
                             <div class="flex items-center justify-center gap-2">
-                                <button wire:click="edit({{ $charge->id }})" title="ویرایش" class="p-1.5 bg-zinc-800 text-zinc-400 hover:text-orange-400 rounded-md border border-zinc-700/50 transition">
+                                <button wire:click="edit({{ $charge->id }})" title="ویرایش" class="p-1.5 bg-zinc-800 text-zinc-400 hover:text-brand-400 rounded-md border border-zinc-700/50 transition">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </button>
                                 <button wire:click="delete({{ $charge->id }})" onclick="confirm('آیا از حذف کامل این بسته مطمئن هستید؟') || event.stopImmediatePropagation()" class="p-1.5 bg-zinc-800 text-zinc-400 hover:text-red-400 rounded-md border border-zinc-700/50 transition">

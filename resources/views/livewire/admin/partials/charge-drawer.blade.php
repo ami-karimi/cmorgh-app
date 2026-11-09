@@ -1,18 +1,18 @@
 <div class="fixed inset-0 z-40 flex justify-end" x-show="drawerOpen" x-cloak>
-    <div class="fixed inset-0 bg-[#080B12]/60" @click="drawerOpen = false"></div>
+    <div class="fixed inset-0 bg-[#080f1d]/60" @click="drawerOpen = false"></div>
 
-    <div class="relative w-full max-w-2xl bg-[#111722] border-r border-[#202938] shadow-2xl overflow-y-auto"
+    <div class="relative w-full max-w-2xl bg-[#111c2e] border-r border-[#243247] shadow-2xl overflow-y-auto"
          x-show="drawerOpen"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 translate-x-full"
          x-transition:enter-end="opacity-100 translate-x-0">
 
         {{-- Header --}}
-        <div class="sticky top-0 z-10 bg-[#111722] border-b border-[#202938] p-4 flex items-center justify-between">
+        <div class="sticky top-0 z-10 bg-[#111c2e] border-b border-[#243247] p-4 flex items-center justify-between">
             <h3 class="text-sm font-bold text-[#F8FAFC]">
                 {{ $selectedRequest ? 'جزئیات درخواست #' . $selectedRequest->id : 'جزئیات پیام بانکی #' . $selectedMessage->id }}
             </h3>
-            <button wire:click="closeDrawer" class="p-1.5 rounded-lg bg-[#202938] text-[#94A3B8] hover:text-[#F8FAFC]">
+            <button wire:click="closeDrawer" class="p-1.5 rounded-lg bg-[#243247] text-[#94A3B8] hover:text-[#F8FAFC]">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
@@ -67,9 +67,9 @@
 
                     {{-- پیام بانکی مرتبط --}}
                     @if($selectedRequest->matchedBankMessage)
-                        <div class="border-t border-[#202938] pt-4">
+                        <div class="border-t border-[#243247] pt-4">
                             <h4 class="text-[11px] text-[#94A3B8] font-bold mb-2">پیام بانکی مرتبط</h4>
-                            <div class="grid grid-cols-2 gap-3 text-xs bg-[#080B12] p-3 rounded-xl">
+                            <div class="grid grid-cols-2 gap-3 text-xs bg-[#080f1d] p-3 rounded-xl">
                                 <div>
                                     <span class="text-[#94A3B8]">شناسه</span>
                                     <div class="font-bold text-[#F8FAFC]">#{{ $selectedRequest->matchedBankMessage->id }}</div>
@@ -93,9 +93,9 @@
 
                 {{-- پیام بانکی مرتبط --}}
                 @if($selectedRequest->matchedBankMessage)
-                    <div class="border-t border-[#202938] pt-4">
+                    <div class="border-t border-[#243247] pt-4">
                         <h4 class="text-xs font-bold text-[#94A3B8] mb-2">پیام بانکی مرتبط</h4>
-                        <div class="bg-[#080B12] border border-[#202938] rounded-xl p-4 space-y-2 text-sm">
+                        <div class="bg-[#080f1d] border border-[#243247] rounded-xl p-4 space-y-2 text-sm">
                             <div class="flex justify-between">
                                 <span class="text-[#94A3B8]">شناسه</span>
                                 <span class="font-bold text-[#F8FAFC]">#{{ $selectedRequest->matchedBankMessage->id }}</span>
@@ -117,7 +117,7 @@
                 @endif
 
                 {{-- Timeline --}}
-                <div class="border-t border-[#202938] pt-4">
+                <div class="border-t border-[#243247] pt-4">
                     <h4 class="text-xs font-bold text-[#94A3B8] mb-3">تاریخچه</h4>
                     <div class="space-y-3">
                         <div class="flex items-start gap-3">
@@ -197,9 +197,9 @@
 
                 {{-- درخواست مرتبط --}}
                 @if($selectedMessage->matchedRequest)
-                    <div class="border-t border-[#202938] pt-4">
+                    <div class="border-t border-[#243247] pt-4">
                         <h4 class="text-xs font-bold text-[#94A3B8] mb-2">درخواست مرتبط</h4>
-                        <div class="bg-[#080B12] border border-[#202938] rounded-xl p-4 space-y-2 text-sm">
+                        <div class="bg-[#080f1d] border border-[#243247] rounded-xl p-4 space-y-2 text-sm">
                             <div class="flex justify-between">
                                 <span class="text-[#94A3B8]">شناسه</span>
                                 <span class="font-bold text-[#F8FAFC]">#{{ $selectedMessage->matchedRequest->id }}</span>
@@ -224,9 +224,9 @@
 
                 {{-- متن خام پیام --}}
                 @if($selectedMessage->raw_message)
-                    <div class="border-t border-[#202938] pt-4">
+                    <div class="border-t border-[#243247] pt-4">
                         <h4 class="text-xs font-bold text-[#94A3B8] mb-2">متن خام پیام</h4>
-                        <div class="bg-[#080B12] border border-[#202938] rounded-xl p-4 text-xs font-mono text-[#94A3B8] break-words">
+                        <div class="bg-[#080f1d] border border-[#243247] rounded-xl p-4 text-xs font-mono text-[#94A3B8] break-words">
                             {{ $selectedMessage->raw_message }}
                         </div>
                     </div>

@@ -5,7 +5,7 @@
 
     <style>
         .ql-toolbar.ql-snow { border: 1px solid #3f3f46; border-top-left-radius: 1rem; border-top-right-radius: 1rem; background-color: #18181b; }
-        .ql-container.ql-snow { border: 1px solid #3f3f46; border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem; background-color: #09090b; color: #e4e4e7; font-family: inherit; font-size: 0.875rem; min-height: 250px; }
+        .ql-container.ql-snow { border: 1px solid #3f3f46; border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem; background-color: #080f1d; color: #e4e4e7; font-family: inherit; font-size: 0.875rem; min-height: 250px; }
         .ql-snow .ql-stroke { stroke: #a1a1aa; }
         .ql-snow .ql-fill, .ql-snow .ql-stroke.ql-fill { fill: #a1a1aa; }
         .ql-snow.ql-toolbar button:hover .ql-stroke { stroke: #3b82f6; }
@@ -15,7 +15,7 @@
         .ql-editor iframe { width: 100%; height: 400px; border-radius: 0.75rem; margin: 15px 0; border: 1px solid #27272a; }
     </style>
 
-    <div class="relative overflow-hidden bg-zinc-900/60 backdrop-blur-xl border border-zinc-800/60 rounded-[2rem] p-6 shadow-2xl">
+    <div class="relative overflow-hidden bg-zinc-900/60 backdrop-blur-xl border border-zinc-800/60 rounded-[1.25rem] p-6 shadow-2xl">
         <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div class="flex items-center gap-4">
                 <div class="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-black text-xl shadow-inner">
@@ -35,7 +35,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         @forelse($tutorials as $tutorial)
-            <div class="bg-zinc-900/50 border {{ $tutorial->is_published ? 'border-zinc-800/60' : 'border-rose-900/50 bg-rose-950/10' }} rounded-[2rem] p-6 hover:-translate-y-1 transition-all duration-300 shadow-xl flex flex-col">
+            <div class="bg-zinc-900/50 border {{ $tutorial->is_published ? 'border-zinc-800/60' : 'border-rose-900/50 bg-rose-950/10' }} rounded-[1.25rem] p-6 hover:-translate-y-1 transition-all duration-300 shadow-xl flex flex-col">
                 <div class="flex justify-between items-start mb-4">
                     <div>
                         <span class="px-3 py-1 rounded-lg text-[10px] font-bold bg-zinc-800 text-zinc-300 border border-zinc-700 uppercase tracking-wider mb-2 inline-block">{{ $tutorial->platform }}</span>
@@ -63,12 +63,12 @@
                             @php
                                 $fileName = basename($file);
                             @endphp
-                            <a href="{{ Storage::url($file) }}" target="_blank" download class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-colors group">
+                            <a href="{{ Storage::url($file) }}" target="_blank" download class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-brand-500/10 hover:bg-brand-500/20 border border-brand-500/20 transition-colors group">
                                 <div class="flex items-center gap-2 overflow-hidden">
-                                    <svg class="w-4 h-4 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
-                                    <span class="text-purple-400 text-[11px] font-mono font-bold truncate">{{ $fileName }}</span>
+                                    <svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                                    <span class="text-brand-400 text-[11px] font-mono font-bold truncate">{{ $fileName }}</span>
                                 </div>
-                                <svg class="w-4 h-4 text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                <svg class="w-4 h-4 text-brand-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                             </a>
                         @endforeach
                     </div>
@@ -82,7 +82,7 @@
                 </div>
             </div>
         @empty
-            <div class="col-span-full py-16 text-center border-2 border-dashed border-zinc-800/60 rounded-[2rem] bg-zinc-900/20">
+            <div class="col-span-full py-16 text-center border-2 border-dashed border-zinc-800/60 rounded-[1.25rem] bg-zinc-900/20">
                 <p class="text-zinc-400 font-bold text-sm">هیچ آموزشی یافت نشد. اولین آموزش را ایجاد کنید.</p>
             </div>
         @endforelse
@@ -133,7 +133,7 @@
 
                     <div class="bg-zinc-950/50 border border-zinc-800 rounded-[1.5rem] p-5">
                         <label class="block text-[11px] font-bold text-zinc-400 mb-3 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                            <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
                             پیوست فایل‌ها (انتخاب همزمان چندین فایل مجاز است)
                         </label>
 
@@ -141,7 +141,7 @@
 
                             <div class="relative w-full xl:w-1/3">
                                 <input wire:model="attachments" type="file" id="file-upload" class="hidden" multiple />
-                                <label for="file-upload" class="cursor-pointer w-full flex flex-col items-center justify-center py-6 border-2 border-dashed border-zinc-700 hover:border-purple-500 hover:bg-purple-500/5 rounded-2xl transition-all">
+                                <label for="file-upload" class="cursor-pointer w-full flex flex-col items-center justify-center py-6 border-2 border-dashed border-zinc-700 hover:border-brand-500 hover:bg-brand-500/5 rounded-2xl transition-all">
                                     <svg class="w-7 h-7 text-zinc-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                                     <span class="text-[11px] font-bold text-zinc-400">برای انتخاب فایل‌ها کلیک کنید</span>
                                     <span class="text-[9px] font-bold text-zinc-600 mt-1">امکان انتخاب چند فایل با هم</span>

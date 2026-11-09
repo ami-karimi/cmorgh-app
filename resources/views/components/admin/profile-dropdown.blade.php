@@ -1,13 +1,11 @@
-<div class="relative cursor-pointer" x-data="{ open: false }" @click.outside="open = false">
+<div class="relative cursor-pointer" x-data="{ open: false }" @click.outside="open = false" @keydown.escape.window="open = false">
 
-    <button @click="open = !open" class="cursor-pointer flex items-center gap-3 pl-2  border-zinc-800 focus:outline-none transition hover:opacity-80">
+    <button type="button" aria-label="منوی حساب مدیریت" :aria-expanded="open" @click="open = !open" class="cursor-pointer flex items-center gap-3 pl-2  border-zinc-800 focus:outline-none transition hover:opacity-80">
         <div class="hidden sm:block text-left">
             <p class="text-sm font-bold text-white leading-none">{{ auth()->user()->name ?? 'مدیر سیستم' }}</p>
-            <p class="text-xs text-zinc-500 mt-1 uppercase tracking-wider">Admin</p>
+            <p class="text-xs text-zinc-500 mt-1 uppercase tracking-wider">مدیریت</p>
         </div>
-        <img class="w-10 h-10 rounded-full border-2 border-orange-500/50 object-cover"
-             src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=f97316&color=fff&font-size=0.33"
-             alt="Avatar">
+        <span class="ui-brand-mark text-sm" aria-hidden="true">{{ mb_substr(auth()->user()->name ?? 'م', 0, 1) }}</span>
     </button>
 
     <div x-show="open"
@@ -20,9 +18,9 @@
          class="absolute left-0 mt-4 w-52 bg-zinc-900 border border-zinc-800 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] py-2 z-50 overflow-hidden"
          x-cloak>
 
-        <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-300 hover:text-white hover:bg-zinc-800/80 transition-colors">
+        <a href="{{ route('admin.settings') }}" wire:navigate class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-300 hover:text-white hover:bg-zinc-800/80 transition-colors">
             <svg class="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-            مدیریت حساب
+            تنظیمات سیستم
         </a>
 
         <div class="h-px bg-zinc-800/80 my-1"></div>

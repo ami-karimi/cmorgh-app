@@ -1,7 +1,7 @@
-<div class="bg-[#111722] border border-[#202938] rounded-xl overflow-hidden">
+<div class="bg-[#111c2e] border border-[#243247] rounded-xl overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-right text-xs">
-            <thead class="bg-[#080B12] border-b border-[#202938]">
+            <thead class="bg-[#080f1d] border-b border-[#243247]">
             <tr>
                 <th class="p-3 rounded-r-xl cursor-pointer hover:text-[#F59E0B] transition" wire:click="sortBy('id')">
                     شناسه
@@ -18,9 +18,9 @@
                 <th class="p-3 rounded-l-xl">عملیات</th>
             </tr>
             </thead>
-            <tbody class="divide-y divide-[#202938]">
+            <tbody class="divide-y divide-[#243247]">
             @forelse($requests as $request)
-                <tr class="hover:bg-[#171E2B]/40 transition">
+                <tr class="hover:bg-[#17253a]/40 transition">
                     <td class="p-3 font-mono text-[#F8FAFC]">#{{ $request->id }}</td>
                     <td class="p-3">
                         <div class="font-bold text-[#F8FAFC]">{{ $request->user?->name ?? 'نامشخص' }}</div>
@@ -30,7 +30,7 @@
                     <td class="p-3 font-mono font-bold text-[#F59E0B]">{{ number_format($request->payable_amount) }}</td>
                     <td class="p-3">
                         @php
-                            $colors = ['pending'=>'bg-yellow-500/10 text-yellow-500','paid'=>'bg-blue-500/10 text-blue-500','verifying'=>'bg-purple-500/10 text-purple-500','approved'=>'bg-green-500/10 text-green-500','rejected'=>'bg-red-500/10 text-red-500','expired'=>'bg-gray-500/10 text-gray-500'];
+                            $colors = ['pending'=>'bg-yellow-500/10 text-yellow-500','paid'=>'bg-blue-500/10 text-blue-500','verifying'=>'bg-brand-500/10 text-brand-500','approved'=>'bg-green-500/10 text-green-500','rejected'=>'bg-red-500/10 text-red-500','expired'=>'bg-gray-500/10 text-gray-500'];
                             $labels = ['pending'=>'در انتظار','paid'=>'پرداخت شده','verifying'=>'در حال بررسی','approved'=>'تأیید شده','rejected'=>'رد شده','expired'=>'منقضی شده'];
                         @endphp
                         <span class="px-2 py-1 rounded-lg text-[10px] font-bold border {{ $colors[$request->status] ?? 'bg-gray-500/10 text-gray-500' }}">
@@ -52,21 +52,21 @@
                     <td class="p-3 text-[10px] text-[#94A3B8] font-mono">{{ $this->toJalaliDateTime($request->created_at) }}</td>
                     <td class="p-3">
                         <div class="flex items-center gap-1.5">
-                            <button wire:click="showRequestDetail({{ $request->id }})" class="p-1.5 rounded-lg bg-[#202938] hover:bg-[#3B82F6] text-[#94A3B8] hover:text-white transition" title="جزئیات">
+                            <button wire:click="showRequestDetail({{ $request->id }})" class="p-1.5 rounded-lg bg-[#243247] hover:bg-[#3B82F6] text-[#94A3B8] hover:text-white transition" title="جزئیات">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             </button>
 
                             @if(in_array($request->status, ['pending', 'paid']))
                                 <button wire:click="approve({{ $request->id }})"
                                         wire:confirm="آیا از تأیید این درخواست اطمینان دارید؟"
-                                        class="p-1.5 rounded-lg bg-[#202938] hover:bg-[#10B981] text-[#94A3B8] hover:text-white transition" title="تأیید">
+                                        class="p-1.5 rounded-lg bg-[#243247] hover:bg-[#10B981] text-[#94A3B8] hover:text-white transition" title="تأیید">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 </button>
-                                <button wire:click="openRejectModal({{ $request->id }})" class="p-1.5 rounded-lg bg-[#202938] hover:bg-[#EF4444] text-[#94A3B8] hover:text-white transition" title="رد">
+                                <button wire:click="openRejectModal({{ $request->id }})" class="p-1.5 rounded-lg bg-[#243247] hover:bg-[#EF4444] text-[#94A3B8] hover:text-white transition" title="رد">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
                                 @if(!$request->matched_bank_message_id)
-                                    <button wire:click="openMatchModal({{ $request->id }})" class="p-1.5 rounded-lg bg-[#202938] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition" title="تطبیق دستی">
+                                    <button wire:click="openMatchModal({{ $request->id }})" class="p-1.5 rounded-lg bg-[#243247] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition" title="تطبیق دستی">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                     </button>
                                 @endif
@@ -87,7 +87,7 @@
             </tbody>
         </table>
     </div>
-    <div class="p-3 border-t border-[#202938]">
+    <div class="p-3 border-t border-[#243247]">
         {{ $requests->links() }}
     </div>
 </div>

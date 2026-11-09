@@ -8,7 +8,7 @@
             <p class="text-xs text-[#94A3B8] mt-1">مدیریت موجودی، فیش‌های واریزی و حساب‌های زیرنمایندگان</p>
         </div>
 
-        <div class="bg-[#111722] border border-[#202938] rounded-2xl px-6 py-4 flex items-center gap-4 shadow-sm">
+        <div class="bg-[#111c2e] border border-[#243247] rounded-2xl px-6 py-4 flex items-center gap-4 shadow-sm">
             <div class="w-12 h-12 rounded-full bg-[#F59E0B]/10 flex items-center justify-center text-[#F59E0B] shrink-0">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
@@ -23,7 +23,7 @@
     {{-- 2. BANK ACCOUNT CARD                         --}}
     {{-- ============================================ --}}
     @if($bankAccount)
-        <div class="bg-[#111722] border border-[#202938] rounded-2xl p-5 shadow-sm">
+        <div class="bg-[#111c2e] border border-[#243247] rounded-2xl p-5 shadow-sm">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-[#F59E0B]/10 border border-[#F59E0B]/20 flex items-center justify-center text-[#F59E0B] shrink-0">
@@ -35,7 +35,7 @@
                             @if(auth()->user()->role === 'manager')
                                 <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20">حساب مدیر اصلی</span>
                             @else
-                                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/20">حساب نماینده بالادستی</span>
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#3b82f6]/10 text-[#3b82f6] border border-[#3b82f6]/20">حساب نماینده بالادستی</span>
                             @endif
                         </div>
                         <p class="text-[10px] text-[#94A3B8] mt-0.5">شماره حساب زیر برای واریز وجه استفاده می‌شود</p>
@@ -57,7 +57,7 @@
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 pt-4 border-t border-[#202938]">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 pt-4 border-t border-[#243247]">
                 {{-- بانک --}}
                 <div>
                     <span class="text-[10px] text-[#94A3B8] block">بانک</span>
@@ -83,7 +83,7 @@
                         @endif
                     </span>
                             <button onclick="copyToClipboard('{{ $bankAccount->card_number }}', 'شماره کارت')"
-                                    class="p-1.5 rounded-lg bg-[#202938] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition group"
+                                    class="p-1.5 rounded-lg bg-[#243247] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition group"
                                     title="کپی شماره کارت">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                             </button>
@@ -104,7 +104,7 @@
                         @endif
                     </span>
                             <button onclick="copyToClipboard('{{ $bankAccount->sheba_number }}', 'شماره شبا')"
-                                    class="p-1.5 rounded-lg bg-[#202938] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition group"
+                                    class="p-1.5 rounded-lg bg-[#243247] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition group"
                                     title="کپی شماره شبا">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                             </button>
@@ -115,14 +115,14 @@
 
             {{-- هشدار امنیتی --}}
             @if($showBankDetails)
-                <div class="mt-3 pt-3 border-t border-[#202938] text-[10px] text-[#F59E0B] flex items-center gap-2">
+                <div class="mt-3 pt-3 border-t border-[#243247] text-[10px] text-[#F59E0B] flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                     <span>اطلاعات حساب به صورت کامل نمایش داده می‌شود. پس از اتمام، حتماً آن را مخفی کنید.</span>
                 </div>
             @endif
         </div>
     @else
-        <div class="bg-[#111722] border border-[#202938] rounded-2xl p-5 shadow-sm">
+        <div class="bg-[#111c2e] border border-[#243247] rounded-2xl p-5 shadow-sm">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-[#F59E0B]/10 border border-[#F59E0B]/20 flex items-center justify-center text-[#F59E0B] shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -138,9 +138,9 @@
     {{-- ============================================ --}}
     {{-- 3. TABS                                      --}}
     {{-- ============================================ --}}
-    <div class="flex gap-2 border-b border-[#202938] pb-3">
+    <div class="flex gap-2 border-b border-[#243247] pb-3">
         <button wire:click="$set('activeTab', 'my_wallet')"
-                class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 {{ $activeTab === 'my_wallet' ? 'bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#202938]/50' }}">
+                class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 {{ $activeTab === 'my_wallet' ? 'bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#243247]/50' }}">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
             کیف پول من
             @php $pendingCount = $myTransactions->where('approved', 0)->count(); @endphp
@@ -150,13 +150,13 @@
         </button>
         @if(auth()->user()->role === 'agent')
             <button wire:click="$set('activeTab', 'auto_charge')"
-                    class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 {{ $activeTab === 'auto_charge' ? 'bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#202938]/50' }}">
+                    class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 {{ $activeTab === 'auto_charge' ? 'bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#243247]/50' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                  کارت به کارت تایید آنی
             </button>
         @endif
         <button wire:click="$set('activeTab', 'sub_agents')"
-                class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 {{ $activeTab === 'sub_agents' ? 'bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#202938]/50' }}">
+                class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 {{ $activeTab === 'sub_agents' ? 'bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#243247]/50' }}">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
             امور مالی زیرنمایندگان
             @php $subPendingCount = $subTransactions->where('approved', 0)->count(); @endphp
@@ -174,7 +174,7 @@
         <div class="animate-fade-in">
             @if(!$isWaiting)
                 {{-- فرم ورود مبلغ --}}
-                <div class="bg-[#111722] border border-[#202938] rounded-2xl p-5 shadow-sm max-w-2xl mx-auto">
+                <div class="bg-[#111c2e] border border-[#243247] rounded-2xl p-5 shadow-sm max-w-2xl mx-auto">
                     <h3 class="text-sm font-bold text-[#F8FAFC] mb-1">شارژ خودکار کیف پول</h3>
                     <p class="text-[10px] text-[#94A3B8] mb-4">مبلغ موردنظر را وارد کنید تا مبلغ نهایی قابل پرداخت را دریافت کنید.</p>
 
@@ -192,7 +192,7 @@
                                 <input wire:model.live.debounce.300ms="chargeAmount"
                                        type="number"
                                        dir="ltr"
-                                       class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-sm rounded-xl px-4 py-3 font-mono tabular-nums focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition"
+                                       class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-sm rounded-xl px-4 py-3 font-mono tabular-nums focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition"
                                        placeholder="مثال: 1000000">
                                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#94A3B8] font-bold pointer-events-none">تومان</span>
                             </div>
@@ -210,7 +210,7 @@
                 </div>
             @else
                 {{-- نمایش اطلاعات درخواست فعال --}}
-                <div class="bg-[#111722] border border-[#202938] rounded-2xl p-5 shadow-sm max-w-2xl mx-auto" wire:poll.5s="checkStatus">
+                <div class="bg-[#111c2e] border border-[#243247] rounded-2xl p-5 shadow-sm max-w-2xl mx-auto" wire:poll.5s="checkStatus">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-sm font-bold text-[#F8FAFC] flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-[#F59E0B] animate-pulse"></span>
@@ -222,7 +222,7 @@
                     </div>
 
                     {{-- مبلغ شارژ --}}
-                    <div class="bg-[#080B12] border border-[#202938] rounded-xl p-4 text-center">
+                    <div class="bg-[#080f1d] border border-[#243247] rounded-xl p-4 text-center">
                         <span class="text-[10px] text-[#94A3B8]">مبلغ شارژ کیف پول</span>
                         <div class="text-2xl font-black text-[#F8FAFC] mt-1">{{ number_format($activeRequest->requested_amount) }} <span class="text-sm text-[#94A3B8] font-sans">تومان</span></div>
                     </div>
@@ -235,7 +235,7 @@
                         </div>
                         <span class="text-[10px] text-[#94A3B8] block mt-1">تومان</span>
                         <button onclick="copyToClipboard('{{ $activeRequest->payable_amount }}', 'مبلغ')"
-                                class="absolute left-3 top-3 p-1.5 rounded-lg bg-[#202938] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition group">
+                                class="absolute left-3 top-3 p-1.5 rounded-lg bg-[#243247] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition group">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                         </button>
                     </div>
@@ -248,7 +248,7 @@
 
                     {{-- اطلاعات حساب مقصد --}}
                     @if($bankAccount)
-                        <div class="mt-4 border-t border-[#202938] pt-4">
+                        <div class="mt-4 border-t border-[#243247] pt-4">
                             <h4 class="text-[11px] text-[#94A3B8] font-bold mb-2">واریز به حساب</h4>
                             <div class="grid grid-cols-2 gap-3 text-xs">
                                 <div>
@@ -271,7 +271,7 @@
                                             @endif
                                         </span>
                                             <button onclick="copyToClipboard('{{ $bankAccount->card_number }}', 'شماره کارت')"
-                                                    class="p-1.5 rounded-lg bg-[#202938] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition group">
+                                                    class="p-1.5 rounded-lg bg-[#243247] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition group">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                             </button>
                                         </div>
@@ -319,7 +319,7 @@
     @if($activeTab === 'my_wallet')
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 animate-fade-in">
             {{-- Left: Upload Receipt Form --}}
-            <div class="lg:col-span-2 bg-[#111722] border border-[#202938] rounded-2xl p-5 shadow-sm">
+            <div class="lg:col-span-2 bg-[#111c2e] border border-[#243247] rounded-2xl p-5 shadow-sm">
                 <h3 class="text-sm font-bold text-[#F8FAFC] mb-1">ثبت درخواست شارژ کیف پول</h3>
                 <p class="text-[10px] text-[#94A3B8] mb-4">پس از واریز وجه، اطلاعات پرداخت و تصویر فیش را ارسال کنید.</p>
 
@@ -339,7 +339,7 @@
                             <input wire:model.live.debounce.300ms="myAmount"
                                    type="number"
                                    dir="ltr"
-                                   class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-sm rounded-xl px-4 py-3 font-mono tabular-nums focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition"
+                                   class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-sm rounded-xl px-4 py-3 font-mono tabular-nums focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition"
                                    placeholder="مثال: 1500000">
                             {{-- برای RTL، right-3 یعنی سمت چپ عدد --}}
                             <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#94A3B8] font-bold pointer-events-none">تومان</span>
@@ -359,11 +359,11 @@
                             <input wire:model="myReceipt"
                                    type="file"
                                    accept="image/*"
-                                   class="w-full bg-[#080B12] border border-[#202938] text-[#94A3B8] text-xs rounded-xl p-3 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#202938] file:text-[#F8FAFC] hover:file:bg-[#171E2B] focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition cursor-pointer">
+                                   class="w-full bg-[#080f1d] border border-[#243247] text-[#94A3B8] text-xs rounded-xl p-3 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#243247] file:text-[#F8FAFC] hover:file:bg-[#17253a] focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition cursor-pointer">
                         </div>
                         @error('myReceipt') <span class="text-[#EF4444] text-[10px] mt-1 block">{{ $message }}</span> @enderror
                         @if($myReceipt)
-                            <div class="flex items-center gap-3 mt-2 p-2 bg-[#080B12] border border-[#202938] rounded-xl">
+                            <div class="flex items-center gap-3 mt-2 p-2 bg-[#080f1d] border border-[#243247] rounded-xl">
                                 <svg class="w-4 h-4 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 12l2 2 4-4m6 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <span class="text-xs text-[#F8FAFC]">{{ $myReceipt->getClientOriginalName() }}</span>
                                 <span class="text-[10px] text-[#94A3B8]">({{ round($myReceipt->getSize() / 1024) }} KB)</span>
@@ -378,7 +378,7 @@
                         <label class="block text-[11px] text-[#94A3B8] font-bold mb-1.5">توضیحات (اختیاری)</label>
                         <textarea wire:model="myDescription"
                                   rows="2"
-                                  class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-4 py-3 focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition resize-none"
+                                  class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-xl px-4 py-3 focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition resize-none"
                                   placeholder="مثلاً: واریز بابت افزایش موجودی کیف پول"></textarea>
                     </div>
 
@@ -393,7 +393,7 @@
             </div>
 
             {{-- Right: Transaction History --}}
-            <div class="lg:col-span-3 bg-[#111722] border border-[#202938] rounded-2xl p-5 shadow-sm overflow-hidden">
+            <div class="lg:col-span-3 bg-[#111c2e] border border-[#243247] rounded-2xl p-5 shadow-sm overflow-hidden">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <h3 class="text-sm font-bold text-[#F8FAFC]">تاریخچه تراکنش‌های من</h3>
                     <div class="flex items-center gap-2">
@@ -402,7 +402,7 @@
                             <input wire:model.live.debounce.300ms="myTransactionSearch"
                                    type="text"
                                    placeholder="جستجوی شرح..."
-                                   class="w-40 sm:w-48 bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-lg py-2 pr-9 pl-3 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
+                                   class="w-40 sm:w-48 bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-lg py-2 pr-9 pl-3 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
                         </div>
                         @if($myTransactionSearch)
                             <button wire:click="$set('myTransactionSearch', '')" class="text-[#94A3B8] hover:text-[#F8FAFC] text-xs">✕</button>
@@ -412,7 +412,7 @@
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-right text-xs">
-                        <thead class="text-[#94A3B8] bg-[#080B12] border-b border-[#202938]">
+                        <thead class="text-[#94A3B8] bg-[#080f1d] border-b border-[#243247]">
                         <tr>
                             <th class="p-3 rounded-r-xl">مبلغ</th>
                             <th class="p-3">شرح</th>
@@ -420,7 +420,7 @@
                             <th class="p-3 rounded-l-xl">تاریخ</th>
                         </tr>
                         </thead>
-                        <tbody class="divide-y divide-[#202938] text-[#F8FAFC]">
+                        <tbody class="divide-y divide-[#243247] text-[#F8FAFC]">
                         @forelse($myTransactions as $tx)
                             @php
                                 $isPlus = in_array($tx->type, ['plus', 'plus_amn']);
@@ -433,7 +433,7 @@
                                 ];
                                 $status = $statusMap[$tx->approved] ?? $statusMap[1];
                             @endphp
-                            <tr class="hover:bg-[#171E2B]/40 transition">
+                            <tr class="hover:bg-[#17253a]/40 transition">
                                 <td class="p-3 font-mono font-bold {{ $color }} tabular-nums" dir="ltr">{{ $sign }}{{ number_format($tx->price) }}</td>
                                 <td class="p-3 text-[11px] max-w-[150px] truncate">{{ $tx->description ?? 'ثبت سیستمی' }}</td>
                                 <td class="p-3">
@@ -457,7 +457,7 @@
                 </div>
 
                 @if($myTransactions instanceof \Illuminate\Pagination\LengthAwarePaginator && $myTransactions->hasPages())
-                    <div class="pt-4 border-t border-[#202938] mt-4">
+                    <div class="pt-4 border-t border-[#243247] mt-4">
                         {{ $myTransactions->links() }}
                     </div>
                 @endif
@@ -471,7 +471,7 @@
     @if($activeTab === 'sub_agents')
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 animate-fade-in">
             {{-- Left: Manage Sub Agent --}}
-            <div class="lg:col-span-2 bg-[#111722] border border-[#202938] rounded-2xl p-5 shadow-sm">
+            <div class="lg:col-span-2 bg-[#111c2e] border border-[#243247] rounded-2xl p-5 shadow-sm">
                 <h3 class="text-sm font-bold text-[#F8FAFC] mb-1">مدیریت موجودی زیرنماینده</h3>
                 <p class="text-[10px] text-[#94A3B8] mb-4">انتقال وجه بین کیف پول خود و زیرنمایندگان</p>
 
@@ -493,7 +493,7 @@
                     <div>
                         <label class="block text-[11px] text-[#94A3B8] font-bold mb-1.5">انتخاب زیرنماینده <span class="text-[#EF4444]">*</span></label>
                         <select wire:model="subAgentId"
-                                class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-4 py-3 focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition">
+                                class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-xl px-4 py-3 focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition">
                             <option value="">-- انتخاب کنید --</option>
                             @foreach($subAgents as $sub)
                                 <option value="{{ $sub->id }}">{{ $sub->name }} ({{ $sub->username }})</option>
@@ -506,7 +506,7 @@
                     @if($subAgentId)
                         @php $selectedSub = $subAgents->firstWhere('id', $subAgentId); @endphp
                         @if($selectedSub)
-                            <div class="p-3 bg-[#080B12] border border-[#202938] rounded-xl flex items-center justify-between text-xs">
+                            <div class="p-3 bg-[#080f1d] border border-[#243247] rounded-xl flex items-center justify-between text-xs">
                                 <span class="text-[#94A3B8]">موجودی <span class="text-[#F8FAFC] font-bold">{{ $selectedSub->name }}</span></span>
                                 <span class="font-mono font-bold text-[#F8FAFC]">{{ number_format($selectedSub->balance) }} تومان</span>
                             </div>
@@ -517,7 +517,7 @@
                     <div>
                         <label class="block text-[11px] text-[#94A3B8] font-bold mb-1.5">نوع عملیات <span class="text-[#EF4444]">*</span></label>
                         <select wire:model="subType"
-                                class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-xl px-4 py-3 focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition">
+                                class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-xl px-4 py-3 focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition">
                             <option value="plus">افزایش موجودی (کسر از کیف پول من)</option>
                             <option value="minus">کسر موجودی (بازگشت به کیف پول من)</option>
                         </select>
@@ -529,14 +529,14 @@
                         <input wire:model="subAmount"
                                type="number"
                                dir="ltr"
-                               class="w-full bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-sm rounded-xl px-4 py-3 font-mono tabular-nums focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition"
+                               class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-sm rounded-xl px-4 py-3 font-mono tabular-nums focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition"
                                placeholder="مثال: 500000">
                         @error('subAmount') <span class="text-[#EF4444] text-[10px] mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     {{-- Summary --}}
                     @if($subAgentId && $subAmount && $subAmount > 0)
-                        <div class="p-3 bg-[#080B12] border border-[#202938] rounded-xl space-y-1.5 text-xs">
+                        <div class="p-3 bg-[#080f1d] border border-[#243247] rounded-xl space-y-1.5 text-xs">
                             <div class="flex justify-between">
                                 <span class="text-[#94A3B8]">کیف پول شما</span>
                                 <span class="font-mono font-bold text-[#F8FAFC]">{{ number_format($balance) }} تومان</span>
@@ -551,7 +551,7 @@
                                 <span>مبلغ انتقال</span>
                                 <span class="font-mono">{{ number_format($subAmount) }} تومان</span>
                             </div>
-                            <div class="border-t border-[#202938] pt-1.5 flex justify-between">
+                            <div class="border-t border-[#243247] pt-1.5 flex justify-between">
                                 <span class="text-[#94A3B8]">موجودی شما پس از عملیات</span>
                                 <span class="font-mono font-bold {{ ($subType === 'plus' && $subAmount > $balance) ? 'text-[#EF4444]' : 'text-[#F8FAFC]' }}">
                                     {{ number_format($subType === 'plus' ? $balance - $subAmount : $balance + $subAmount) }} تومان
@@ -571,7 +571,7 @@
             </div>
 
             {{-- Right: Sub Agent Transactions --}}
-            <div class="lg:col-span-3 bg-[#111722] border border-[#202938] rounded-2xl p-5 shadow-sm overflow-hidden">
+            <div class="lg:col-span-3 bg-[#111c2e] border border-[#243247] rounded-2xl p-5 shadow-sm overflow-hidden">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <h3 class="text-sm font-bold text-[#F8FAFC]">فیش‌ها و تراکنش‌های زیرنمایندگان</h3>
                     <div class="flex items-center gap-2">
@@ -580,7 +580,7 @@
                             <input wire:model.live.debounce.300ms="subTransactionSearch"
                                    type="text"
                                    placeholder="جستجوی شرح..."
-                                   class="w-40 sm:w-48 bg-[#080B12] border border-[#202938] text-[#F8FAFC] text-xs rounded-lg py-2 pr-9 pl-3 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
+                                   class="w-40 sm:w-48 bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-lg py-2 pr-9 pl-3 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
                         </div>
                         @if($subTransactionSearch)
                             <button wire:click="$set('subTransactionSearch', '')" class="text-[#94A3B8] hover:text-[#F8FAFC] text-xs">✕</button>
@@ -590,7 +590,7 @@
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-right text-xs">
-                        <thead class="text-[#94A3B8] bg-[#080B12] border-b border-[#202938]">
+                        <thead class="text-[#94A3B8] bg-[#080f1d] border-b border-[#243247]">
                         <tr>
                             <th class="p-3 rounded-r-xl">زیرنماینده</th>
                             <th class="p-3">مبلغ</th>
@@ -599,7 +599,7 @@
                             <th class="p-3 rounded-l-xl">عملیات</th>
                         </tr>
                         </thead>
-                        <tbody class="divide-y divide-[#202938] text-[#F8FAFC]">
+                        <tbody class="divide-y divide-[#243247] text-[#F8FAFC]">
                         @forelse($subTransactions as $tx)
                             @php
                                 $isPlus = in_array($tx->type, ['plus', 'plus_amn']);
@@ -613,7 +613,7 @@
                                 ];
                                 $status = $statusMap[$tx->approved] ?? $statusMap[1];
                             @endphp
-                            <tr class="hover:bg-[#171E2B]/40 transition">
+                            <tr class="hover:bg-[#17253a]/40 transition">
                                 <td class="p-3 text-[11px] font-bold text-[#F8FAFC]">{{ $subUser->name ?? 'کاربر نامشخص' }}</td>
                                 <td class="p-3 font-mono font-bold {{ $color }} tabular-nums" dir="ltr">{{ $sign }}{{ number_format($tx->price) }}</td>
                                 <td class="p-3 text-[11px]">
@@ -657,7 +657,7 @@
                 </div>
 
                 @if($subTransactions instanceof \Illuminate\Pagination\LengthAwarePaginator && $subTransactions->hasPages())
-                    <div class="pt-4 border-t border-[#202938] mt-4">
+                    <div class="pt-4 border-t border-[#243247] mt-4">
                         {{ $subTransactions->links() }}
                     </div>
                 @endif
@@ -669,15 +669,15 @@
     {{-- 6. REVIEW RECEIPT MODAL                      --}}
     {{-- ============================================ --}}
     @if($isReviewModalOpen && $reviewTransaction)
-        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#080B12]/90 backdrop-blur-md">
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#080f1d]/90 backdrop-blur-md">
             <div class="fixed inset-0" wire:click="$set('isReviewModalOpen', false)"></div>
-            <div class="relative w-full max-w-md bg-[#111722] border border-[#202938] rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-                <div class="flex items-center justify-between p-5 border-b border-[#202938]">
+            <div class="relative w-full max-w-md bg-[#111c2e] border border-[#243247] rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center justify-between p-5 border-b border-[#243247]">
                     <h3 class="text-sm font-bold text-[#F8FAFC] flex items-center gap-2">
                         <svg class="w-5 h-5 text-[#F59E0B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 12l2 2 4-4m6 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         بررسی فیش واریزی
                     </h3>
-                    <button wire:click="$set('isReviewModalOpen', false)" class="p-1.5 rounded-lg bg-[#202938] text-[#94A3B8] hover:text-[#F8FAFC] transition">
+                    <button wire:click="$set('isReviewModalOpen', false)" class="p-1.5 rounded-lg bg-[#243247] text-[#94A3B8] hover:text-[#F8FAFC] transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -703,7 +703,7 @@
                     </div>
 
                     @if($reviewTransaction->attachment)
-                        <div class="bg-[#080B12] border border-[#202938] rounded-xl p-3 text-center">
+                        <div class="bg-[#080f1d] border border-[#243247] rounded-xl p-3 text-center">
                             <a href="{{ asset('storage/' . $reviewTransaction->attachment) }}" target="_blank"
                                class="inline-flex items-center gap-2 text-[#3B82F6] hover:text-[#2563EB] text-xs font-bold transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -712,7 +712,7 @@
                         </div>
                     @endif
 
-                    <div class="border-t border-[#202938] pt-4 flex items-center gap-3">
+                    <div class="border-t border-[#243247] pt-4 flex items-center gap-3">
                         <button wire:click="toggleSubAgentReceipt({{ $reviewTransaction->id }}, 2)"
                                 class="flex-1 py-2.5 rounded-xl bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-bold transition">
                             رد فیش
@@ -741,7 +741,7 @@
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 translate-y-2"
              x-transition:enter-end="opacity-100 translate-y-0"
-             class="fixed bottom-6 left-6 z-[200] max-w-sm bg-[#111722] border border-[#202938] rounded-2xl p-4 shadow-2xl">
+             class="fixed bottom-6 left-6 z-[200] max-w-sm bg-[#111c2e] border border-[#243247] rounded-2xl p-4 shadow-2xl">
             <div class="flex items-start gap-3">
                 <div class="w-8 h-8 rounded-full {{ session('toast_type') === 'success' ? 'bg-[#10B981]/20 text-[#10B981]' : 'bg-[#EF4444]/20 text-[#EF4444]' }} flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="{{ session('toast_type') === 'success' ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12' }}"/></svg>

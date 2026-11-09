@@ -20,7 +20,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             @foreach($servers as $server)
-                <div class="bg-[#111827] border border-zinc-800 rounded-3xl p-5 relative overflow-hidden">
+                <div class="bg-[#111c2e] border border-zinc-800 rounded-2xl p-5 relative overflow-hidden">
                     <div class="flex justify-between items-center mb-4">
                         <div class="flex items-center gap-3">
                             <span class="flex h-3 w-3 relative">
@@ -56,13 +56,13 @@
                 وضعیت زیرساخت‌ها
             </h2>
 
-            <button wire:click="openServiceModal" class="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-orange-500/20 transition flex items-center gap-2">
+            <button wire:click="openServiceModal" class="px-4 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 افزودن سرویس / تغییر وضعیت
             </button>
         </div>
 
-        <div class="bg-[#111827] border border-zinc-800 rounded-3xl shadow-xl overflow-hidden">
+        <div class="bg-[#111c2e] border border-zinc-800 rounded-2xl shadow-xl overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-right">
                     <thead class="bg-zinc-900/50 border-b border-zinc-800">
@@ -99,7 +99,7 @@
                             <td class="p-4 text-[10px] text-zinc-500 font-mono">{{ jdate($srv->updated_at)->ago() }}</td>
 
                             <td class="p-4 flex items-center justify-center gap-2">
-                                <button wire:click="openServiceModal({{ $srv->id }})" class="p-2 rounded-xl bg-zinc-800 text-zinc-400 hover:text-orange-400 transition" title="ویرایش وضعیت">
+                                <button wire:click="openServiceModal({{ $srv->id }})" class="p-2 rounded-xl bg-zinc-800 text-zinc-400 hover:text-brand-400 transition" title="ویرایش وضعیت">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </button>
                                 <button wire:click="deleteService({{ $srv->id }})" wire:confirm="آیا از حذف این سرویس مطمئن هستید؟" class="p-2 rounded-xl bg-zinc-800 text-zinc-400 hover:text-rose-400 transition" title="حذف">
@@ -120,9 +120,9 @@
 
     @if($isServiceModalOpen)
         <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
-            <div class="w-full max-w-md bg-[#111827] border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden my-8 flex flex-col">
+            <div class="w-full max-w-md bg-[#111c2e] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden my-8 flex flex-col">
 
-                <div class="p-5 border-b border-zinc-800 flex items-center justify-between bg-[#09090b]">
+                <div class="p-5 border-b border-zinc-800 flex items-center justify-between bg-[#080f1d]">
                     <h3 class="text-base font-black text-white">
                         {{ $serviceId ? 'ویرایش وضعیت سرویس' : 'ثبت سرویس و وضعیت جدید' }}
                     </h3>
@@ -135,7 +135,7 @@
 
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-1.5">انتخاب سرور <span class="text-rose-500">*</span></label>
-                        <select wire:model="service_name" class="w-full bg-[#09090b] border border-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-orange-500 outline-none appearance-none">
+                        <select wire:model="service_name" class="w-full bg-[#080f1d] border border-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-brand-500 outline-none appearance-none">
                             <option value="">-- لطفاً یک سرور را انتخاب کنید --</option>
 
                             <optgroup label="لیست سرورهای شما">
@@ -156,13 +156,13 @@
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-1.5">وضعیت عملیاتی <span class="text-rose-500">*</span></label>
                         <div class="grid grid-cols-3 gap-2">
-                            <button type="button" wire:click="$set('status', 'operational')" class="py-2.5 rounded-xl border text-xs font-bold transition-all {{ $status === 'operational' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500' : 'bg-[#09090b] border-zinc-800 text-zinc-500' }}">
+                            <button type="button" wire:click="$set('status', 'operational')" class="py-2.5 rounded-xl border text-xs font-bold transition-all {{ $status === 'operational' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500' : 'bg-[#080f1d] border-zinc-800 text-zinc-500' }}">
                                 نرمال
                             </button>
-                            <button type="button" wire:click="$set('status', 'degraded')" class="py-2.5 rounded-xl border text-xs font-bold transition-all {{ $status === 'degraded' ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-[#09090b] border-zinc-800 text-zinc-500' }}">
+                            <button type="button" wire:click="$set('status', 'degraded')" class="py-2.5 rounded-xl border text-xs font-bold transition-all {{ $status === 'degraded' ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-[#080f1d] border-zinc-800 text-zinc-500' }}">
                                 اختلال
                             </button>
-                            <button type="button" wire:click="$set('status', 'outage')" class="py-2.5 rounded-xl border text-xs font-bold transition-all {{ $status === 'outage' ? 'bg-rose-500/10 border-rose-500 text-rose-500' : 'bg-[#09090b] border-zinc-800 text-zinc-500' }}">
+                            <button type="button" wire:click="$set('status', 'outage')" class="py-2.5 rounded-xl border text-xs font-bold transition-all {{ $status === 'outage' ? 'bg-rose-500/10 border-rose-500 text-rose-500' : 'bg-[#080f1d] border-zinc-800 text-zinc-500' }}">
                                 قطعی
                             </button>
                         </div>
@@ -171,12 +171,12 @@
 
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-1.5">اطلاعیه و جزئیات رخداد (اختیاری)</label>
-                        <textarea wire:model="last_change_log" rows="3" placeholder="مثال: سرورها در حال ارتقا سخت‌افزاری هستند و تا ۲ ساعت آینده اختلال خواهیم داشت..." class="w-full bg-[#09090b] border border-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-orange-500 outline-none"></textarea>
+                        <textarea wire:model="last_change_log" rows="3" placeholder="مثال: سرورها در حال ارتقا سخت‌افزاری هستند و تا ۲ ساعت آینده اختلال خواهیم داشت..." class="w-full bg-[#080f1d] border border-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-brand-500 outline-none"></textarea>
                     </div>
 
                     <div class="flex gap-3 pt-2">
                         <button type="button" wire:click="$set('isServiceModalOpen', false)" class="flex-1 py-3 rounded-xl bg-zinc-800 text-white text-sm font-bold hover:bg-zinc-700 transition">انصراف</button>
-                        <button type="submit" class="flex-1 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-black transition shadow-lg shadow-orange-500/20">
+                        <button type="submit" class="flex-1 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-black transition shadow-lg shadow-brand-500/20">
                             {{ $serviceId ? 'ثبت تغییرات' : 'افزودن به لیست' }}
                         </button>
                     </div>
