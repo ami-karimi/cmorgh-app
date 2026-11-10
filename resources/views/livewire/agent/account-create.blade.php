@@ -18,6 +18,17 @@
     </div>
     @enderror
 
+    @if($errors->any())
+        <div role="alert" class="p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl text-sm">
+            <p class="font-bold mb-2">صدور انجام نشد؛ موارد زیر را بررسی کنید:</p>
+            <ul class="list-disc list-inside space-y-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <div class="lg:col-span-2 space-y-6">
@@ -244,6 +255,7 @@
                                                 <input wire:model="newCustomerEmail" type="email" dir="ltr" class="flex-1 bg-zinc-950 border border-zinc-700 text-white rounded-lg text-xs p-2.5 font-mono focus:ring-1 focus:ring-brand-500">
                                                 <button type="button" wire:click="generateRandomEmail" class="px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-[10px] font-bold transition whitespace-nowrap">تولید ایمیل رندوم 🎲</button>
                                             </div>
+                                            @error('newCustomerEmail') <span class="text-red-500 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                                         </div>
                                     </div>
                                 </div>
@@ -297,8 +309,9 @@
                     @endif
 
                     <div class="pt-2 text-left">
-                        <button type="submit" class="px-8 py-3 w-full md:w-auto bg-gradient-to-r from-brand-600 to-amber-500 hover:from-brand-500 text-white font-bold text-sm rounded-xl shadow-[0_5px_15px_-5px_rgba(59,130,246,0.4)] transition-all">
-                            تایید، صدور و کسر هزینه
+                        <button type="submit" wire:loading.attr="disabled" wire:target="createAccounts" class="px-8 py-3 w-full md:w-auto bg-gradient-to-r from-brand-600 to-amber-500 hover:from-brand-500 text-white font-bold text-sm rounded-xl shadow-[0_5px_15px_-5px_rgba(59,130,246,0.4)] transition-all">
+                            <span wire:loading.remove wire:target="createAccounts">تایید، صدور و کسر هزینه</span>
+                            <span wire:loading wire:target="createAccounts">در حال صدور اکانت…</span>
                         </button>
                     </div>
                 </form>

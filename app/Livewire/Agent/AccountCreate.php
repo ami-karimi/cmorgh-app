@@ -87,6 +87,10 @@ class AccountCreate extends Component
     public function createAccounts()
     {
         $agent = Auth::user();
+        // Bulk issuance uses the archive; its customer fields are not displayed.
+        $customerId = $this->creationType === 'bulk' ? 'me' : $this->customer_id;
+        $this->isErrorModalOpen = false;
+        $this->errorMessage = '';
 
         // ==========================================
         // ۱. جمع‌آوری تمام قوانین و پیام‌های خطا به صورت یکجا
@@ -102,10 +106,10 @@ class AccountCreate extends Component
         ];
 
         // اگر مشتری جدید بود، قوانین مشتری هم اضافه شود
-        if ($this->customer_id === 'new') {
+        if ($customerId === 'new') {
             $rules['newCustomerName']  = 'required|string|max:255';
             $rules['newCustomerPhone'] = 'nullable|string|max:20';
-            $rules['newCustomerEmail'] = 'required|email|max:255';
+            $rules['newCustomerEmail'] = 'nullable|email|max:255';
 
             $messages['newCustomerName.required']  = 'وارد کردن نام مشتری الزامی است.';
             $messages['newCustomerEmail.required'] = 'وارد کردن ایمیل الزامی است.';
@@ -160,25 +164,25 @@ class AccountCreate extends Component
         // ==========================================
         DB::beginTransaction();
         try {
-            $provisioningService = new \App\Services\AccountProvisioningService();
+            $provisioningService = app(\App\Services\AccountProvisioningService::class);
             $targetUser = null;
             $existingUserId = null;
 
             // ثبت یا پیدا کردن مشتری
-            if ($this->customer_id === 'me') {
+            if ($customerId === 'me') {
                 $targetUser = User::firstOrCreate(
                     ['creator' => $agent->id, 'role' => 'customer', 'email' => 'archive_' . $agent->id . '@local.system'],
                     ['name' => '🗂️ آرشیو اکانت‌های من', 'username' => 'archive_agent_' . $agent->id, 'password' => \Illuminate\Support\Facades\Hash::make(Str::random(16)), 'is_active' => 1]
                 );
                 $existingUserId = $targetUser->id;
-            } elseif (is_numeric($this->customer_id)) {
-                $targetUser = User::find($this->customer_id);
+            } elseif (is_numeric($customerId)) {
+                $targetUser = User::where('creator', $agent->id)->where('role', 'customer')->findOrFail($customerId);
                 $existingUserId = $targetUser->id;
-            } elseif ($this->customer_id === 'new') {
+            } elseif ($customerId === 'new') {
                 $targetUser = new User([
                     'name'     => $this->newCustomerName,
-                    'username' => $this->newCustomerPhone ?? Str::random(10),
-                    'email'    => $this->newCustomerEmail,
+                    'username' => $this->newCustomerPhone ?: Str::random(10),
+                    'email'    => $this->newCustomerEmail ?: null,
                     'phone'    => $this->newCustomerPhone,
                 ]);
             }
@@ -207,7 +211,7 @@ class AccountCreate extends Component
                     throw new \Exception($result['message']);
                 }
 
-                $accountObj = $result['account'] ?? null;
+                $accountObj = $result instanceof Accounts ? $result : ($result['account'] ?? null);
                 $createdList[] = [
                     'id'            => $accountObj ? $accountObj->id : null,
                     'username'      => strtolower($this->username),
@@ -218,7 +222,8 @@ class AccountCreate extends Component
 
                 // ثبت اکانت گروهی
             } else {
-                $defaultWgServerId = $this->service_group === 'wireguard' ? \App\Models\Nas::where('type', 'wireguard')->value('id') : null;
+                $defaultWgServerId = $this->service_group === 'wireguard' && $this->selectedWgServer !== 'auto'
+                    ? $this->selectedWgServer : null;
 
                 for ($i = 0; $i < $this->bulkCount; $i++) {
                     do {
@@ -244,7 +249,7 @@ class AccountCreate extends Component
                         throw new \Exception("خطا در ساخت اکانت گروهی: " . $result['message']);
                     }
 
-                    $accountObj = $result['account'] ?? null;
+                    $accountObj = $result instanceof Accounts ? $result : ($result['account'] ?? null);
                     $createdList[] = [
                         'id'            => $accountObj ? $accountObj->id : null,
                         'username'      => $randUser,
@@ -263,8 +268,9 @@ class AccountCreate extends Component
             $this->reset(['username', 'password', 'group_id', 'newCustomerName', 'newCustomerPhone', 'newCustomerEmail']);
             $this->customer_id = 'new';
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
+            report($e);
             $this->errorMessage = 'خطای سیستمی رخ داد: ' . $e->getMessage();
             $this->isErrorModalOpen = true;
         }
@@ -303,7 +309,7 @@ class AccountCreate extends Component
 
         // فیلتر نوار جستجو
         if (!empty($this->searchPlan)) {
-            $groupsQuery->where('name', 'like', '\%' .$this->searchPlan . '%');
+            $groupsQuery->where('name', 'like', '%' .$this->searchPlan . '%');
         }
 
         $availableGroups =$groupsQuery->get();
