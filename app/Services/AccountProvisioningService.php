@@ -85,8 +85,7 @@ class AccountProvisioningService
             'phonenumber'   => $phone ?? $user->phone ?? null,
             'group_id'      => $group->id,
             'service_group' => $serviceGroup,
-            'multi_login'   => $group->
-                ?? 1,
+            'multi_login'   => $group->multi_login ?? 1,
             'expire_type'   => $group->expire_type ?? 'month',
             'expire_value'  => $group->expire_value ?? 1,
             'expire_date'   => $expireDate,
