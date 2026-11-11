@@ -10,8 +10,8 @@
                     @endif
                 </th>
                 <th class="p-3 cursor-pointer hover:text-[#F59E0B] transition" wire:click="sortBy('user_id')">نماینده</th>
-                <th class="p-3 cursor-pointer hover:text-[#F59E0B] transition" wire:click="sortBy('requested_amount')">مبلغ درخواستی</th>
-                <th class="p-3 cursor-pointer hover:text-[#F59E0B] transition" wire:click="sortBy('payable_amount')">مبلغ یونیک</th>
+                <th class="p-3 cursor-pointer hover:text-[#F59E0B] transition" wire:click="sortBy('requested_amount')">مبلغ درخواستی (تومان)</th>
+                <th class="p-3 cursor-pointer hover:text-[#F59E0B] transition" wire:click="sortBy('payable_amount')">مبلغ پرداخت (تومان)</th>
                 <th class="p-3">وضعیت</th>
                 <th class="p-3">تطبیق</th>
                 <th class="p-3 cursor-pointer hover:text-[#F59E0B] transition" wire:click="sortBy('created_at')">تاریخ ثبت</th>
@@ -27,11 +27,11 @@
                         <div class="text-[10px] text-[#94A3B8]">@ {{ $request->user?->username ?? '' }}</div>
                     </td>
                     <td class="p-3 font-mono font-bold text-[#F8FAFC]">{{ number_format($request->requested_amount) }}</td>
-                    <td class="p-3 font-mono font-bold text-[#F59E0B]">{{ number_format($request->payable_amount) }}</td>
+                    <td class="p-3 font-mono font-bold text-[#F59E0B]">{{ number_format($request->payable_amount / 10) }}</td>
                     <td class="p-3">
                         @php
-                            $colors = ['pending'=>'bg-yellow-500/10 text-yellow-500','paid'=>'bg-blue-500/10 text-blue-500','verifying'=>'bg-brand-500/10 text-brand-500','approved'=>'bg-green-500/10 text-green-500','rejected'=>'bg-red-500/10 text-red-500','expired'=>'bg-gray-500/10 text-gray-500'];
-                            $labels = ['pending'=>'در انتظار','paid'=>'پرداخت شده','verifying'=>'در حال بررسی','approved'=>'تأیید شده','rejected'=>'رد شده','expired'=>'منقضی شده'];
+                            $colors = ['pending'=>'bg-yellow-500/10 text-yellow-500','paid'=>'bg-blue-500/10 text-blue-500','verifying'=>'bg-brand-500/10 text-brand-500','completed'=>'bg-green-500/10 text-green-500','approved'=>'bg-green-500/10 text-green-500','rejected'=>'bg-red-500/10 text-red-500','expired'=>'bg-gray-500/10 text-gray-500'];
+                            $labels = ['pending'=>'در انتظار','paid'=>'پرداخت شده','verifying'=>'در حال بررسی','completed'=>'تأیید شده','approved'=>'تأیید شده','rejected'=>'رد شده','expired'=>'منقضی شده'];
                         @endphp
                         <span class="px-2 py-1 rounded-lg text-[10px] font-bold border {{ $colors[$request->status] ?? 'bg-gray-500/10 text-gray-500' }}">
                                 {{ $labels[$request->status] ?? $request->status }}
@@ -66,7 +66,7 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
                                 @if(!$request->matched_bank_message_id)
-                                    <button wire:click="openMatchModal({{ $request->id }})" class="p-1.5 rounded-lg bg-[#243247] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition" title="تطبیق دستی">
+                                    <button wire:click="openMatchModal({{ $request->id }})" class="p-1.5 rounded-lg bg-[#243247] hover:bg-[#F59E0B] text-[#94A3B8] hover:text-white transition" wire:loading.attr="disabled" title="تطبیق دستی">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                     </button>
                                 @endif

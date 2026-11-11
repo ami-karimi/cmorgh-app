@@ -1,4 +1,7 @@
 <div class="bg-[#111c2e] border border-[#243247] rounded-xl p-4 space-y-3">
+    @foreach(['filters.date_from', 'filters.date_to', 'filters.amount_min', 'filters.amount_max'] as $field)
+        @error($field) <p role="alert" class="text-red-400 text-xs">{{ $message }}</p> @enderror
+    @endforeach
     <div class="flex flex-wrap items-center gap-3">
         <div class="flex-1 min-w-[200px]">
             <div class="relative">
@@ -10,20 +13,27 @@
             </div>
         </div>
 
+        @if($activeTab === 'requests')
         <select wire:model.live="filters.status" class="bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
             <option value="">همه وضعیت‌ها</option>
             <option value="pending">در انتظار</option>
             <option value="paid">پرداخت شده</option>
-            <option value="verifying">در حال بررسی</option>
             <option value="approved">تأیید شده</option>
             <option value="rejected">رد شده</option>
             <option value="expired">منقضی شده</option>
         </select>
-
+        @else
+        <select wire:model.live="filters.message_status" class="bg-[#080f1d] rounded-xl px-3 py-2.5 text-xs" aria-label="وضعیت پیام">
+            <option value="">همه پیام‌ها</option>
+            <option value="pending">در انتظار بررسی</option>
+            <option value="checked">بررسی شده، بدون تطبیق</option>
+            <option value="matched">تطبیق شده</option>
+        </select>
+        @endif
 
         <select wire:model.live="filters.match_status" class="bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
             <option value="">همه تطبیق‌ها</option>
-            <option value="pending">در انتظار</option>
+            <option value="automatic">تطبیق خودکار</option>
             <option value="matched">تطبیق شده</option>
             <option value="unmatched">بدون تطبیق</option>
             <option value="manual">تطبیق دستی</option>
@@ -31,11 +41,11 @@
 
         <input wire:model.live.debounce.300ms="filters.amount_min"
                type="number"
-               placeholder="حداقل مبلغ"
+               placeholder="حداقل تومان"
                class="w-28 bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
         <input wire:model.live.debounce.300ms="filters.amount_max"
                type="number"
-               placeholder="حداکثر مبلغ"
+               placeholder="حداکثر تومان"
                class="w-28 bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#F59E0B] transition">
 
         <div>
@@ -62,6 +72,9 @@
             فقط بدون تطبیق
         </label>
 
+        <select wire:model.live="perPage" aria-label="تعداد در صفحه" class="bg-[#080f1d] rounded-xl px-3 py-2.5 text-xs">
+            @foreach([15, 25, 50, 100] as $count)<option value="{{ $count }}">{{ $count }} در صفحه</option>@endforeach
+        </select>
         <button wire:click="resetFilters" class="px-4 py-2.5 rounded-xl bg-[#243247] text-[#94A3B8] hover:text-[#F8FAFC] text-xs transition">
             بازنشانی
         </button>

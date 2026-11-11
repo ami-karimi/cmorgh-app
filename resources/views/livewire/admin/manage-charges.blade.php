@@ -1,4 +1,8 @@
 <div class="space-y-6" x-data="{ drawerOpen: @entangle('showDrawer') }">
+    @php
+        $statusLabels = ['pending'=>'در انتظار', 'paid'=>'پرداخت شده', 'completed'=>'تأیید شده', 'approved'=>'تأیید شده', 'rejected'=>'رد شده', 'expired'=>'منقضی شده'];
+    @endphp
+    @error('operation') <div role="alert" class="p-4 rounded-xl bg-red-500/10 text-red-400">{{ $message }}</div> @enderror
     {{-- Header --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -6,6 +10,7 @@
             <p class="text-xs text-[#94A3B8] mt-1">مدیریت درخواست‌های شارژ، پیام‌های بانکی و تطبیق خودکار تراکنش‌ها</p>
         </div>
         <div class="flex items-center gap-3">
+            <button wire:click="processPendingMessages" wire:loading.attr="disabled" wire:confirm="پیام‌های جدید بررسی و پرداخت‌های سازگار به کیف پول اضافه می‌شوند. ادامه می‌دهید؟" class="px-4 py-2 rounded-xl bg-[#243247] text-xs">پردازش پیام‌های جدید</button>
             <button wire:click="$refresh" class="px-4 py-2 rounded-xl bg-[#243247] text-[#94A3B8] text-xs hover:text-[#F8FAFC] transition">
                 <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                 بروزرسانی
@@ -55,9 +60,9 @@
         </button>
     </div>
 
+    @include('livewire.admin.partials.charge-filters')
     {{-- ========== TAB: REQUESTS ========== --}}
     @if($activeTab === 'requests')
-        @include('livewire.admin.partials.charge-filters')
         @include('livewire.admin.partials.charge-table')
     @endif
 
@@ -82,5 +87,5 @@
     @endif
 
     {{-- Toast --}}
-    @include('livewire.admin.partials.toast')
+    {{-- Feedback is handled by the shared shell toast region. --}}
 </div>

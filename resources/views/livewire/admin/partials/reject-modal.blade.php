@@ -14,8 +14,9 @@
                 <textarea wire:model="rejectReason" rows="3" class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-sm rounded-xl px-4 py-3 focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition" placeholder="دلیل را وارد کنید..."></textarea>
                 @error('rejectReason') <span class="text-[#EF4444] text-[10px]">{{ $message }}</span> @enderror
             </div>
+            @error('operation') <p role="alert" class="text-red-400 text-xs">{{ $message }}</p> @enderror
             <div class="flex gap-3 pt-3 border-t border-[#243247]">
-                <button wire:click="confirmReject" class="flex-1 py-2.5 rounded-xl bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-bold transition">
+                <button wire:click="confirmReject" wire:loading.attr="disabled" class="flex-1 py-2.5 rounded-xl bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-bold transition">
                     تأیید رد
                 </button>
                 <button wire:click="$set('showRejectModal', false)" class="flex-1 py-2.5 rounded-xl bg-[#243247] hover:bg-[#333] text-[#94A3B8] text-xs font-bold transition">

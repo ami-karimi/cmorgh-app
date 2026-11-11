@@ -243,7 +243,7 @@
                     {{-- هشدار --}}
                     <div class="mt-3 flex items-start gap-2 text-[10px] text-[#EF4444] bg-[#EF4444]/5 border border-[#EF4444]/20 rounded-xl p-3">
                         <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        <span><strong>توجه:</strong> برای تأیید خودکار، دقیقاً مبلغ <strong>{{ number_format($activeRequest->payable_amount) }}</strong> تومان را به شماره کارت زیر واریز کنید.</span>
+                        <span><strong>توجه:</strong> برای تأیید خودکار، دقیقاً مبلغ <strong>{{ number_format($activeRequest->payable_amount / 10) }}</strong> تومان را به شماره کارت زیر واریز کنید.</span>
                     </div>
 
                     {{-- اطلاعات حساب مقصد --}}

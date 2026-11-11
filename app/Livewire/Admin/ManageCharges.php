@@ -4,17 +4,13 @@ namespace App\Livewire\Admin;
 
 use App\Models\TopupRequest;
 use App\Models\BankMessage;
-use App\Models\User;
-use App\Models\Financial;
-use App\Models\AuditLog;
+use App\Services\BankPaymentService;
 use App\Traits\ConvertsDates;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Morilog\Jalali\Jalalian;
+use Illuminate\Validation\ValidationException;
 
 #[Title('تایید خودکار کارت به کارت | همراه سیمرغ')]
 #[Layout('layouts.admin')]
@@ -26,396 +22,276 @@ class ManageCharges extends Component
     public $perPage = 15;
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
-
-    // حذف match_status از فیلترها
     public $filters = [
-        'search' => '',
-        'status' => '',
-        'date_from' => '',
-        'date_to' => '',
-        'today' => false,
-        'unmatched_only' => false,
-        'amount_min' => '',
-        'amount_max' => '',
+        'search' => '', 'status' => '', 'message_status' => '', 'match_status' => '',
+        'date_from' => '', 'date_to' => '', 'today' => false,
+        'unmatched_only' => false, 'amount_min' => '', 'amount_max' => '',
     ];
-
     public $selectedRequestId = null;
     public $selectedMessageId = null;
     public $showDrawer = false;
-
     public $showMatchModal = false;
     public $matchRequestId = null;
     public $matchMessageId = null;
     public $matchableMessages = [];
-
     public $showRejectModal = false;
     public $rejectRequestId = null;
     public $rejectReason = '';
 
-    protected $queryString = [
-        'activeTab' => ['except' => 'requests'],
-        'filters' => ['except' => []],
-    ];
+    protected $queryString = ['activeTab' => ['except' => 'requests'], 'filters' => ['except' => []]];
 
-    // ========== متدهای فیلتر ==========
-
-    public function resetFilters()
+    public function boot(): void
     {
-        $this->filters = [
-            'search' => '',
-            'status' => '',
-            'date_from' => '',
-            'date_to' => '',
-            'today' => false,
-            'unmatched_only' => false,
-            'amount_min' => '',
-            'amount_max' => '',
-        ];
-        $this->resetPage();
+        // Also protect Livewire actions; route middleware alone is not enough.
+        abort_unless(auth()->check() && in_array(auth()->user()->role, ['admin', 'manager'], true), 403);
     }
 
-    public function sortBy($field)
+    public function updatedFilters(): void
     {
-        if ($this->sortField === $field) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortField = $field;
-            $this->sortDirection = 'asc';
+        foreach (['date_from', 'date_to', 'amount_min', 'amount_max'] as $key) {
+            $value = $this->normalizeDigits((string) ($this->filters[$key] ?? ''));
+            $this->filters[$key] = $value;
+            $this->resetValidation('filters.'.$key);
+            if ($value !== '') {
+                if (str_starts_with($key, 'date_') && !$this->filterDate($value)) {
+                    $this->addError('filters.'.$key, 'تاریخ شمسی معتبر با قالب ۱۴۰۵/۰۶/۱۲ وارد کنید.');
+                } elseif (str_starts_with($key, 'amount_') && (!ctype_digit($value) || (int) $value > 100000000)) {
+                    $this->addError('filters.'.$key, 'مبلغ باید عدد صحیح نامنفی برحسب تومان باشد.');
+                }
+            }
         }
+        if (is_numeric($this->filters['amount_min']) && is_numeric($this->filters['amount_max'])
+            && $this->filters['amount_min'] > $this->filters['amount_max']) {
+            $this->addError('filters.amount_max', 'حداکثر مبلغ نباید کمتر از حداقل باشد.');
+        }
+        $this->resetPage('requestsPage');
+        $this->resetPage('messagesPage');
     }
 
-    // ========== کوئری درخواست‌ها ==========
+    public function updatedPerPage(): void { $this->updatedFilters(); }
+    public function updatedActiveTab(): void { $this->updatedFilters(); }
 
-    public function getRequestsQuery()
+    public function resetFilters(): void
     {
-        $query = TopupRequest::with(['user', 'matchedBankMessage']);
+        $this->reset('filters');
+        $this->resetValidation();
+        $this->updatedFilters();
+    }
 
-        // جستجو
-        if (!empty($this->filters['search'])) {
-            $search = $this->filters['search'];
-            $query->where(function ($q) use ($search) {
-                $q->where('id', $search)
-                    ->orWhere('payable_amount', $search)
-                    ->orWhere('requested_amount', $search)
-                    ->orWhereHas('user', function ($u) use ($search) {
-                        $u->where('name', 'like', "%{$search}%")
-                            ->orWhere('username', 'like', "%{$search}%")
-                            ->orWhere('mobile', 'like', "%{$search}%");
+    public function sortBy($field): void
+    {
+        if (!in_array($field, ['id', 'user_id', 'requested_amount', 'payable_amount', 'created_at'], true)) {
+            return;
+        }
+        $this->sortDirection = $this->sortField === $field && $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        $this->sortField = $field;
+        $this->updatedFilters();
+    }
+
+    private function normalizeDigits(string $value): string
+    {
+        return strtr(trim($value), array_combine(
+            preg_split('//u', '۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩', -1, PREG_SPLIT_NO_EMPTY), str_split('01234567890123456789')
+        ));
+    }
+
+    private function filterDate(string $value): ?string
+    {
+        $value = str_replace('-', '/', $this->normalizeDigits($value));
+        if (!preg_match('/^[0-9]{4}\/[0-9]{2}\/[0-9]{2}$/', $value)) { return null; }
+        try {
+            $date = \Morilog\Jalali\Jalalian::fromFormat('Y/m/d', $value)->toCarbon();
+            return \Morilog\Jalali\Jalalian::fromCarbon($date)->format('Y/m/d') === $value ? $date->toDateString() : null;
+        } catch (\Throwable) { return null; }
+    }
+
+    private function applyCommonFilters($query, bool $messages = false)
+    {
+        $filters = array_merge((new self)->filters, $this->filters);
+        $search = $this->normalizeDigits((string) $filters['search']);
+        if ($search !== '') {
+            $query->where(function ($q) use ($search, $messages) {
+                $q->where('id', $search);
+                if ($messages) {
+                    $q->orWhere('account_number', 'like', "%{$search}%")->orWhere('raw_message', 'like', "%{$search}%");
+                } else {
+                    $phone = (new \App\Models\User(['phone' => $search]))->phone;
+                    $q->orWhereHas('user', function ($u) use ($search, $phone) {
+                        $u->where('name', 'like', "%{$search}%")->orWhere('username', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                        if ($phone) { $u->orWhere('phone', $phone); }
                     });
+                }
+                if (is_numeric($search)) {
+                    if ($messages) {
+                        $q->orWhere('deposit_amount', (int) $search * 10);
+                    } else {
+                        $q->orWhere('requested_amount', (int) $search)->orWhere('payable_amount', (int) $search * 10);
+                    }
+                }
             });
         }
-
-        // فیلتر وضعیت
-        if (!empty($this->filters['status'])) {
-            $query->where('status', $this->filters['status']);
-        }
-
-        // فیلتر بازه تاریخ شمسی → تبدیل به میلادی
-        if (!empty($this->filters['date_from'])) {
-            $gregorianFrom = $this->jalaliToGregorian($this->filters['date_from']);
-            if ($gregorianFrom) {
-                $query->whereDate('created_at', '>=', $gregorianFrom);
+        foreach (['date_from' => '>=', 'date_to' => '<='] as $key => $operator) {
+            if ($filters[$key] && ($date = $this->filterDate((string) $filters[$key]))) {
+                $query->whereDate('created_at', $operator, $date);
             }
         }
-        if (!empty($this->filters['date_to'])) {
-            $gregorianTo = $this->jalaliToGregorian($this->filters['date_to']);
-            if ($gregorianTo) {
-                $query->whereDate('created_at', '<=', $gregorianTo);
+        if ($filters['today']) { $query->whereDate('created_at', today()); }
+        foreach (['amount_min' => '>=', 'amount_max' => '<='] as $key => $operator) {
+            if ($filters[$key] !== '' && is_numeric($filters[$key])) {
+                $query->where($messages ? 'deposit_amount' : 'requested_amount', $operator, (int) $filters[$key] * ($messages ? 10 : 1));
             }
         }
-
-        // فیلتر امروز
-        if ($this->filters['today']) {
-            $query->whereDate('created_at', today());
+        $match = $filters['unmatched_only'] ? 'unmatched' : $filters['match_status'];
+        if ($messages) {
+            $messageStatus = $filters['message_status'];
+            if ($messageStatus === 'pending') { $query->where('processed', false); }
+            if ($messageStatus === 'checked') { $query->where('processed', true)->whereDoesntHave('matchedRequest'); }
+            if ($messageStatus === 'matched') { $query->whereHas('matchedRequest'); }
+            if (in_array($match, ['matched', 'unmatched'], true)) {
+                $match === 'matched' ? $query->whereHas('matchedRequest') : $query->whereDoesntHave('matchedRequest');
+            } elseif (in_array($match, ['manual', 'automatic'], true)) {
+                $query->whereHas('matchedRequest', fn ($q) => $q->where('match_type', $match));
+            }
+        } else {
+            if ($match === 'matched') { $query->whereNotNull('matched_bank_message_id'); }
+            if ($match === 'unmatched') { $query->whereNull('matched_bank_message_id'); }
+            if (in_array($match, ['manual', 'automatic'], true)) { $query->where('match_type', $match); }
         }
-
-        // فیلتر مبلغ
-        if (!empty($this->filters['amount_min'])) {
-            $query->where('requested_amount', '>=', (int) $this->filters['amount_min']);
-        }
-        if (!empty($this->filters['amount_max'])) {
-            $query->where('requested_amount', '<=', (int) $this->filters['amount_max']);
-        }
-
-        // فقط درخواست‌های بدون تطبیق (matched_bank_message_id IS NULL)
-        if ($this->filters['unmatched_only']) {
-            $query->whereNull('matched_bank_message_id');
-        }
-
-        // سورت
-        $query->orderBy($this->sortField, $this->sortDirection);
-
         return $query;
     }
 
-    // ========== آمار ==========
-
-    public function getStats()
+    public function getRequestsQuery()
     {
+        $query = $this->applyCommonFilters(TopupRequest::with(['user', 'matchedBankMessage']));
+        $status = $this->filters['status'] ?? '';
+        if (in_array($status, ['approved', 'completed'], true)) {
+            $query->whereIn('status', ['completed', 'approved']);
+        } elseif (in_array($status, ['pending', 'paid', 'rejected', 'expired'], true)) {
+            $query->where('status', $status);
+        }
+        $sort = in_array($this->sortField, ['id', 'user_id', 'requested_amount', 'payable_amount', 'created_at'], true) ? $this->sortField : 'created_at';
+        return $query->orderBy($sort, $this->sortDirection === 'asc' ? 'asc' : 'desc')->orderBy('id', 'desc');
+    }
+
+    public function getStats(): array
+    {
+        $dateColumn = \Illuminate\Support\Facades\DB::raw('COALESCE(settled_at, updated_at)');
         return [
-            'pending_count' => TopupRequest::where('status', 'pending')->count(),
-            'approved_today' => TopupRequest::where('status', 'approved')->whereDate('created_at', today())->count(),
-            'rejected_today' => TopupRequest::where('status', 'rejected')->whereDate('created_at', today())->count(),
+            'pending_count' => TopupRequest::whereIn('status', ['pending', 'paid'])->count(),
+            'approved_today' => TopupRequest::whereIn('status', ['completed', 'approved'])->whereDate($dateColumn, today())->count(),
+            'rejected_today' => TopupRequest::where('status', 'rejected')->whereDate('updated_at', today())->count(),
             'unprocessed_messages' => BankMessage::where('processed', false)->count(),
             'unmatched_messages' => BankMessage::whereDoesntHave('matchedRequest')->count(),
-            'total_today_amount' => TopupRequest::where('status', 'approved')
-                ->whereDate('created_at', today())
-                ->sum('requested_amount'),
+            'total_today_amount' => TopupRequest::whereIn('status', ['completed', 'approved'])->whereDate($dateColumn, today())->sum('requested_amount'),
         ];
     }
 
-    // ========== عملیات تأیید ==========
-
-    public function approve($requestId)
+    private function perform(callable $action, string $success): bool
     {
-        $request = TopupRequest::findOrFail($requestId);
-
+        $this->resetValidation();
         try {
-            DB::transaction(function () use ($request) {
-                $request = TopupRequest::where('id', $request->id)->lockForUpdate()->first();
-
-                if (!in_array($request->status, ['pending', 'paid'])) {
-                    throw new \Exception('درخواست قابل تأیید نیست.');
-                }
-
-                if (Financial::where('top_up_request_id', $request->id)->exists()) {
-                    throw new \Exception('این درخواست قبلاً پردازش شده است.');
-                }
-
-                $financial = Financial::create([
-                    'creator' => $request->user_id,
-                    'for' => $request->user_id,
-                    'price' => $request->requested_amount,
-                    'type' => 'plus',
-                    'approved' => 1,
-                    'description' => 'شارژ خودکار - درخواست #' . $request->id,
-                    'top_up_request_id' => $request->id,
-                ]);
-
-                User::find($request->user_id)->increment('balance', $request->requested_amount);
-
-                $oldStatus = $request->status;
-                $request->update(['status' => 'approved']);
-
-                AuditLog::create([
-                    'user_id' => Auth::id(),
-                    'action' => 'approve_top_up',
-                    'entity' => 'topup_request',
-                    'entity_id' => $request->id,
-                    'old_value' => ['status' => $oldStatus],
-                    'new_value' => ['status' => 'approved', 'financial_id' => $financial->id],
-                    'ip' => request()->ip(),
-                ]);
-            });
-
-            $this->dispatch('toast', type: 'success', message: 'درخواست با موفقیت تأیید شد.');
+            $action();
+            $this->dispatch('toast', type: 'success', message: $success);
             $this->refreshData();
-
-        } catch (\Exception $e) {
-            $this->dispatch('toast', type: 'error', message: $e->getMessage());
+            return true;
+        } catch (\Throwable $e) {
+            if (!$e instanceof ValidationException) { report($e); }
+            $message = $e instanceof ValidationException ? collect($e->errors())->flatten()->first() : 'عملیات انجام نشد؛ خطا در گزارش سیستم ثبت شد.';
+            $this->addError('operation', $message);
+            $this->dispatch('toast', type: 'error', message: $message);
+            return false;
         }
     }
 
-    // ========== عملیات رد ==========
-
-    public function openRejectModal($requestId)
+    public function approve($requestId): void
     {
+        $this->perform(fn () => app(BankPaymentService::class)->approve((int) $requestId), 'درخواست تأیید و کیف پول شارژ شد.');
+    }
+
+    public function openRejectModal($requestId): void
+    {
+        $this->resetValidation();
         $this->rejectRequestId = $requestId;
         $this->rejectReason = '';
         $this->showRejectModal = true;
     }
 
-    public function confirmReject()
+    public function confirmReject(): void
     {
-        $this->validate([
-            'rejectReason' => 'required|string|min:3',
-        ]);
-
-        $request = TopupRequest::findOrFail($this->rejectRequestId);
-
-        try {
-            DB::transaction(function () use ($request) {
-                $request = TopupRequest::where('id', $request->id)->lockForUpdate()->first();
-
-                if (!in_array($request->status, ['pending', 'paid'])) {
-                    throw new \Exception('درخواست قابل رد نیست.');
-                }
-
-                $oldStatus = $request->status;
-                $request->update(['status' => 'rejected']);
-
-                AuditLog::create([
-                    'user_id' => Auth::id(),
-                    'action' => 'reject_top_up',
-                    'entity' => 'topup_request',
-                    'entity_id' => $request->id,
-                    'old_value' => ['status' => $oldStatus],
-                    'new_value' => ['status' => 'rejected', 'reason' => $this->rejectReason],
-                    'ip' => request()->ip(),
-                ]);
-            });
-
-            $this->showRejectModal = false;
-            $this->rejectRequestId = null;
-            $this->rejectReason = '';
-
-            $this->dispatch('toast', type: 'success', message: 'درخواست رد شد.');
-            $this->refreshData();
-
-        } catch (\Exception $e) {
-            $this->dispatch('toast', type: 'error', message: $e->getMessage());
+        $this->validate(['rejectReason' => 'required|string|min:3|max:1000']);
+        if ($this->perform(fn () => app(BankPaymentService::class)->reject((int) $this->rejectRequestId, $this->rejectReason), 'درخواست رد شد.')) {
+            $this->reset('showRejectModal', 'rejectRequestId', 'rejectReason');
         }
     }
 
-    // ========== تطبیق دستی ==========
-
-    public function openMatchModal($requestId)
+    public function openMatchModal($requestId): void
     {
+        $this->resetValidation();
+        $request = TopupRequest::findOrFail($requestId);
+        if (!in_array($request->status, ['pending', 'paid'], true) || $request->matched_bank_message_id) {
+            $this->addError('operation', 'این درخواست قابل تطبیق نیست.');
+            return;
+        }
         $this->matchRequestId = $requestId;
         $this->matchMessageId = null;
-        $this->matchableMessages = BankMessage::where('processed', false)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $service = app(BankPaymentService::class);
+        $this->matchableMessages = BankMessage::whereDoesntHave('matchedRequest')
+            ->where('deposit_amount', $request->payable_amount)->orderByDesc('transaction_datetime')->get()
+            ->filter(fn ($message) => $service->withinPaymentWindow($request, $message))->values();
         $this->showMatchModal = true;
     }
 
-    public function confirmMatch()
+    public function confirmMatch(): void
     {
-        if (!$this->matchMessageId) {
-            $this->dispatch('toast', type: 'error', message: 'لطفاً یک پیام بانکی انتخاب کنید.');
-            return;
-        }
-
-        $request = TopupRequest::findOrFail($this->matchRequestId);
-        $message = BankMessage::findOrFail($this->matchMessageId);
-
-        try {
-            DB::transaction(function () use ($request, $message) {
-                $request = TopupRequest::where('id', $request->id)->lockForUpdate()->first();
-                $message = BankMessage::where('id', $message->id)->lockForUpdate()->first();
-
-                if ($message->processed) {
-                    throw new \Exception('این پیام بانکی قبلاً پردازش شده است.');
-                }
-
-                if ($request->matched_bank_message_id) {
-                    throw new \Exception('این درخواست قبلاً تطبیق داده شده است.');
-                }
-
-                if ($request->payable_amount != $message->deposit_amount) {
-                    throw new \Exception('مبلغ درخواست با مبلغ پیام بانکی مطابقت ندارد.');
-                }
-
-                // به‌روزرسانی با matched_bank_message_id
-                $request->update([
-                    'matched_bank_message_id' => $message->id,
-                    'matched_at' => now(),
-                    'status' => 'paid',
-                ]);
-
-                $message->update([
-                    'processed' => true,
-                    'processed_at' => now(),
-                ]);
-
-                AuditLog::create([
-                    'user_id' => Auth::id(),
-                    'action' => 'manual_match',
-                    'entity' => 'topup_request',
-                    'entity_id' => $request->id,
-                    'old_value' => ['matched_bank_message_id' => null],
-                    'new_value' => ['matched_bank_message_id' => $message->id],
-                    'ip' => request()->ip(),
-                ]);
-            });
-
-            $this->showMatchModal = false;
-            $this->matchRequestId = null;
-            $this->matchMessageId = null;
-
-            $this->dispatch('toast', type: 'success', message: 'تطبیق با موفقیت انجام شد.');
-            $this->refreshData();
-
-        } catch (\Exception $e) {
-            $this->dispatch('toast', type: 'error', message: $e->getMessage());
+        $this->validate(['matchMessageId' => 'required|integer|exists:bank_messages,id']);
+        if ($this->perform(fn () => app(BankPaymentService::class)->match((int) $this->matchRequestId, (int) $this->matchMessageId), 'تطبیق انجام شد و کیف پول شارژ شد.')) {
+            $this->reset('showMatchModal', 'matchRequestId', 'matchMessageId', 'matchableMessages');
         }
     }
 
-    // ========== پردازش مجدد پیام ==========
-
-    public function reprocessMessage($messageId)
+    public function reprocessMessage($messageId): void
     {
         $message = BankMessage::findOrFail($messageId);
-        $message->update(['processed' => false]);
-        $this->dispatch('toast', type: 'success', message: 'پیام برای پردازش مجدد در صف قرار گرفت.');
+        if ($message->matchedRequest()->exists()) {
+            $this->addError('operation', 'این پیام قبلاً مصرف شده است؛ شارژ مجدد مجاز نیست.');
+            return;
+        }
+        $this->perform(function () use ($message) {
+            if (!app(BankPaymentService::class)->processMessage($message->id)) {
+                throw ValidationException::withMessages(['payment' => $message->fresh()->processing_error ?? 'تطبیق جدیدی یافت نشد.']);
+            }
+        }, 'پیام پردازش شد و کیف پول شارژ شد.');
     }
 
-    // ========== جزئیات Drawer ==========
-
-    public function showRequestDetail($id)
+    public function processPendingMessages(): void
     {
-        $this->selectedRequestId = $id;
-        $this->selectedMessageId = null;
-        $this->showDrawer = true;
+        $this->perform(function () {
+            $result = app(BankPaymentService::class)->processPending();
+            $this->dispatch('toast', type: 'info', message: "{$result['processed']} پیام بررسی و {$result['matched']} درخواست تأیید شد.");
+        }, 'بررسی پیام‌های در انتظار پایان یافت.');
     }
 
-    public function showMessageDetail($id)
+    public function showRequestDetail($id): void
     {
-        $this->selectedMessageId = $id;
-        $this->selectedRequestId = null;
-        $this->showDrawer = true;
+        $this->selectedRequestId = $id; $this->selectedMessageId = null; $this->showDrawer = true;
     }
-
-    public function closeDrawer()
+    public function showMessageDetail($id): void
     {
-        $this->showDrawer = false;
-        $this->selectedRequestId = null;
-        $this->selectedMessageId = null;
+        $this->selectedMessageId = $id; $this->selectedRequestId = null; $this->showDrawer = true;
     }
-
-    // ========== متدهای کمکی ==========
-
-    public function refreshData()
-    {
-        $this->resetPage();
-    }
-
-    public function getListeners()
-    {
-        return [
-            'toast' => '$refresh',
-        ];
-    }
-
-    // ========== Render ==========
+    public function closeDrawer(): void { $this->reset('showDrawer', 'selectedRequestId', 'selectedMessageId'); }
+    public function refreshData(): void { $this->updatedFilters(); }
 
     public function render()
     {
-        $requests = $this->getRequestsQuery()->paginate($this->perPage);
-
-        $messages = BankMessage::with(['matchedRequest.user'])
-            ->orderBy('created_at', 'desc')
-            ->paginate($this->perPage);
-
-        $stats = $this->getStats();
-
-        $selectedRequest = null;
-        $selectedMessage = null;
-
-        if ($this->selectedRequestId) {
-            $selectedRequest = TopupRequest::with(['user', 'matchedBankMessage'])->find($this->selectedRequestId);
-        }
-
-        if ($this->selectedMessageId) {
-            $selectedMessage = BankMessage::with(['matchedRequest.user'])->find($this->selectedMessageId);
-        }
-
+        $perPage = in_array((int) $this->perPage, [15, 25, 50, 100], true) ? (int) $this->perPage : 15;
         return view('livewire.admin.manage-charges', [
-            'requests' => $requests,
-            'messages' => $messages,
-            'stats' => $stats,
-            'selectedRequest' => $selectedRequest,
-            'selectedMessage' => $selectedMessage,
+            'requests' => $this->getRequestsQuery()->paginate($perPage, ['*'], 'requestsPage'),
+            'messages' => $this->applyCommonFilters(BankMessage::with('matchedRequest.user'), true)->orderByDesc('id')->paginate($perPage, ['*'], 'messagesPage'),
+            'stats' => $this->getStats(),
+            'selectedRequest' => $this->selectedRequestId ? TopupRequest::with(['user', 'matchedBankMessage', 'auditLogs.user'])->find($this->selectedRequestId) : null,
+            'selectedMessage' => $this->selectedMessageId ? BankMessage::with('matchedRequest.user')->find($this->selectedMessageId) : null,
         ]);
     }
 }

@@ -67,26 +67,16 @@ class FinancialManager extends Component
             'chargeAmount' => 'required|integer|min:1000|max:100000000',
         ]);
 
-        // بررسی درخواست فعال قبلی
-        if (TopupRequest::where('user_id', auth()->id())->active()->exists()) {
-            session()->flash('error', 'شما یک درخواست فعال دارید. لطفاً منتظر بمانید یا آن را لغو کنید.');
+        try {
+            $request = app(\App\Services\BankPaymentService::class)->createRequest(auth()->id(), (int) $this->chargeAmount);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->addError('chargeAmount', collect($e->errors())->flatten()->first());
+            return;
+        } catch (\Throwable $e) {
+            report($e);
+            $this->addError('chargeAmount', 'ثبت درخواست انجام نشد؛ لطفاً دوباره تلاش کنید.');
             return;
         }
-
-        // تولید عدد یونیک منحصربه‌فرد
-        do {
-            $unique = rand(1, 999);
-            $payable = $this->chargeAmount + $unique;
-        } while (TopupRequest::where('payable_amount', $payable)->where('status', 'pending')->exists());
-
-        $request = TopupRequest::create([
-            'user_id' => auth()->id(),
-            'requested_amount' => $this->chargeAmount,
-            'unique_amount' => $unique * 10,
-            'payable_amount' => $payable * 10,
-            'status' => 'pending',
-            'expires_at' => now()->addMinutes(20),
-        ]);
 
         $this->activeRequest = $request;
         $this->isWaiting = true;
@@ -97,8 +87,7 @@ class FinancialManager extends Component
 // لغو درخواست
     public function cancelRequest()
     {
-        if ($this->activeRequest && $this->activeRequest->status === 'pending') {
-            $this->activeRequest->update(['status' => 'expired']);
+        if ($this->activeRequest && app(\App\Services\BankPaymentService::class)->cancelRequest($this->activeRequest->id, auth()->id())) {
             $this->activeRequest = null;
             $this->isWaiting = false;
             session()->flash('success', 'درخواست لغو شد.');
@@ -112,17 +101,14 @@ class FinancialManager extends Component
             return;
         }
 
-        // اگر درخواست منقضی شده باشد
-        if ($this->activeRequest->expires_at < now()) {
-            $this->activeRequest->update(['status' => 'expired']);
-            $this->activeRequest = null;
+        $this->activeRequest = TopupRequest::where('user_id', auth()->id())->find($this->activeRequest->id);
+        if (!$this->activeRequest) {
             $this->isWaiting = false;
-            session()->flash('error', 'زمان پرداخت به پایان رسید. درخواست منقضی شد.');
             return;
         }
 
-        // اگر وضعیت completed شد، موجودی قبلاً اضافه شده است
-        if ($this->activeRequest->status === 'completed') {
+        // Check fresh settlement first; stale polling must never expire a successful payment.
+        if (in_array($this->activeRequest->status, ['completed', 'approved'], true)) {
             $this->isWaiting = false;
             session()->flash('success', 'کیف پول شما با موفقیت شارژ شد!');
             $this->activeRequest = null;
@@ -130,7 +116,27 @@ class FinancialManager extends Component
             return;
         }
 
-        // در غیر این صورت، وضعیت هنوز pending است
+        if ($this->activeRequest->status === 'rejected') {
+            session()->flash('error', $this->activeRequest->rejection_reason ?: 'درخواست توسط مدیریت رد شد.');
+            $this->activeRequest = null;
+            $this->isWaiting = false;
+            return;
+        }
+        if ($this->activeRequest->status === 'expired' || ($this->activeRequest->expires_at && $this->activeRequest->expires_at->lte(now()))) {
+            if ($this->activeRequest->status === 'pending') {
+                app(\App\Services\BankPaymentService::class)->cancelRequest($this->activeRequest->id, auth()->id());
+                $this->activeRequest->refresh();
+                if (in_array($this->activeRequest->status, ['completed', 'approved'], true)) {
+                    session()->flash('success', 'کیف پول شما با موفقیت شارژ شد!');
+                    $this->activeRequest = null;
+                    $this->isWaiting = false;
+                    return;
+                }
+            }
+            $this->activeRequest = null;
+            $this->isWaiting = false;
+            session()->flash('error', 'زمان پرداخت به پایان رسید.');
+        }
     }
 
 

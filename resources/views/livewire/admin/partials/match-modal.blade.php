@@ -8,18 +8,21 @@
             </button>
         </div>
         <div class="p-4 space-y-4">
-            <p class="text-xs text-[#94A3B8]">یک پیام بانکی برای تطبیق با این درخواست انتخاب کنید.</p>
+            <p class="text-xs text-[#94A3B8]">فقط پیام‌های مصرف‌نشده با مبلغ و زمان سازگار نمایش داده می‌شوند. تأیید تطبیق، کیف پول را نیز شارژ می‌کند.</p>
             <div>
                 <label class="block text-[11px] text-[#94A3B8] font-bold mb-1.5">پیام بانکی</label>
                 <select wire:model="matchMessageId" class="w-full bg-[#080f1d] border border-[#243247] text-[#F8FAFC] text-sm rounded-xl px-4 py-3 focus:ring-1 focus:ring-[#F59E0B] focus:outline-none transition">
                     <option value="">انتخاب کنید...</option>
                     @foreach($matchableMessages as $msg)
-                        <option value="{{ $msg->id }}">#{{ $msg->id }} - {{ number_format($msg->deposit_amount) }} تومان - {{ $msg->transaction_datetime?->format('Y/m/d H:i') }}</option>
+                        <option value="{{ $msg->id }}">#{{ $msg->id }} - {{ number_format($msg->deposit_amount / 10) }} تومان - {{ $msg->transaction_datetime?->format('Y/m/d H:i') }}</option>
                     @endforeach
                 </select>
             </div>
+            @if(count($matchableMessages) === 0)<p class="text-amber-400 text-xs">پیام سازگاری یافت نشد؛ مبلغ، تاریخ و دریافت پیام بانکی را بررسی کنید.</p>@endif
+            @error('matchMessageId') <p class="text-red-400 text-xs">{{ $message }}</p> @enderror
+            @error('operation') <p class="text-red-400 text-xs">{{ $message }}</p> @enderror
             <div class="flex gap-3 pt-3 border-t border-[#243247]">
-                <button wire:click="confirmMatch" class="flex-1 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold transition">
+                <button wire:click="confirmMatch" wire:loading.attr="disabled" @disabled(count($matchableMessages) === 0) class="flex-1 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold transition">
                     تأیید تطبیق
                 </button>
                 <button wire:click="$set('showMatchModal', false)" class="flex-1 py-2.5 rounded-xl bg-[#243247] hover:bg-[#333] text-[#94A3B8] text-xs font-bold transition">

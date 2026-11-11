@@ -13,6 +13,8 @@ class BankMessage extends Model
         'raw_message',
         'processed',
         'processed_at',
+        'deduplication_key',
+        'processing_error',
     ];
 
     protected $casts = [
@@ -20,6 +22,7 @@ class BankMessage extends Model
         'processed_at' => 'datetime',
         'deposit_amount' => 'integer',
         'balance' => 'integer',
+        'processed' => 'boolean',
     ];
 
     public function scopeUnprocessed($query)
