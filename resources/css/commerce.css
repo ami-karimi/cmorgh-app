@@ -1,0 +1,188 @@
+@layer components {
+    .commerce-page { --commerce-line: #ffffff0d; display: grid; grid-template-columns: minmax(0,1fr); gap: 24px; color: #e2e8f0; }
+    .commerce-page > *, .commerce-panel, .commerce-body, .commerce-form-layout { min-width: 0; }
+    .commerce-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+    .commerce-heading-main { display: flex; align-items: center; gap: 16px; }
+    .commerce-heading h1 { color: #f8fafc; font-size: clamp(21px, 2.4vw, 28px); font-weight: 800; letter-spacing: -.6px; }
+    .commerce-heading p { font-size: 12px; color: #8799b2; margin-top: 4px; }
+    .commerce-mark { width: 54px; height: 54px; display: grid; place-items: center; flex-shrink: 0; border-radius: 17px; background: linear-gradient(140deg,#3b82f626,#2563eb0a); border: 1px solid #3b82f630; color: #93c5fd; }
+    .commerce-mark .commerce-icon { width: 25px; height: 25px; }
+    .commerce-icon { width: 19px; height: 19px; flex-shrink: 0; }
+    .commerce-panel { background: #111c2e; border: 1px solid #243247; border-radius: 20px; }
+    .commerce-panel-head { padding: 22px 24px; border-bottom: 1px solid var(--commerce-line); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .commerce-panel-head h2 { font-size: 15px; font-weight: 700; color: #f1f5f9; }
+    .commerce-panel-head p { font-size: 11px; color: #8799b2; margin-top: 3px; }
+    .commerce-body { padding: 24px; }
+    .commerce-stat-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+    .commerce-stat { border: 1px solid #243247; background: #111c2e; border-radius: 16px; padding: 17px 20px; display: flex; align-items: center; gap: 14px; }
+    .commerce-stat > .commerce-icon { width: 36px; height: 36px; padding: 8px; border-radius: 10px; color: #93c5fd; background: #3b82f614; }
+    .commerce-stat span { display: block; font-size: 11px; color: #8799b2; }
+    .commerce-stat strong { display: block; color: #f1f5f9; font-size: 21px; font-weight: 800; line-height: 1.5; }
+    .commerce-stat strong small { font-size: 10px; color: #8799b2; font-weight: 500; }
+    .commerce-form-layout { display: grid; grid-template-columns: minmax(0,2fr) minmax(270px,1fr); gap: 22px; align-items: start; }
+    .commerce-summary { position: sticky; top: 100px; display: grid; gap: 18px; }
+    .commerce-section { padding: 24px; border-bottom: 1px solid var(--commerce-line); }
+    .commerce-section:last-of-type { border-bottom: 0; }
+    .commerce-section-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .commerce-section-heading > span { width: 25px; height: 25px; display: grid; place-items: center; border: 1px solid #334155; border-radius: 8px; color: #8799b2; font-size: 11px; }
+    .commerce-section-heading h3 { font-size: 13px; font-weight: 700; }
+    .commerce-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+    .commerce-field { display: grid; align-content: start; gap: 8px; min-width: 0; position: relative; }
+    .commerce-field > label { color: #cbd5e1; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .commerce-wide { grid-column: 1 / -1; }
+    .commerce-optional { font-size: 10px; color: #64748b; font-weight: 400; }
+    .commerce-input { width: 100%; min-height: 48px; background: #0b1423; border: 1px solid #243247; border-radius: 11px; color: #e2e8f0; padding: 11px 14px; font-size: 13px; transition: border-color .18s, box-shadow .18s; }
+    .commerce-input::placeholder { color: #52667f; font-size: 12px; }
+    .commerce-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px #3b82f61a; }
+    .commerce-numeric { font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
+    .commerce-hint { color: #64748b; font-size: 10px; line-height: 1.9; }
+    .commerce-field-error { color: #fb7185; font-size: 11px; }
+    .commerce-type-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+    .commerce-type { text-align: start; border: 1px solid #243247; border-radius: 13px; padding: 16px 12px; color: #8799b2; background: #0b14234d; transition: border-color .18s, background .18s; min-width: 0; }
+    .commerce-type .commerce-icon { margin-bottom: 10px; }
+    .commerce-type strong { display: block; font-size: 11px; color: #cbd5e1; }
+    .commerce-type small { display: block; font-size: 9px; color: #64748b; margin-top: 4px; }
+    .commerce-type:hover { border-color: #3b82f660; }
+    .commerce-type[aria-pressed='true'] { background: #3b82f610; border-color: #3b82f6; color: #93c5fd; box-shadow: inset 0 0 0 1px #3b82f620; }
+    .commerce-type[aria-pressed='true'] strong { color: #bfdbfe; }
+    .commerce-form-footer { padding: 20px 24px; background: #0b142340; border-top: 1px solid var(--commerce-line); display: flex; align-items: center; justify-content: space-between; gap: 16px; border-radius: 0 0 20px 20px; }
+    .commerce-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 11px 18px; border-radius: 11px; font-size: 12px; font-weight: 700; background: #2563eb; color: white; border: 1px solid transparent; transition: background .18s; white-space: nowrap; }
+    .commerce-button:hover { background: #1d4ed8; }
+    .commerce-button-secondary { background: #17253a; border-color: #334155; color: #cbd5e1; }
+    .commerce-button-secondary:hover { background: #243247; }
+    .commerce-button-quiet { background: transparent; border-color: #243247; color: #8799b2; }
+    .commerce-button-quiet:hover { background: #17253a; color: #e2e8f0; }
+    .commerce-button-danger { color: #fda4af; border-color: #f43f5e30; background: #f43f5e08; }
+    .commerce-button-danger:hover { background: #f43f5e18; }
+    .commerce-badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 7px; padding: 4px 9px; background: #3b82f610; border: 1px solid #3b82f625; color: #93c5fd; font-size: 10px; font-weight: 600; white-space: nowrap; }
+    .commerce-badge-success { color: #6ee7b7; background: #10b9810e; border-color: #10b98126; }
+    .commerce-badge-warning { color: #fcd34d; background: #f59e0b0d; border-color: #f59e0b26; }
+    .commerce-badge-muted { color: #8799b2; background: #64748b0d; border-color: #64748b26; }
+    .commerce-alert { display: flex; align-items: start; gap: 12px; padding: 16px 18px; border: 1px solid #3b82f630; border-radius: 13px; background: #3b82f609; color: #a5b4c9; font-size: 11px; line-height: 2; }
+    .commerce-alert > .commerce-icon { margin-top: 2px; color: #60a5fa; }
+    .commerce-alert strong { display: block; font-size: 12px; color: #e2e8f0; margin-bottom: 3px; }
+    .commerce-alert-error { border-color: #f43f5e35; background: #f43f5e0a; color: #fda4af; }
+    .commerce-alert-error > .commerce-icon { color: #fb7185; }
+    .commerce-alert-success { border-color: #10b98135; background: #10b9810a; }
+    .commerce-alert-success > .commerce-icon { color: #6ee7b7; }
+    .commerce-preview { padding: 24px; background: radial-gradient(ellipse at top right,#2563eb16,transparent 80%),#111c2e; }
+    .commerce-preview-value { font-size: 46px; font-weight: 800; color: #93c5fd; line-height: 1.3; margin: 20px 0; letter-spacing: -1.5px; }
+    .commerce-preview-value small { font-size: 12px; font-weight: 500; color: #8799b2; letter-spacing: 0; }
+    .commerce-summary-rows { display: grid; gap: 14px; font-size: 11px; }
+    .commerce-summary-rows > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .commerce-summary-rows dt { color: #8799b2; }
+    .commerce-summary-rows dd { color: #e2e8f0; font-weight: 600; text-align: end; }
+    .commerce-divider { border: 0; border-top: 1px solid var(--commerce-line); margin: 20px 0; }
+    .commerce-scope-list { display: grid; gap: 9px; max-height: 160px; overflow-y: auto; background: #0b1423; border: 1px solid #243247; padding: 12px; border-radius: 11px; }
+    .commerce-scope-list label { display: flex; align-items: center; gap: 9px; font-size: 11px; min-height: 28px; color: #a5b4c9; }
+    .commerce-scope-list input, .commerce-check input { accent-color: #3b82f6; width: 16px; height: 16px; }
+    .commerce-check { display: flex; gap: 10px; align-items: center; font-size: 11px; color: #a5b4c9; }
+    .commerce-table-wrap { overflow-x: auto; border-radius: 0 0 20px 20px; }
+    .commerce-table { width: 100%; text-align: start; font-size: 11px; border-collapse: collapse; }
+    .commerce-table th { padding: 13px 20px; color: #64748b; background: #0b14234d; font-size: 10px; font-weight: 500; white-space: nowrap; }
+    .commerce-table td { padding: 17px 20px; border-top: 1px solid var(--commerce-line); vertical-align: middle; }
+    .commerce-table td strong { display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; }
+    .commerce-table td small { display: block; font-size: 10px; color: #64748b; margin-top: 4px; }
+    .commerce-table tbody tr:hover { background: #3b82f605; }
+    .commerce-actions { display: flex; gap: 5px; }
+    .commerce-actions button { min-height: 40px; border-radius: 9px; padding: 7px 10px; color: #8799b2; font-size: 10px; }
+    .commerce-actions button:hover { background: #17253a; color: #93c5fd; }
+    .commerce-empty { text-align: center; display: grid; justify-items: center; gap: 9px; padding: 46px 20px; }
+    .commerce-empty .commerce-mark { color: #64748b; background: #64748b0c; border-color: #64748b26; }
+    .commerce-empty strong { font-size: 13px; color: #cbd5e1; }
+    .commerce-empty p { font-size: 11px; color: #64748b; }
+    .commerce-date-control { position: relative; }
+    .commerce-date-control .commerce-input { padding-left: 48px; padding-right: 14px; }
+    .commerce-calendar-trigger { position: absolute; inset-inline-end: 4px; top: 4px; width: 40px; height: 40px; display: grid; place-items: center; color: #8799b2; border-radius: 8px; }
+    .commerce-calendar-trigger:hover { color: #93c5fd; background: #3b82f610; }
+    .commerce-calendar { position: absolute; top: calc(100% - 12px); inset-inline-start: 0; z-index: 90; background: #142137; border: 1px solid #334155; border-radius: 15px; box-shadow: 0 18px 50px #0008; padding: 12px; width: min(310px,calc(100vw - 48px)); }
+    .commerce-calendar-heading { display: flex; gap: 5px; align-items: center; margin-bottom: 12px; }
+    .commerce-calendar-heading select { background: #0b1423; border: 1px solid #243247; border-radius: 8px; padding: 5px; flex: 1; min-width: 0; font-size: 11px; min-height: 38px !important; }
+    .commerce-calendar-nav { width: 30px; min-height: 38px; font-size: 23px; border-radius: 8px; color: #93c5fd; }
+    .commerce-calendar-grid { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 3px; }
+    .commerce-calendar-weekday { text-align: center; color: #64748b; font-size: 10px; padding-bottom: 8px; }
+    .commerce-calendar-grid button { min-height: 37px; border-radius: 8px; font-size: 12px; }
+    .commerce-calendar-grid button:hover:not(:disabled) { background: #3b82f625; }
+    .commerce-calendar-grid button.is-selected { background: #2563eb; color: white; }
+    .commerce-calendar-grid button:disabled { visibility: hidden; }
+    .commerce-calendar-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #243247; font-size: 10px; color: #8799b2; }
+    .commerce-calendar-footer label { display: flex; align-items: center; gap: 8px; }
+    .commerce-calendar-footer input { background: #0b1423; border: 1px solid #243247; padding: 5px 7px; border-radius: 7px; font-size: 11px; min-height: 36px !important; width: 107px; }
+    .commerce-calendar-footer button { padding: 7px; border-radius: 7px; min-height: 36px; }
+    .commerce-wallet-grid { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(300px,.85fr); gap: 22px; align-items: start; }
+    .commerce-balance { background: radial-gradient(ellipse at top right,#2563eb22,transparent 70%),#111c2e; }
+    .commerce-balance-amount { font-size: 36px; font-weight: 800; letter-spacing: -.7px; margin: 18px 0 7px; color: #f1f5f9; }
+    .commerce-balance-amount small { font-size: 12px; font-weight: 400; color: #8799b2; }
+    .commerce-amount-input { text-align: center; font-size: 26px; font-weight: 800; padding: 18px; min-height: 75px; letter-spacing: -.5px; }
+    .commerce-quick-amounts { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px; margin: 12px 0 20px; }
+    .commerce-quick-amounts button { padding: 9px 5px; border: 1px solid #243247; border-radius: 9px; font-size: 10px; min-height: 41px; color: #8799b2; }
+    .commerce-quick-amounts button[aria-pressed='true'] { border-color: #3b82f6; color: #93c5fd; background: #3b82f610; }
+    .commerce-pay-amount { text-align: center; background: #3b82f609; border: 1px dashed #3b82f640; border-radius: 14px; padding: 22px 16px; }
+    .commerce-pay-amount > span { font-size: 11px; color: #8799b2; display: block; }
+    .commerce-pay-amount > strong { font-size: 33px; font-weight: 800; color: #bfdbfe; display: block; margin: 7px 0; letter-spacing: -.7px; }
+    .commerce-pay-amount > strong small { font-size: 11px; color: #8799b2; font-weight: 400; }
+    .commerce-pay-amount > p { font-size: 10px; color: #64748b; }
+    .commerce-bank-card { background: #0b1423; border: 1px solid #243247; border-radius: 13px; padding: 18px; margin-top: 18px; }
+    .commerce-bank-card > header { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #8799b2; }
+    .commerce-card-number { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 17px 0 10px; }
+    .commerce-card-number code { color: #e2e8f0; font-family: var(--font-sans); font-size: clamp(16px,2vw,23px); font-weight: 600; letter-spacing: 1px; overflow-wrap: anywhere; }
+    .commerce-card-number button { width: 38px; height: 38px; border: 1px solid #243247; border-radius: 9px; display: grid; place-items: center; color: #8799b2; flex-shrink: 0; }
+    .commerce-card-number button:hover { color: #93c5fd; border-color: #3b82f6; }
+    .commerce-bank-card > p { color: #64748b; font-size: 11px; }
+    .commerce-deadline { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 11px; margin: 18px 0; color: #8799b2; }
+    .commerce-deadline span { display: flex; align-items: center; gap: 7px; }
+    .commerce-deadline time { color: #cbd5e1; white-space: nowrap; }
+    .commerce-status-hero { padding: 32px 24px; display: grid; justify-items: center; text-align: center; border-bottom: 1px solid var(--commerce-line); background: radial-gradient(ellipse at top,#3b82f611,transparent 80%); }
+    .commerce-status-hero h2 { font-size: 19px; font-weight: 800; color: #f1f5f9; margin: 16px 0 7px; }
+    .commerce-status-hero p { max-width: 420px; color: #8799b2; font-size: 11px; line-height: 2; }
+    .commerce-steps { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; margin: 23px 0; }
+    .commerce-step { display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center; font-size: 10px; color: #64748b; position: relative; }
+    .commerce-step > span { width: 30px; height: 30px; border: 1px solid #334155; border-radius: 10px; display: grid; place-items: center; background: #111c2e; z-index: 1; }
+    .commerce-step:not(:last-child)::after { content: ''; position: absolute; height: 1px; background: #243247; width: calc(100% - 28px); inset-inline-start: calc(50% + 20px); top: 15px; }
+    .commerce-step.is-complete { color: #a5b4c9; }
+    .commerce-step.is-complete > span { background: #10b98114; color: #6ee7b7; border-color: #10b98140; }
+    .commerce-step.is-current > span { background: #2563eb; border-color: #2563eb; color: white; }
+    .commerce-payment-layout { width: 100%; max-width: 820px; margin-inline: auto; }
+    .commerce-payment-columns { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(230px,.8fr); gap: 24px; }
+    .commerce-payment-aside { background: #0b14234d; border: 1px solid #243247; border-radius: 14px; padding: 20px; align-self: start; }
+    .commerce-coupon { border: 1px solid #243247; border-radius: 15px; background: #111c2e; padding: 18px; max-width: 672px; margin: 0 auto 24px; }
+    .commerce-coupon-title { display: flex; align-items: center; gap: 9px; color: #cbd5e1; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
+    .commerce-coupon-control { display: flex; gap: 8px; }
+    .commerce-coupon-control .commerce-input { flex: 1; min-width: 0; }
+    .commerce-coupon-result { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 11px; color: #6ee7b7; padding-top: 14px; margin-top: 14px; border-top: 1px solid #243247; }
+}
+@media (max-width: 1050px) {
+    .commerce-form-layout { grid-template-columns: minmax(0,1fr); }
+    .commerce-summary { position: static; grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .commerce-wallet-grid { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 640px) {
+    .commerce-page { gap: 18px; }
+    .commerce-heading { align-items: start; flex-direction: column; gap: 14px; }
+    .commerce-heading-main { gap: 12px; }
+    .commerce-heading h1 { font-size: 21px; }
+    .commerce-heading p { font-size: 11px; }
+    .commerce-mark { width: 45px; height: 45px; border-radius: 14px; }
+    .commerce-stat-grid { gap: 8px; }
+    .commerce-stat { padding: 12px 10px; gap: 7px; }
+    .commerce-stat > .commerce-icon { display: none; }
+    .commerce-stat strong { font-size: 19px; }
+    .commerce-stat span { font-size: 9px; }
+    .commerce-fields { grid-template-columns: minmax(0,1fr); gap: 17px; }
+    .commerce-panel-head, .commerce-body, .commerce-section, .commerce-preview { padding: 20px; }
+    .commerce-form-footer { padding: 16px 20px; flex-wrap: wrap; }
+    .commerce-form-footer > .commerce-button { width: 100%; }
+    .commerce-summary { grid-template-columns: minmax(0,1fr); }
+    .commerce-type { padding: 13px 9px; }
+    .commerce-type small { display: none; }
+    .commerce-type strong { font-size: 10px; }
+    .commerce-table th, .commerce-table td { padding-inline: 15px; }
+    .commerce-payment-columns { grid-template-columns: minmax(0,1fr); }
+    .commerce-payment-aside { order: 2; }
+    .commerce-balance-amount { font-size: 30px; }
+    .commerce-pay-amount > strong { font-size: 30px; }
+    .commerce-date-control .commerce-input { font-size: 16px; }
+    .commerce-coupon-control { flex-wrap: wrap; }
+    .commerce-coupon-control .commerce-input { flex-basis: 100%; }
+    .commerce-coupon-control .commerce-button { flex: 1; }
+}
