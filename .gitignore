@@ -25,4 +25,4 @@ Thumbs.db
 
 # Local Android toolchain (not part of the app)
 /.android-dev/
-/android/
+/android/*
