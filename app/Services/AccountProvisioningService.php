@@ -26,7 +26,9 @@ class AccountProvisioningService
         $vpnPassword = $overrides['password'] ?? Str::random(8);
 
         // تشخیص نوع سرویس (امکان override کردن)
-        $serviceGroup = $overrides['service_group'] ?? (str_contains(mb_strtolower($group->name), 'وایرگارد') ? 'wireguard' : 'l2tp_cisco');
+        $planName = mb_strtolower($group->name);
+        $isWireguard = str_contains($planName,'وایرگارد') || str_contains($planName,'wireguard') || str_contains($planName,'wg');
+        $serviceGroup = $overrides['service_group'] ?? ($isWireguard ? 'wireguard' : 'l2tp_cisco');
 
         $finalWgServerId = null;
         if ($serviceGroup === 'wireguard') {
@@ -90,6 +92,8 @@ class AccountProvisioningService
             'expire_value'  => $group->expire_value ?? 1,
             'expire_date'   => $expireDate,
             'first_login'   => $group->first_login == 1 ? null : Carbon::now(),
+            'expire_set'    => $group->first_login == 1 ? 0 : 1,
+            'is_enabled'    => 1,
             'exp_val_minute'=> $expValMinute,
             'max_usage'     => $maxUsageBytes,
             'speed_limit'   => $group->mikrotik_speed ?? null,
@@ -138,8 +142,12 @@ class AccountProvisioningService
             if (isset($configData['user_id'])) {
                 unset($configData['user_id']);
             }
-            $configData['creator'] = $user->id;
-            $account = Accounts::create($configData);
+            // speed_limit is provisioning metadata, NOT a column of the accounts table.
+            $speedLimit = $configData['speed_limit'] ?? null;
+            $accountAttributes = $configData;
+            unset($accountAttributes['speed_limit']);
+            $accountAttributes['creator'] = $user->id;
+            $account = Accounts::create($accountAttributes);
 
             DB::table('user_accounts')->insert([
                 'user_id'    => $user->id,
@@ -162,7 +170,7 @@ class AccountProvisioningService
 
 
             if ($configData['service_group'] === 'wireguard') {
-                $this->provisionWireguard($account, $configData['wg_server_id'] ?? null, $configData['speed_limit'] ?? null);
+                $this->provisionWireguard($account, $configData['wg_server_id'] ?? null, $speedLimit);
             }
 
             ActivityLogger::log($account->id, "اکانت VPN و دسترسی ورود به پنل برای {$account->username} با موفقیت صادر شد.");

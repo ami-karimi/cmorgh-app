@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Jobs\FulfillStoreOrder;
 use App\Models\Financial;
 use App\Models\Group;
 use App\Models\StoreOrder;
@@ -86,8 +85,9 @@ class StoreCheckoutService
         ]);
         $order->update(['paid_at'=>now(), 'status'=>'paid']);
         app(PromotionService::class)->redeem('order', $order->id);
-        // This dispatch only happens after the outer payment/checkout transaction commits.
-        FulfillStoreOrder::dispatch($order->id)->afterCommit();
+        // Issue immediately after the durable payment commit, regardless of QUEUE_CONNECTION/worker availability.
+        // Never perform external provisioning inside a payment transaction that may be retried.
+        DB::afterCommit(fn () => app(OrderFulfillmentService::class)->fulfill($order->id));
     }
 
     public function approveReceipt(int $orderId, User $operator): void
