@@ -12,15 +12,26 @@ use Illuminate\Validation\ValidationException;
 
 class BankPaymentService
 {
-    public function createRequest(int $userId, int $amount): TopupRequest
+    public function createRequest(int $userId, int $amount, ?int $orderId = null, ?string $expectedAccount = null): TopupRequest
     {
         if ($amount < 1000 || $amount > 100000000) {
             $this->fail('مبلغ شارژ باید بین ۱٬۰۰۰ تا ۱۰۰٬۰۰۰٬۰۰۰ تومان باشد.');
         }
-        return DB::transaction(function () use ($userId, $amount) {
-            \App\Models\User::lockForUpdate()->findOrFail($userId);
-            TopupRequest::where('user_id', $userId)->where('status', 'pending')
-                ->where('expires_at', '<=', now())->update(['status' => 'expired']);
+        return DB::transaction(function () use ($userId, $amount, $orderId, $expectedAccount) {
+            $user = \App\Models\User::lockForUpdate()->findOrFail($userId);
+            if ($orderId && !\App\Models\StoreOrder::whereKey($orderId)->where('user_id',$userId)->where('payment_method','bank')->where('status','pending')
+                ->whereNull('paid_at')->where('price',$amount)->exists()) {
+                $this->fail('درخواست پرداخت به سفارش معتبر متعلق به این کاربر متصل نیست.');
+            }
+            $expired = TopupRequest::where('user_id',$userId)->where('status','pending')->where('expires_at','<=',now())->lockForUpdate()->get();
+            foreach ($expired as $old) {
+                $old->update(['status'=>'expired']);
+                app(PromotionService::class)->release('topup',$old->id);
+                if ($old->store_order_id) {
+                    \App\Models\StoreOrder::whereKey($old->store_order_id)->whereNull('paid_at')->update(['status'=>'cancelled']);
+                    app(PromotionService::class)->release('order',$old->store_order_id);
+                }
+            }
             if (TopupRequest::where('user_id', $userId)->whereIn('status', ['pending', 'paid'])->exists()) {
                 $this->fail('شما یک درخواست فعال دارید؛ ابتدا آن را تکمیل یا لغو کنید.');
             }
@@ -31,11 +42,19 @@ class BankPaymentService
             foreach ($offsets as $offset) {
                 $payable = ($amount + $offset) * 10;
                 if (!in_array($payable, $used)) {
-                    return TopupRequest::create([
+                    $quote = $orderId ? ['original'=>$amount, 'discount'=>0, 'promotion_id'=>null] : app(PromotionService::class)->quote($amount, $user, null, 'topup_bonus');
+                    $extra = [];
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('topup_requests', 'purpose')) {
+                        $extra = ['purpose'=>$orderId ? 'order' : 'wallet', 'store_order_id'=>$orderId,
+                            'expected_account_number'=>$expectedAccount, 'bonus_amount'=>$quote['discount'], 'bonus_promotion_id'=>$quote['promotion_id']];
+                    }
+                    $request = TopupRequest::create(array_merge($extra, [
                         'user_id' => $userId, 'requested_amount' => $amount,
                         'unique_amount' => $offset * 10, 'payable_amount' => $payable,
                         'status' => 'pending', 'expires_at' => now()->addMinutes(20),
-                    ]);
+                    ]));
+                    app(PromotionService::class)->reserve($quote, $user, null, 'topup', $request->id, null);
+                    return $request;
                 }
             }
             $this->fail('برای این مبلغ ظرفیت درخواست فعال پر است؛ مبلغ دیگری انتخاب کنید.');
@@ -48,6 +67,11 @@ class BankPaymentService
             $request = TopupRequest::where('user_id', $userId)->lockForUpdate()->findOrFail($requestId);
             if ($request->status !== 'pending') { return false; }
             $request->update(['status' => 'expired']);
+            app(PromotionService::class)->release('topup', $request->id);
+            if ($request->store_order_id) {
+                \App\Models\StoreOrder::whereKey($request->store_order_id)->whereNull('paid_at')->update(['status'=>'cancelled']);
+                app(PromotionService::class)->release('order', $request->store_order_id);
+            }
             return true;
         }, 3);
     }
@@ -68,6 +92,11 @@ class BankPaymentService
             $this->ensurePayable($request);
             $old = $request->status;
             $request->update(['status' => 'rejected', 'rejection_reason' => $reason]);
+            app(PromotionService::class)->release('topup', $request->id);
+            if ($request->store_order_id) {
+                \App\Models\StoreOrder::whereKey($request->store_order_id)->whereNull('paid_at')->update(['status'=>'rejected']);
+                app(PromotionService::class)->release('order', $request->store_order_id);
+            }
             $this->audit($request, 'reject_top_up', ['status' => $old], ['status' => 'rejected', 'reason' => $reason]);
         }, 3);
     }
@@ -106,6 +135,7 @@ class BankPaymentService
     {
         $time = $message->transaction_datetime;
         // SMS timestamps have minute precision; allow the request's first minute, not older messages.
+        if ($request->expected_account_number && $request->expected_account_number !== $message->account_number) { return false; }
         return $time && $request->created_at
             && $time->gte($request->created_at->copy()->startOfMinute())
             && (!$request->expires_at || $time->lte($request->expires_at))
@@ -171,7 +201,8 @@ class BankPaymentService
 
     private function credit(TopupRequest $request, string $action): TopupRequest
     {
-        if (!$request->user()->exists() || $request->requested_amount <= 0) {
+        $payingUser = \App\Models\User::lockForUpdate()->find($request->user_id);
+        if (!$payingUser || $request->requested_amount <= 0) {
             $this->fail('کاربر یا مبلغ درخواست معتبر نیست.');
         }
         $old = $request->status;
@@ -184,6 +215,15 @@ class BankPaymentService
             'description' => 'شارژ کیف پول - درخواست #'.$request->id,
             'top_up_request_id' => $request->id,
         ]);
+        if ($request->purpose !== 'order' && (int) $request->bonus_amount > 0) {
+            Financial::create([
+                'creator'=>auth()->id() ?? $request->user_id, 'for'=>$request->user_id,
+                'price'=>(int) $request->bonus_amount, 'type'=>'plus', 'approved'=>1,
+                'description'=>'بونوس شارژ #'.$request->id, 'bonus_topup_id'=>$request->id,
+            ]);
+        }
+        app(PromotionService::class)->redeem('topup', $request->id);
+        if ($request->store_order_id) { app(StoreCheckoutService::class)->capture($request->store_order_id); }
         $request->update(['status' => 'completed', 'settled_at' => now()]);
         $this->audit($request, $action, ['status' => $old], [
             'status' => 'completed', 'financial_id' => $financial->id,

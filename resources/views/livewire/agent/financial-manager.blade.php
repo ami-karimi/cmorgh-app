@@ -221,6 +221,9 @@
                         </button>
                     </div>
 
+                    @if($activeRequest->bonus_amount)
+                        <p class="text-emerald-400 mb-3">بونوس این شارژ: {{ number_format($activeRequest->bonus_amount) }} تومان · اعتبار نهایی {{ number_format($activeRequest->requested_amount + $activeRequest->bonus_amount) }} تومان</p>
+                    @endif
                     {{-- مبلغ شارژ --}}
                     <div class="bg-[#080f1d] border border-[#243247] rounded-xl p-4 text-center">
                         <span class="text-[10px] text-[#94A3B8]">مبلغ شارژ کیف پول</span>

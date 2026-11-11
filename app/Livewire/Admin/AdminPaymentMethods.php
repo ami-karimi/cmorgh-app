@@ -14,7 +14,9 @@ class AdminPaymentMethods extends Component
 
     // فیلد نوع روش پرداخت
     public $type = 'card'; // card (تومانی), crypto (ارزی/کریپتو), custom (سایر)
-    public $bank_name, $account_name, $card_number, $sheba_number;
+    public $bank_name, $account_name, $card_number, $sheba_number, $account_number;
+
+    public function boot(): void { abort_unless(auth()->check() && in_array(auth()->user()->role, ['admin','manager'], true), 403); }
     public $is_show = true;
 
     public function openModal($id = null)
@@ -28,9 +30,10 @@ class AdminPaymentMethods extends Component
             $this->account_name = $method->account_name;
             $this->card_number = $method->card_number;
             $this->sheba_number = $method->sheba_number ?? '';
+            $this->account_number = $method->account_number ?? '';
             $this->is_show = isset($method->is_show) ? (bool)$method->is_show : true;
         } else {
-            $this->reset(['methodId', 'bank_name', 'account_name', 'card_number', 'sheba_number']);
+            $this->reset(['methodId', 'bank_name', 'account_name', 'card_number', 'sheba_number', 'account_number']);
             $this->type = 'card';
             $this->is_show = true;
         }
@@ -58,6 +61,7 @@ class AdminPaymentMethods extends Component
                 'card_number'  => 'required|string|max:30',
                 'bank_name'    => 'nullable|string|max:255',
                 'sheba_number' => 'nullable|string|max:50',
+                'account_number' => 'nullable|regex:/^[0-9.-]{1,50}$/',
             ], [
                 'account_name.required' => 'نام صاحب حساب الزامی است.',
                 'card_number.required'  => 'شماره کارت الزامی است.',
@@ -74,12 +78,13 @@ class AdminPaymentMethods extends Component
         }
 
         $data = [
-            'user_id'      => Auth::id(), // ثبت آیدی ایجاد کننده
+            'user_id'      => $this->methodId ? DB::table('agent_bank_accounts')->where('id',$this->methodId)->value('user_id') : Auth::id(), // Preserve the bank-account owner on edits.
             'type'         => $this->type,
             'bank_name'    => $this->type === 'crypto' ? ($this->bank_name ?: 'کیف پول ارزی') : $this->bank_name,
             'account_name' => $this->account_name,
             'card_number'  => $this->card_number,
             'sheba_number' => $this->sheba_number,
+            'account_number' => $this->type === 'card' ? ($this->account_number ?: null) : null,
             'is_show'      => $this->is_show ? 1 : 0,
             'updated_at'   => now()
         ];

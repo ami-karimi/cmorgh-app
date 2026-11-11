@@ -14,6 +14,14 @@ class MessagesController extends Controller
 
     public function get(Request $request)
     {
+        $expected = (string) config('bank-payments.webhook_token');
+        if ($expected === '') {
+            return response()->json(['success'=>false, 'message'=>'دریافت پیام بانکی هنوز پیکربندی نشده است.'], 503);
+        }
+        $provided = $request->bearerToken() ?? $request->header('X-Bank-Token', '');
+        if (!hash_equals($expected, (string) $provided)) {
+            return response()->json(['success'=>false, 'message'=>'دسترسی غیرمجاز.'], 401);
+        }
         try {
             $data = $request->validate(['message' => 'required|string|max:10000']);
             $message = $this->bankMessageService->storeFromRawMessage($data['message']);

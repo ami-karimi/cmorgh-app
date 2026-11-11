@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TopupRequest extends Model
 {
-    protected $fillable = ['user_id', 'requested_amount', 'unique_amount', 'payable_amount', 'status','matched_bank_message_id', 'expires_at', 'matched_at', 'match_type', 'settled_at', 'rejection_reason'];
+    protected $fillable = ['user_id', 'requested_amount', 'unique_amount', 'payable_amount', 'status','matched_bank_message_id', 'expires_at', 'matched_at', 'match_type', 'settled_at', 'rejection_reason', 'purpose', 'store_order_id', 'bonus_amount', 'bonus_promotion_id', 'expected_account_number'];
 
     protected $casts = ['expires_at' => 'datetime', 'matched_at' => 'datetime', 'settled_at' => 'datetime', 'requested_amount' => 'integer', 'payable_amount' => 'integer'];
 

@@ -123,7 +123,10 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-zinc-400 mb-1.5">شماره شبا (بدون IR)</label>
+                            <label class="block text-xs font-bold text-zinc-400 mb-1.5">شماره حساب داخل پیام بانک (برای تطبیق خودکار؛ نه شماره کارت)</label>
+                            <input wire:model="account_number" dir="ltr" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm" placeholder="9490032979">
+                            @error('account_number')<p class="text-red-400">{{ $message }}</p>@enderror
+                            <label class="block text-xs font-bold text-zinc-400 mb-1.5 mt-3">شماره شبا (بدون IR)</label>
                             <input wire:model="sheba_number" type="text" class="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl p-3 text-sm focus:ring-brand-500 outline-none font-mono" dir="ltr" placeholder="012345678901234567890123">
                         </div>
                 @else

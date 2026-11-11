@@ -1,4 +1,5 @@
 <div class="space-y-6 animate-fade-in">
+    @if($pendingOrder) @include('livewire.store.bank-order-status') @endif
 
     <div>
         <h1 class="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">سفارشات من</h1>
@@ -42,6 +43,10 @@
                                         <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                         در انتظار تایید
                                     </span>
+                            @elseif($order->status === 'paid')
+                                <span class="text-blue-400">{{ $order->fulfillment_state === 'requires_review' ? 'پرداخت ثبت شد؛ نیازمند بررسی صدور' : 'پرداخت ثبت شد؛ در حال صدور' }}</span>
+                            @elseif(in_array($order->status, ['cancelled','refunded']))
+                                <span>{{ $order->status === 'refunded' ? 'هزینه به کیف پول برگشت داده شد' : 'لغو شده' }}</span>
                             @elseif($order->status === 'approved')
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
@@ -55,8 +60,9 @@
                         </td>
 
                         <td class="p-4 text-center">
-                            @if($order->receipt_image)
-                                <button wire:click="viewReceipt('{{ $order->receipt_image }}')" class="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:text-brand-500 hover:bg-brand-500/10 transition shadow-sm" title="مشاهده فیش واریزی">
+                            <button wire:click="showPayment({{ $order->id }})" class="p-2 text-blue-400">جزئیات پرداخت</button>
+                            @if($order->payment_method === 'receipt' && $order->receipt_image)
+                                <button wire:click="viewReceipt({{ $order->id }})" class="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:text-brand-500 hover:bg-brand-500/10 transition shadow-sm" title="مشاهده فیش واریزی">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 </button>
                             @else

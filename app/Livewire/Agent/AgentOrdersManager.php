@@ -40,65 +40,28 @@ class AgentOrdersManager extends Component
         }
     }
 
-    public function approveOrder($orderId)
+    public function boot(): void
+    {
+        abort_unless(auth()->check() && in_array(auth()->user()->role, ['agent','sub_agent'], true), 403);
+    }
+
+    private function paymentAction(string $method, $orderId, string $success): void
     {
         try {
-            DB::transaction(function () use ($orderId) {$order = StoreOrder::with(['user', 'group'])
-                ->where('agent_id', Auth::id())
-                ->findOrFail($orderId);
-
-                if ($order->status === 'approved') {
-                    throw new \Exception('این سفارش قبلاً تایید شده است.');
-                }
-
-                $user =$order->user;
-                $group =$order->group;
-
-                if (!$user || !$group) {
-                    throw new \Exception('اطلاعات کاربر یا بسته درخواستی یافت نشد!');
-                }
-
-
-                // آماده‌سازی و ساخت اکانت
-                $accService = new AccountProvisioningService();
-                $preparedData = $accService->prepareAccountData($group, $user,$order->phone);
-
-                $createdAccount = $accService->createFullAccount($preparedData['userData'],
-                    $preparedData['configData'],$user->id,
-                    true,
-                    false
-                );
-
-                if (is_array($createdAccount) && isset($createdAccount['status']) &&$createdAccount['status'] === false) {
-                    throw new \Exception($createdAccount['message'] ?? 'خطایی در صدور اکانت رخ داد.');
-                }
-
-                // تایید نهایی سفارش
-                $order->update([
-                    'status'     => 'approved',
-                    'account_id' => $createdAccount->id ?? $createdAccount['id'] ?? null,
-                ]);
-            });
-
-            session()->flash('success', 'فیش تایید و اکانت با موفقیت صادر شد.');
+            app(\App\Services\StoreCheckoutService::class)->$method((int) $orderId, auth()->user());
+            session()->flash('success', $success);
             $this->isReceiptModalOpen = false;
-
-        } catch (\Exception $e) {
-            session()->flash('error', 'خطا در تایید سفارش: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            if (!$e instanceof \Illuminate\Validation\ValidationException) { report($e); }
+            $message = $e instanceof \Illuminate\Validation\ValidationException ? collect($e->errors())->flatten()->first() : 'عملیات انجام نشد؛ گزارش خطا ثبت شد.';
+            $this->addError('receipt', $message);
+            session()->flash('error', $message);
         }
     }
 
-    public function rejectOrder($orderId)
-    {
-        try {
-            $order = StoreOrder::where('agent_id', Auth::id())->findOrFail($orderId);$order->update(['status' => 'rejected']);
-
-            session()->flash('success', 'سفارش با موفقیت رد شد.');
-            $this->isReceiptModalOpen = false;
-        } catch (\Exception $e) {
-            session()->flash('error', 'خطا در رد سفارش: ' . $e->getMessage());
-        }
-    }
+    public function approveOrder($orderId): void { $this->paymentAction('approveReceipt', $orderId, 'فیش تأیید شد؛ سفارش برای صدور ثبت شد.'); }
+    public function rejectOrder($orderId): void { $this->paymentAction('rejectReceipt', $orderId, 'سفارش رد شد.'); }
+    public function refundOrder($orderId): void { $this->paymentAction('refund', $orderId, 'هزینه سفارش به کیف پول مشتری برگشت داده شد.'); }
 
     public function render()
     {
@@ -133,10 +96,10 @@ class AgentOrdersManager extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('phone', 'like', '\%' .$this->search . '%')
+                $q->where('phone', 'like', '%' .$this->search . '%')
                     ->orWhere('id', 'like', '%' . $this->search . '%')
                     ->orWhereHas('user', function ($u) {
-                        $u->where('name', 'like', '\%' .$this->search . '%')
+                        $u->where('name', 'like', '%' .$this->search . '%')
                             ->orWhere('username', 'like', '%' . $this->search . '%');
                     });
             });
@@ -144,7 +107,7 @@ class AgentOrdersManager extends Component
 
         $orders =$query->paginate(15);
         $selectedOrder =$this->selectedOrderId
-            ? StoreOrder::with(['user', 'group', 'account'])->find($this->selectedOrderId)
+            ? StoreOrder::with(['user', 'group', 'account'])->where('agent_id', auth()->id())->find($this->selectedOrderId)
             : null;
 
         return view('livewire.agent.agent-orders-manager', [

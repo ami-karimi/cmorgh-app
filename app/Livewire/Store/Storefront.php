@@ -2,273 +2,153 @@
 
 namespace App\Livewire\Store;
 
-use App\Models\AgentBankAccount;
-use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\Locked;
 use App\Models\User;
 use App\Models\Group;
 use App\Models\AgentStore;
 use App\Models\StoreOrder;
-use App\Models\Financial;
+use App\Models\AgentBankAccount;
+use App\Services\StoreCheckoutService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use App\Services\AccountProvisioningService;
 use Illuminate\Support\Str;
+
 class Storefront extends Component
 {
     use WithFileUploads;
-
     public $storeData = [];
-    public $sellerId = null;
+    #[Locked] public $sellerId = null;
     public $bankDetails = null;
+    public $step = 1, $selectedProtocol = 'all', $selectedPlan = null;
+    #[Locked] public $selectedPlanPrice = 0;
+    public $name, $phone, $email, $receipt;
+    public $paymentMethod = 'receipt', $couponCode = '', $discountAmount = 0;
+    #[Locked] public $checkoutKey = '';
+    #[Locked] public $pendingOrderId = null;
 
-    public $step = 1;
-    public $selectedProtocol = 'all';
-    public $selectedPlan = null;
-    public $selectedPlanPrice = 0; // 👈 متغیر جدید برای حفظ قیمت در طول مراحل
-
-    public $name,$phone, $email,$receipt;
-    public $paymentMethod = 'receipt';
-
-    public function mount()
+    public function mount(): void
     {
-        $host = request()->getHost();
-        $host = str_replace('www.', '',$host);
-
-        $agent = User::where('custom_domain',$host)->where('domain_status', 'approved')->first();
-        if(Auth::user()){
-            $agent = auth()->user()->parentAgent;
-        }
-
-        if ($agent) {
-            $store = AgentStore::where('user_id',$agent->id)->first();
-            if ($store &&$store->is_active == 1) {
-                $this->sellerId =$agent->id;
-                $this->storeData = [
-                    'brand_name' => $agent->brand_name ?? 'فروشگاه VPN',
-                    'logo' => $agent->brand_logo ? asset('storage/' . $agent->brand_logo) : null,
-                    'support_link' => $store->support_id ?? '#',
-                    'description' => $store->title ?? 'خرید امن و تحویل آنی سرویس',
-                ];
-                $this->bankDetails = DB::table('agent_bank_accounts')->where('user_id',$agent->id)->where('is_show', 1)->first();
-            } else {
-                abort(403, 'این فروشگاه در حال حاضر غیرفعال است.');
-            }
+        $host = preg_replace('/^www\./', '', request()->getHost());
+        $agent = User::where('custom_domain', $host)->where('domain_status', 'approved')->first();
+        if (auth()->check()) { $agent = auth()->user()->parentAgent; }
+        if ($agent && in_array($agent->role, ['agent','sub_agent'], true)) {
+            $store = AgentStore::where('user_id', $agent->id)->where('is_active', 1)->first();
+            abort_unless($store, 403, 'این فروشگاه غیرفعال است.');
+            $this->sellerId = $agent->id;
+            $this->storeData = ['brand_name'=>$agent->brand_name ?: 'فروشگاه VPN', 'logo'=>$agent->brand_logo ? asset('storage/'.$agent->brand_logo) : null,
+                'support_link'=>$store->support_id, 'description'=>$store->title ?: 'خرید و تحویل سرویس'];
         } else {
-            $this->storeData = [
-                'brand_name' => setting('SITE_TITLE', 'همراه سیمرغ'),
-                'logo' => setting('SITE_LOGO'),
-                'support_link' =>  setting('TELEGRAM_SUPPORT'),
-                'description' => 'پلتفرم جامع مدیریت و فروش سرویس اینترنت آزاد',
-            ];
-            $mng= User::where('role','manager')->first();
-            $this->bankDetails = DB::table('agent_bank_accounts')->where('user_id', $mng->id)->first();
+            $this->storeData = ['brand_name'=>setting('SITE_TITLE','همراه سیمرغ'), 'logo'=>setting('SITE_LOGO'),
+                'support_link'=>setting('TELEGRAM_SUPPORT'), 'description'=>'پلتفرم مدیریت و فروش سرویس'];
         }
-
-        if($this->bankDetails == null){
-            $this->bankDetails = AgentBankAccount::whereHas('user', function($query) {
-                $query->where('role', 'manager');
-            })
-                ->where('is_show', 1)
-                ->orderBy('id', 'asc')
-                ->first();
-        }
-        if (Auth::check()) {
-            $this->name = Auth::user()->name;
-            $this->phone = Auth::user()->phone;
-            $this->email = Auth::user()->email;
+        $this->bankDetails = $this->resolveBank();
+        $this->checkoutKey = (string) Str::uuid();
+        if (auth()->check()) {
+            $this->name = auth()->user()->name; $this->phone = auth()->user()->phone; $this->email = auth()->user()->email;
             $this->paymentMethod = 'wallet';
         }
     }
 
-    public function selectPlan($planId)
+    private function resolveBank()
     {
-        $this->selectedPlan = Group::findOrFail($planId);
-
-        // 👈 محاسبه قیمت و ذخیره در متغیر مستقل برای جلوگیری از صفر شدن
-        $seller = $this->sellerId ? User::find($this->sellerId) : null;
-        $this->selectedPlanPrice =$this->selectedPlan->getSellingPriceFor($seller);$this->step = 2;
+        $query = AgentBankAccount::where('is_show',1)->where('type','card');
+        if ($this->sellerId) {
+            $bank = (clone $query)->where('user_id',$this->sellerId)->first();
+            if ($bank) { return $bank; }
+        }
+        return $query->whereHas('user', fn ($q) => $q->whereIn('role',['manager','admin']))->orderBy('id')->first();
     }
+
+    public function selectPlan($planId): void
+    {
+        $this->selectedPlan = Group::where('is_enabled',1)->findOrFail($planId);
+        if ($this->sellerId && DB::table('agent_hidden_groups')->where('agent_id',$this->sellerId)->where('group_id',$planId)->exists()) { abort(403); }
+        $this->couponCode = ''; $this->discountAmount = 0; $this->checkoutKey = (string) Str::uuid();
+        $this->refreshQuote(); $this->step = 2;
+    }
+
+    private function refreshQuote(): void
+    {
+        if (!$this->selectedPlan) { return; }
+        if (auth()->check()) {
+            $quote = app(StoreCheckoutService::class)->quote(auth()->user(), $this->selectedPlan->id, $this->sellerId, $this->couponCode);
+            $this->selectedPlanPrice = $quote['total']; $this->discountAmount = $quote['discount'];
+        } else {
+            $this->selectedPlanPrice = $this->selectedPlan->getSellingPriceFor($this->sellerId ? User::find($this->sellerId) : null);
+        }
+    }
+
+    public function applyCoupon()
+    {
+        if (!auth()->check()) { return redirect()->route('login'); }
+        $this->validate(['couponCode'=>'nullable|string|max:64']);
+        $this->resetValidation();
+        try { $this->refreshQuote(); }
+        catch (\Illuminate\Validation\ValidationException $e) { $this->addError('couponCode', collect($e->errors())->flatten()->first()); }
+    }
+
+    public function removeCoupon(): void { $this->couponCode = ''; $this->resetValidation(); $this->refreshQuote(); }
 
     public function goToPayment()
     {
-        if (!Auth::check()) {
-            $this->validate([
-                'name'  => 'required|string|max:255',
-                'phone' => 'required|numeric|digits:11',
-            ], [
-                'name.required' => 'وارد کردن نام الزامی است.',
-                'phone.required' => 'شماره موبایل جهت دریافت اکانت الزامی است.',
-                'phone.digits' => 'شماره موبایل باید ۱۱ رقم باشد.'
-            ]);
-        }
-        $this->step = 3;
+        if (!auth()->check()) { return redirect()->route('login'); }
+        $this->refreshQuote(); $this->step = 3;
     }
-
-    public function previousStep()
-    {
-        if ($this->step > 1) {$this->step--;
-        }
-    }
+    public function previousStep(): void { if ($this->step > 1 && $this->step < 4) { $this->step--; } }
 
     public function submitOrder()
     {
-        $seller = $this->sellerId ? User::find($this->sellerId) : null;
-        $securePrice = $this->selectedPlan->getSellingPriceFor($seller);
-
-        // =========================================================================
-        // ۱. حالت پرداخت مستقیم و آنی از کیف پول (ساخت فوری اکانت VPN)
-        // =========================================================================
-        if (Auth::check() && $this->paymentMethod === 'wallet') {
-            $user = Auth::user();
-
-            if ($user->balance < $securePrice) {
-                $this->addError('wallet', 'موجودی کیف پول شما کافی نیست. لطفاً حساب خود را شارژ کنید یا فیش واریز نمایید.');
-                return;
-            }
-
-            try {
-                DB::transaction(function () use ($user, $securePrice) {
-
-                    // ۱-۲. ایجاد سفارش در وضعیت تایید شده
-                    $order = StoreOrder::create([
-                        'agent_id'      => $this->sellerId,
-                        'user_id'       => $user->id,
-                        'group_id'      => $this->selectedPlan->id,
-                        'phone'         => $this->phone ?? $user->phone,
-                        'email'         => $this->email ?? $user->email,
-                        'price'         => $securePrice,
-                        'receipt_image' => 'wallet_payment',
-                        'status'        => 'approved',
-                    ]);
-
-                    // ۱-۳. استفاده از سرویس یکپارچه برای آماده‌سازی دیتا
-                    $accService = new \App\Services\AccountProvisioningService();
-                    $preparedData = $accService->prepareAccountData($this->selectedPlan, $user, $this->phone ?? null);
-
-                    // ۱-۴. ساخت اکانت و کسر هزینه عمده از نماینده
-                    $createdAccount = $accService->createFullAccount(
-                        $preparedData['userData'],
-                        $preparedData['configData'],
-                        $user->id
-                    );
-                    if (isset($createdAccount['status']) && $createdAccount['status'] === false) {
-                        throw new \Exception($createdAccount['message'] ?? 'خطایی در صدور اکانت رخ داد.');
-                    }
-                    if ($createdAccount) {
-                        $order->update(['account_id' => $createdAccount->id]);
-                    }
-                });
-
-                session()->flash('success_order', 'پرداخت از کیف پول با موفقیت انجام شد و سرویس جدید شما بلافاصله در داشبورد فعال گردید!');
-                $this->resetWizard();
-                return;
-
-            } catch (\Exception $e) {
-                $this->addError('wallet', 'خطا در صدور آنی اکانت: ' . $e->getMessage());
-                return;
-            }
+        if (!auth()->check()) { return redirect()->route('login'); }
+        $this->validate(['paymentMethod'=>'required|in:wallet,bank,receipt', 'couponCode'=>'nullable|string|max:64']);
+        $path = null;
+        if ($this->paymentMethod === 'receipt') {
+            $this->validate(['receipt'=>'required|image|max:2048']);
+            $path = $this->receipt->store('attachments/orders','public');
         }
-
-        // =========================================================================
-        // ۲. حالت ثبت با فیش واریزی (در انتظار تایید مدیریت)
-        // =========================================================================
-        $this->validate([
-            'receipt' => 'required|image|max:2048',
-        ], [
-            'receipt.required' => 'آپلود تصویر فیش واریزی الزامی است.',
-        ]);
-
-        $path = $this->receipt->store('attachments/orders', 'public');
-
-        $newPassword = null;
-        $customerId = null;
-
-        if (Auth::check()) {
-            $customerId = Auth::id();
-        } else {
-            $customer = User::where('phone', $this->phone)->where('creator', $this->sellerId ?? 1)->first();
-            if (!$customer) {
-                $newPassword = rand(100000, 999999);
-                $customer = User::create([
-                    'name'      => $this->name,
-                    'phone'     => $this->phone,
-                    'email'     => $this->email,
-                    'password'  => \Illuminate\Support\Facades\Hash::make($newPassword),
-                    'role'      => 'customer',
-                    'creator'   => $this->sellerId ?? 1,
-                    'is_active' => 1,
-                ]);
-            }
-            $customerId = $customer->id;
+        try {
+            $bank = $this->resolveBank();
+            $order = app(StoreCheckoutService::class)->create(auth()->user(), (int) $this->selectedPlan?->id,
+                $this->sellerId, $this->paymentMethod, $this->checkoutKey, $this->couponCode, $path, $bank?->account_number, (int) $this->selectedPlanPrice);
+            $this->pendingOrderId = $order->id; $this->step = 4;
+        } catch (\Throwable $e) {
+            if (!$e instanceof \Illuminate\Validation\ValidationException) { report($e); }
+            $message = $e instanceof \Illuminate\Validation\ValidationException ? collect($e->errors())->flatten()->first() : 'ثبت سفارش انجام نشد؛ خطا در گزارش سیستم ثبت شد.';
+            try { $this->refreshQuote(); } catch (\Throwable) { /* Keep the invalid-code message; no payment was captured. */ }
+            $this->addError('wallet', $message);
         }
-
-        StoreOrder::create([
-            'agent_id'      => $this->sellerId,
-            'user_id'       => $customerId,
-            'group_id'      => $this->selectedPlan->id,
-            'phone'         => $this->phone,
-            'email'         => $this->email,
-            'price'         => $securePrice,
-            'receipt_image' => $path,
-            'status'        => 'pending',
-        ]);
-
-        if ($newPassword) {
-            session()->flash('new_account', true);
-            session()->flash('username', $this->phone);
-            session()->flash('password', $newPassword);
-            session()->flash('success_order', 'سفارش ثبت شد! یک حساب کاربری برای پیگیری ایجاد گردید.');
-        } else {
-            session()->flash('success_order', 'فیش واریزی ثبت شد و در انتظار تایید مدیریت است.');
-        }
-
-        $this->resetWizard();
     }
 
-    public function resetWizard()
+    public function checkOrderStatus(): void
     {
-        $this->reset(['step', 'selectedPlan', 'selectedPlanPrice', 'receipt']);
-        if(!Auth::check()) {
-            $this->reset(['name', 'phone', 'email']);
+        if ($this->pendingOrderId && auth()->check()) {
+            $order = StoreOrder::where('user_id', auth()->id())->find($this->pendingOrderId);
+            if (!$order) { $this->pendingOrderId = null; }
         }
+    }
+
+    public function cancelBankOrder(): void
+    {
+        $order = StoreOrder::where('user_id',auth()->id())->with('bankPayment')->findOrFail($this->pendingOrderId);
+        if ($order->bankPayment) { app(\App\Services\BankPaymentService::class)->cancelRequest($order->bankPayment->id, auth()->id()); }
+    }
+
+    public function resetWizard(): void
+    {
+        $this->reset('step','selectedPlan','selectedPlanPrice','receipt','pendingOrderId','couponCode','discountAmount');
+        $this->checkoutKey = (string) Str::uuid();
     }
 
     public function render()
     {
-        $query = Group::where('is_enabled', 1);
-
-        if ($this->sellerId) {
-            $hiddenGroups = DB::table('agent_hidden_groups')->where('agent_id',$this->sellerId)->pluck('group_id')->toArray();
-            if (!empty($hiddenGroups)) {
-                $query->whereNotIn('id',$hiddenGroups);
-            }
-        }
-
+        $query = Group::where('is_enabled',1);
+        if ($this->sellerId) { $query->whereNotIn('id',DB::table('agent_hidden_groups')->where('agent_id',$this->sellerId)->pluck('group_id')); }
         $seller = $this->sellerId ? User::find($this->sellerId) : null;
-
-
-
-        $allPlans = $query->get()->map(function($group) use ($seller) {$group->final_sell_price = $group->getSellingPriceFor($seller);
-            return $group;
-        });
-
-        // 👈 فیلتر بهبودیافته وایرگارد (پشتیبانی از نام‌های مختلف)
-        if ($this->selectedProtocol === 'wireguard') {$plans = $allPlans->filter(function($p) {
-            $name = strtolower($p->name);
-            return str_contains($name, 'wireguard') || str_contains($name, 'وایرگارد') || str_contains($name, 'wg');
-            });
-        } elseif ($this->selectedProtocol === 'l2tp_openvpn') {$plans = $allPlans->filter(function($p) {
-            $name = strtolower($p->name);
-            return !str_contains($name, 'wireguard') && !str_contains($name, 'وایرگارد') && !str_contains($name, 'wg');
-        });
-        } else {
-            $plans =$allPlans;
+        $plans = $query->get()->map(function ($group) use ($seller) { $group->final_sell_price = $group->getSellingPriceFor($seller); return $group; });
+        if ($this->selectedProtocol !== 'all') {
+            $plans = $plans->filter(function ($p) { $wg = str_contains(strtolower($p->name),'wireguard') || str_contains($p->name,'وایرگارد') || str_contains(strtolower($p->name),'wg'); return $this->selectedProtocol === 'wireguard' ? $wg : !$wg; });
         }
-
-        return view('livewire.store.storefront', [
-            'plans' => $plans
-        ])->layout('layouts.store')->title($this->storeData['brand_name']);
+        $order = $this->pendingOrderId && auth()->check() ? StoreOrder::where('user_id',auth()->id())->with(['bankPayment','account'])->find($this->pendingOrderId) : null;
+        return view('livewire.store.storefront', ['plans'=>$plans, 'pendingOrder'=>$order])->layout('layouts.store')->title($this->storeData['brand_name'] ?? 'فروشگاه');
     }
 }

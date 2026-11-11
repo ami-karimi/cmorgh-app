@@ -14,6 +14,8 @@ Schedule::command('vpn:sync-wg-usage')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/wireguard_sync.log'));
 
+Schedule::command('orders:fulfill-paid')->everyMinute()->withoutOverlapping();
+
 Schedule::command('bank:sync-payment')
     ->everyMinute()
     ->withoutOverlapping();

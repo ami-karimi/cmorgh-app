@@ -59,7 +59,7 @@ class FinancialManager extends Component
     // ایجاد درخواست جدید
     public function createTopupRequest()
     {
-        if (auth()->user()->role !== 'agent') {
+        if (!in_array(auth()->user()->role, ['agent','sub_agent'], true)) {
             abort(403);
         }
 
@@ -67,8 +67,13 @@ class FinancialManager extends Component
             'chargeAmount' => 'required|integer|min:1000|max:100000000',
         ]);
 
+        $this->loadBankAccount();
+        if (!$this->bankAccount?->account_number) {
+            $this->addError('chargeAmount', 'شماره حساب پیام بانکی برای شارژ خودکار تنظیم نشده است.');
+            return;
+        }
         try {
-            $request = app(\App\Services\BankPaymentService::class)->createRequest(auth()->id(), (int) $this->chargeAmount);
+            $request = app(\App\Services\BankPaymentService::class)->createRequest(auth()->id(), (int) $this->chargeAmount, null, $this->bankAccount->account_number);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->addError('chargeAmount', collect($e->errors())->flatten()->first());
             return;

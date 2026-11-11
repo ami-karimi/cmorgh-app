@@ -121,6 +121,7 @@
         </div>
 
         <!-- سفارشات فروشگاه -->
+        <a @click="sidebarOpen = false" href="{{ route('admin.promotions') }}" wire:navigate class="flex px-4 py-3 rounded-xl font-bold {{ request()->routeIs('admin.promotions') ? 'bg-brand-500 text-white' : 'text-zinc-400 hover:bg-zinc-800/50' }}">تخفیف‌ها و بونوس شارژ</a>
         <a @click="sidebarOpen = false" href="{{ route('admin.store.orders') }}" wire:navigate
            class="flex items-center justify-between px-4 py-3 rounded-xl font-bold transition-all duration-300 {{ request()->routeIs('admin.store.orders') ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100' }}">
             <div class="flex items-center gap-3">

@@ -59,6 +59,7 @@ Route::middleware(['auth', 'is_customer'])->prefix('customer')->name('customer.'
 
     Route::get('/dashboard', \App\Livewire\Customer\Dashboard::class)->name('dashboard');
     Route::get('/my-orders', \App\Livewire\Customer\MyOrders::class)->name('orders');
+    Route::get('/wallet', \App\Livewire\Customer\Wallet::class)->name('wallet');
 });
 
  Route::get('/store', \App\Livewire\Store\Storefront::class)->name('store.index');
@@ -92,6 +93,7 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     Route::get('/',\App\Livewire\Admin\Dashboard::class)->name('dashboard');
     Route::get('/tutorial', \App\Livewire\Admin\TutorialManager::class)->name('tutorial');
     Route::get('/store-orders', \App\Livewire\Admin\StoreOrdersManager::class)->name('store.orders');
+    Route::get('/promotions', \App\Livewire\Admin\PromotionsManager::class)->name('promotions');
     Route::get('/managers/list',\App\Livewire\Admin\ManagerList::class)->name('managers.list');
     Route::get('/managers/{manager}/edit', \App\Livewire\Admin\ManagerEdit::class)->name('managers.edit');
     Route::get('/announcements', \App\Livewire\Admin\AnnouncementsManager::class)->name('announcements');

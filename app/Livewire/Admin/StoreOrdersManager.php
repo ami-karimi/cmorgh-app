@@ -43,62 +43,28 @@ class StoreOrdersManager extends Component
     }
 
 
-    public function approveOrder($orderId)
+    public function boot(): void
+    {
+        abort_unless(auth()->check() && in_array(auth()->user()->role, ['admin','manager'], true), 403);
+    }
+
+    private function paymentAction(string $method, $orderId, string $success): void
     {
         try {
-            DB::transaction(function () use ($orderId) {
-
-               $order = StoreOrder::with(['user', 'group'])->findOrFail($orderId);
-
-                if ($order->status === 'approved') {
-                    throw new \Exception('این سفارش قبلاً تایید و پردازش شده است.');
-                }
-
-                $user = $order->user;
-                $group = $order->group;
-
-                if ($order->agent_id && $user->creator != $order->agent_id) {
-                    $user->creator = $order->agent_id;
-                    $user->save();
-                }
-
-                $accService = new \App\Services\AccountProvisioningService();
-
-                $preparedData = $accService->prepareAccountData($group, $user, $order->phone);
-
-                $create = $accService->createFullAccount(
-                    $preparedData['userData'],
-                    $preparedData['configData'],
-                    $user->id,
-                    true,
-                    false
-                );
-                if (is_array($create) && isset($create['status']) &&$create['status'] === false) {
-                    throw new \Exception($create['message'] ?? 'خطایی در صدور اکانت رخ داد.');
-                }
-
-
-                $order->update(['status' => 'approved','account_id' => $create->id]);
-
-            });
-
-            session()->flash('success', 'فیش واریزی تایید و اکانت با موفقیت صادر شد.');
+            app(\App\Services\StoreCheckoutService::class)->$method((int) $orderId, auth()->user());
+            session()->flash('success', $success);
             $this->isReceiptModalOpen = false;
-
-        } catch (\Exception $e) {
-            $this->addError('receipt', 'خطا در پردازش سفارش: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            if (!$e instanceof \Illuminate\Validation\ValidationException) { report($e); }
+            $message = $e instanceof \Illuminate\Validation\ValidationException ? collect($e->errors())->flatten()->first() : 'عملیات انجام نشد؛ گزارش خطا ثبت شد.';
+            $this->addError('receipt', $message);
+            session()->flash('error', $message);
         }
     }
 
-    // رد کردن سفارش
-    public function rejectOrder($orderId)
-    {
-        $order = StoreOrder::findOrFail($orderId);
-        $order->update(['status' => 'rejected']);
-
-        session()->flash('error', 'سفارش رد شد.');
-        $this->isReceiptModalOpen = false;
-    }
+    public function approveOrder($orderId): void { $this->paymentAction('approveReceipt', $orderId, 'فیش تأیید شد؛ سفارش برای صدور ثبت شد.'); }
+    public function rejectOrder($orderId): void { $this->paymentAction('rejectReceipt', $orderId, 'سفارش رد شد.'); }
+    public function refundOrder($orderId): void { $this->paymentAction('refund', $orderId, 'هزینه سفارش به کیف پول مشتری برگشت داده شد.'); }
 
     public function render()
     {

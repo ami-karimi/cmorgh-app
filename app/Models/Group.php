@@ -53,11 +53,19 @@ class Group extends Model
             }
         }
 
-        return round($currentPrice, 2);
+        $quote = app(\App\Services\PromotionService::class)->quote((int) round($currentPrice), $user, $this->id, 'plan_discount');
+        return (float) $quote['total'];
     }
 
 
     public function getSellingPriceFor(?User $seller): float
+    {
+        $base = $this->getBaseSellingPriceFor($seller);
+        $price = (float) app(\App\Services\PromotionService::class)->quote((int) round($base), auth()->user(), $this->id, 'plan_discount')['total'];
+        return $seller && in_array($seller->role,['agent','sub_agent'],true) ? max($price,$this->getFinalPriceFor($seller)) : $price;
+    }
+
+    public function getBaseSellingPriceFor(?User $seller): float
     {
         $defaultPrice = (float) ($this->price ?? 0);
 

@@ -49,7 +49,7 @@
     <div class="flex flex-col md:flex-row md:items-center justify-end gap-3 bg-zinc-50 dark:bg-zinc-900/50 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
         <select wire:model.live="statusFilter" class="bg-white dark:bg-[#111c2e] border border-zinc-200 dark:border-zinc-700 text-sm text-zinc-900 dark:text-white rounded-xl px-4 py-2 focus:ring-2 focus:ring-brand-500/50 outline-none transition">
             <option value="">همه وضعیت‌ها</option>
-            <option value="pending">⏳ در انتظار بررسی</option>
+            <option value="paid">پرداخت ثبت شد / در حال صدور</option><option value="refunded">بازگشت هزینه</option><option value="cancelled">لغو شده</option><option value="pending">⏳ در انتظار بررسی</option>
             <option value="approved">✅ تایید شده</option>
             <option value="rejected">❌ رد شده</option>
         </select>
@@ -88,7 +88,7 @@
                 <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800/80 text-sm">
                 @forelse($orders as $order)
                     @php
-                        $createdAccount = $order->account ?? \App\Models\Accounts::where('creator', $order->user_id)->latest()->first();
+                        $createdAccount = $order->account;
                     @endphp
                     <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900/30 transition">
                         <td class="p-4">
@@ -126,6 +126,10 @@
                                         {{ $createdAccount->service_group }}
                                     </span>
                                 </a>
+                            @elseif($order->status === 'paid')
+                                <span class="text-blue-400">{{ $order->fulfillment_state === 'requires_review' ? 'نیازمند بررسی صدور' : 'در حال صدور' }}</span>
+                            @elseif(in_array($order->status, ['refunded','cancelled']))
+                                <span>{{ $order->status === 'refunded' ? 'بازگشت هزینه' : 'لغو شده' }}</span>
                             @elseif($order->status === 'approved')
                                 <span class="text-[11px] text-amber-500 font-bold">اکانت یافت نشد</span>
                             @else
@@ -173,7 +177,7 @@
 
     @if($isReceiptModalOpen && $selectedOrder)
         @php
-            $modalAccount = $selectedOrder->account ?? \App\Models\Accounts::where('creator', $selectedOrder->user_id)->latest()->first();
+            $modalAccount = $selectedOrder->account;
         @endphp
 
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
@@ -189,7 +193,7 @@
                 <div class="p-6 overflow-y-auto space-y-5">
 
                     <div class="p-4 bg-zinc-100 dark:bg-[#080f1d] rounded-2xl flex items-center justify-center border border-zinc-200 dark:border-zinc-800">
-                        @if($selectedOrder->receipt_image && $selectedOrder->receipt_image !== 'wallet_payment')
+                        @if($selectedOrder->payment_method === 'receipt' && $selectedOrder->receipt_image)
                             <a href="{{ asset('storage/' . $selectedOrder->receipt_image) }}" target="_blank">
                                 <img src="{{ asset('storage/' . $selectedOrder->receipt_image) }}" class="max-h-64 rounded-xl shadow-md border border-zinc-300 dark:border-zinc-800 object-contain hover:scale-105 transition duration-300">
                             </a>
@@ -244,7 +248,16 @@
                         </div>
                     @endif
 
-                    @if($selectedOrder->status === 'pending')
+                    <div class="p-3 mb-3 rounded-xl bg-[#080f1d] text-xs space-y-2">
+                        <p>روش پرداخت: {{ $selectedOrder->payment_method }} · تخفیف: {{ number_format($selectedOrder->discount_amount) }} تومان</p>
+                        <p>وضعیت صدور: {{ $selectedOrder->fulfillment_state }}</p>
+                        @if($selectedOrder->fulfillment_error)<p class="text-amber-400">{{ $selectedOrder->fulfillment_error }}</p>@endif
+                        @if($selectedOrder->paid_at && !$selectedOrder->account_id && $selectedOrder->status !== 'refunded' && $selectedOrder->fulfillment_state !== 'processing')
+                            <button wire:click="refundOrder({{ $selectedOrder->id }})" wire:loading.attr="disabled" wire:confirm="پس از بررسی سرور، هزینه سفارش به کیف پول مشتری برگردد؟" class="text-amber-400 p-2">بازگشت هزینه به کیف پول</button>
+                        @endif
+                        @error('receipt')<p role="alert" class="text-red-400">{{ $message }}</p>@enderror
+                    </div>
+                    @if($selectedOrder->status === 'pending' && $selectedOrder->payment_method === 'receipt')
                         <div class="flex items-center gap-3 pt-2">
                             <button wire:click="rejectOrder({{ $selectedOrder->id }})" wire:confirm="آیا از رد این فیش مطمئن هستید؟" class="flex-1 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-rose-500 font-bold text-sm hover:bg-rose-500 hover:text-white transition">
                                 رد فیش

@@ -260,6 +260,14 @@
                 </div>
             @endif
 
+        @if(in_array($step, [2, 3]))
+            <div class="commerce-coupon">
+                <label for="checkout-coupon" class="commerce-coupon-title"><x-ui.icon name="ticket" />کد تخفیف دارید؟</label>
+                <div class="commerce-coupon-control"><input id="checkout-coupon" wire:model="couponCode" dir="ltr" class="commerce-input" placeholder="کد را اینجا وارد کنید" maxlength="64" autocomplete="off"><button type="button" wire:click="applyCoupon" wire:loading.attr="disabled" class="commerce-button">اعمال کد</button>@if($couponCode)<button type="button" wire:click="removeCoupon" class="commerce-button commerce-button-quiet">حذف</button>@endif</div>
+                @error('couponCode')<p role="alert" class="commerce-field-error mt-3">{{ $message }}</p>@enderror
+                @if($discountAmount)<div class="commerce-coupon-result"><span>{{ number_format($discountAmount) }} تومان تخفیف</span><span>مبلغ نهایی: {{ number_format($selectedPlanPrice) }} تومان</span></div>@endif
+            </div>
+        @endif
         <!-- ================= STEP 2 ================= -->
             @if($step === 2)
                 <div class="max-w-2xl mx-auto w-full flex flex-col md:flex-row gap-6 animate-fade-in">
@@ -338,7 +346,7 @@
                                 </div>
                                 <div class="flex items-start gap-2 bg-zinc-950/30 p-3 rounded-xl border border-white/[0.02]">
                                     <svg class="w-4 h-4 text-zinc-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <p class="text-[10px] text-zinc-400 font-medium leading-relaxed">حساب کاربری شما بر اساس شماره موبایل به صورت خودکار پس از تکمیل خرید ایجاد خواهد شد.</p>
+                                    <p class="text-[10px] text-zinc-400 font-medium leading-relaxed">برای ثبت سفارش وارد حساب شوید؛ ثبت‌نام از صفحه ورود انجام می‌شود. پرداخت خودکار تنها پس از دریافت پیام بانکی معتبر تأیید خواهد شد.</p>
                                 </div>
                             </div>
                     @endif
@@ -386,20 +394,10 @@
                     <!-- 13. Payment Options (Right/Bottom side) -->
                     <div class="w-full md:w-7/12 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-6 md:p-8 order-1 md:order-2">
                         <h3 class="text-lg font-black text-white mb-6">روش پرداخت</h3>
+                        @include('livewire.store.payment-methods')
+                        @error('wallet')<p role="alert" class="text-red-400 mb-3">{{ $message }}</p>@enderror
 
                     @if(Auth::check())
-                        <!-- Payment Method Segmented Control -->
-                            <div class="flex p-1 bg-zinc-950/60 rounded-xl border border-white/5 mb-8">
-                                <button wire:click="$set('paymentMethod', 'wallet')" class="flex-1 py-2.5 rounded-lg text-xs font-bold transition-all duration-300 flex items-center justify-center gap-2 {{ $paymentMethod === 'wallet' ? 'bg-zinc-800 text-white shadow-md border border-white/5' : 'text-zinc-500 hover:text-zinc-300' }}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-                                    کیف پول
-                                </button>
-                                <button wire:click="$set('paymentMethod', 'receipt')" class="flex-1 py-2.5 rounded-lg text-xs font-bold transition-all duration-300 flex items-center justify-center gap-2 {{ $paymentMethod === 'receipt' ? 'bg-zinc-800 text-white shadow-md border border-white/5' : 'text-zinc-500 hover:text-zinc-300' }}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                    فیش بانکی
-                                </button>
-                            </div>
-
                             <!-- 14. Wallet View -->
                             @if($paymentMethod === 'wallet')
                                 <div class="bg-zinc-950/80 border border-zinc-800 rounded-2xl p-6 text-center mb-8 relative overflow-hidden">
@@ -473,10 +471,10 @@
                     <!-- 17. Submit Actions -->
                         <div class="flex gap-3 pt-2">
                             <button wire:click="previousStep" class="px-5 py-3.5 rounded-xl bg-zinc-800 text-white font-bold text-sm hover:bg-zinc-700 transition-colors">بازگشت</button>
-                            <button wire:click="submitOrder" class="flex-1 py-3.5 rounded-xl {{ $paymentMethod === 'wallet' ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 shadow-[0_8px_20px_-6px_rgba(16,185,129,0.4)]' : 'bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-400 hover:to-brand-500 shadow-[0_8px_20px_-6px_rgba(59,130,246,0.4)]' }} text-white font-black text-sm transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                            <button wire:click="submitOrder" wire:loading.attr="disabled" wire:target="submitOrder,receipt" class="flex-1 py-3.5 rounded-xl {{ $paymentMethod === 'wallet' ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 shadow-[0_8px_20px_-6px_rgba(16,185,129,0.4)]' : 'bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-400 hover:to-brand-500 shadow-[0_8px_20px_-6px_rgba(59,130,246,0.4)]' }} text-white font-black text-sm transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2">
                                 <svg wire:loading wire:target="submitOrder" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 <span wire:loading.remove wire:target="submitOrder">
-                                    {{ $paymentMethod === 'wallet' ? 'پرداخت و دریافت سرویس' : 'ثبت پرداخت و ارسال فیش' }}
+                                    {{ $paymentMethod === 'wallet' ? 'پرداخت و دریافت سرویس' : ($paymentMethod === 'bank' ? 'ثبت سفارش و دریافت مبلغ واریز' : 'ثبت پرداخت و ارسال فیش') }}
                                 </span>
                                 <span wire:loading wire:target="submitOrder">در حال پردازش...</span>
                             </button>
@@ -486,6 +484,9 @@
                 </div>
             @endif
 
+            @if($step === 4 && $pendingOrder)
+                @include('livewire.store.bank-order-status')
+            @endif
         @endif
 
     </div>
