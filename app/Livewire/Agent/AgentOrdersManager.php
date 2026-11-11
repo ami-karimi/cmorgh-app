@@ -47,8 +47,19 @@ class AgentOrdersManager extends Component
 
     private function paymentAction(string $method, $orderId, string $success): void
     {
+        $this->resetValidation('receipt');
         try {
             app(\App\Services\StoreCheckoutService::class)->$method((int) $orderId, auth()->user());
+            if ($method === 'approveReceipt') {
+                $issued = StoreOrder::findOrFail($orderId);
+                if (!$issued->account_id || $issued->status !== 'approved') {
+                    $message = 'پرداخت تأیید شد، اما صدور کامل نشد؛ علت را در جزئیات سفارش بررسی کنید. دوباره پرداخت نکنید.';
+                    $this->addError('receipt', $message);
+                    session()->flash('error', $message);
+                    return;
+                }
+                $success = 'فیش تأیید و اکانت بلافاصله صادر شد.';
+            }
             session()->flash('success', $success);
             $this->isReceiptModalOpen = false;
         } catch (\Throwable $e) {
@@ -62,6 +73,22 @@ class AgentOrdersManager extends Component
     public function approveOrder($orderId): void { $this->paymentAction('approveReceipt', $orderId, 'فیش تأیید شد؛ سفارش برای صدور ثبت شد.'); }
     public function rejectOrder($orderId): void { $this->paymentAction('rejectReceipt', $orderId, 'سفارش رد شد.'); }
     public function refundOrder($orderId): void { $this->paymentAction('refund', $orderId, 'هزینه سفارش به کیف پول مشتری برگشت داده شد.'); }
+
+    public function retryFulfillment($orderId): void
+    {
+        $this->resetValidation('receipt');
+        try {
+            app(\App\Services\OrderFulfillmentService::class)->retry((int)$orderId, auth()->user());
+            $order = \App\Models\StoreOrder::findOrFail($orderId);
+            if ($order->account_id && $order->status === 'approved') {
+                session()->flash('success', 'اکانت همین سفارش با موفقیت صادر شد؛ هزینه دوباره کسر نشد.');
+            } else {
+                $this->addError('receipt', 'صدور تکمیل نشد؛ علت خطا در جزئیات سفارش نمایش داده شده است.');
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->addError('receipt', collect($e->errors())->flatten()->first());
+        }
+    }
 
     public function render()
     {

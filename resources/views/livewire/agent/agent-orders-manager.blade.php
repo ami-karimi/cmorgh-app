@@ -127,7 +127,7 @@
                                     </span>
                                 </a>
                             @elseif($order->status === 'paid')
-                                <span class="text-blue-400">{{ $order->fulfillment_state === 'requires_review' ? 'نیازمند بررسی صدور' : 'در حال صدور' }}</span>
+                                <span class="text-blue-400">{{ $order->status_label }}</span>
                             @elseif(in_array($order->status, ['refunded','cancelled']))
                                 <span>{{ $order->status === 'refunded' ? 'بازگشت هزینه' : 'لغو شده' }}</span>
                             @elseif($order->status === 'approved')
@@ -138,19 +138,7 @@
                         </td>
 
                         <td class="p-4">
-                            @if($order->status === 'pending')
-                                <span class="inline-flex px-2 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold animate-pulse">
-                                    در انتظار بررسی
-                                </span>
-                            @elseif($order->status === 'approved')
-                                <span class="inline-flex px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
-                                    تایید شده
-                                </span>
-                            @else
-                                <span class="inline-flex px-2 py-1 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-bold">
-                                    رد شده
-                                </span>
-                            @endif
+                            <x-ui.order-status :order="$order" />
                         </td>
 
                         <td class="p-4 text-center">
@@ -250,7 +238,10 @@
 
                     <div class="p-3 mb-3 rounded-xl bg-[#080f1d] text-xs space-y-2">
                         <p>روش پرداخت: {{ $selectedOrder->payment_method }} · تخفیف: {{ number_format($selectedOrder->discount_amount) }} تومان</p>
-                        <p>وضعیت صدور: {{ $selectedOrder->fulfillment_state }}</p>
+                        <p>وضعیت سفارش: {{ $selectedOrder->status_label }}</p>
+                        @if($selectedOrder->can_retry_fulfillment)
+                            <button type="button" wire:click="retryFulfillment({{ $selectedOrder->id }})" wire:loading.attr="disabled" wire:confirm="صدور همین سفارش پرداخت‌شده بدون کسر مجدد هزینه انجام شود؟" class="commerce-button mt-2">صدور فوری / تلاش مجدد</button>
+                        @endif
                         @if($selectedOrder->fulfillment_error)<p class="text-amber-400">{{ $selectedOrder->fulfillment_error }}</p>@endif
                         @if($selectedOrder->paid_at && !$selectedOrder->account_id && $selectedOrder->status !== 'refunded' && $selectedOrder->fulfillment_state !== 'processing')
                             <button wire:click="refundOrder({{ $selectedOrder->id }})" wire:loading.attr="disabled" wire:confirm="پس از بررسی سرور، هزینه سفارش به کیف پول مشتری برگردد؟" class="text-amber-400 p-2">بازگشت هزینه به کیف پول</button>

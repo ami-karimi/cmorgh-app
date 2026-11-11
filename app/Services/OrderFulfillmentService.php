@@ -10,6 +10,28 @@ use Illuminate\Support\Facades\DB;
 
 class OrderFulfillmentService
 {
+    /** A durable payment must never be reported as failed merely because post-commit delivery failed. */
+    public function attemptNow(int $orderId): bool
+    {
+        try { return $this->fulfill($orderId); }
+        catch (\Throwable $e) { report($e); return false; }
+    }
+
+    public function retry(int $orderId, User $operator): void
+    {
+        DB::transaction(function () use ($orderId,$operator) {
+            $order = StoreOrder::lockForUpdate()->findOrFail($orderId);
+            $allowed = in_array($operator->role,['admin','manager'],true)
+                || (in_array($operator->role,['agent','sub_agent'],true) && (int)$order->agent_id === (int)$operator->id);
+            abort_unless($allowed,403);
+            if (!$order->can_retry_fulfillment) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['receipt'=>'صدور مجدد مجاز نیست؛ سفارش تحویل داده شده، در حال پردازش است یا نتیجه سرور نیاز به بررسی دارد.']);
+            }
+            $order->update(['fulfillment_state'=>'waiting','fulfillment_error'=>null]);
+            DB::afterCommit(fn () => $this->attemptNow($order->id));
+        },3);
+    }
+
     public function fulfill(int $orderId): bool
     {
         $claimed = DB::transaction(function () use ($orderId) {
@@ -20,9 +42,10 @@ class OrderFulfillmentService
             return true;
         }, 3);
         if (!$claimed) { return false; }
+        $provisioningStarted = false;
         try {
             // No transaction retry here: provisioning has external side effects.
-            DB::transaction(function () use ($orderId) {
+            DB::transaction(function () use ($orderId, &$provisioningStarted) {
                 $order = StoreOrder::with(['group','user'])->lockForUpdate()->findOrFail($orderId);
                 $group = $order->group; $user = $order->user;
                 if (!$group || !$user || !$group->is_enabled) { throw new \RuntimeException('پلن یا کاربر سفارش در دسترس نیست.'); }
@@ -52,14 +75,19 @@ class OrderFulfillmentService
                 $service = app(AccountProvisioningService::class);
                 $data = $service->prepareAccountData($group, $user, $order->phone);
                 // Customer paid the exact order price already; do NOT call the old cascade debit again.
+                $provisioningStarted = true;
                 $account = $service->createFullAccount($data['userData'], $data['configData'], $user->id, false, false);
                 if (!$account instanceof Accounts) { throw new \RuntimeException('صدور اکانت نتیجه معتبر برنگرداند.'); }
                 $order->update(['account_id'=>$account->id, 'status'=>'approved', 'fulfillment_state'=>'completed', 'fulfillment_error'=>null]);
             });
             return true;
         } catch (\Throwable $e) {
+            // Failures before provisioning, or before account/pivot INSERT, cannot have created a VPN peer.
+            $safeSqlFailure = $e instanceof \Illuminate\Database\QueryException
+                && preg_match('/insert\s+into\s+[`"]?(accounts|user_accounts)[`"]?\s*\(/i', $e->getSql());
             StoreOrder::whereKey($orderId)->whereNull('account_id')->update([
-                'fulfillment_state'=>'requires_review', 'fulfillment_error'=>$e->getMessage(),
+                'fulfillment_state'=>!$provisioningStarted || $safeSqlFailure ? 'failed' : 'requires_review',
+                'fulfillment_error'=>$e->getMessage(),
             ]);
             report($e);
             return false;

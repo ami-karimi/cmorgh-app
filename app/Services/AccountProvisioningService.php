@@ -184,6 +184,7 @@ class AccountProvisioningService
      */
     private function provisionWireguard(Accounts $account, $serverId, ?string $speedLimit = null)
     {
+        $speedLimit = $speedLimit ?: '10M/10M';
         $server = Nas::findOrFail($serverId);
         $wgService = new WireguardService($server);
 

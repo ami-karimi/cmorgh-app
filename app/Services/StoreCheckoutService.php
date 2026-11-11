@@ -37,7 +37,7 @@ class StoreCheckoutService
     public function create(User $user, int $groupId, ?int $sellerId, string $method, string $key, ?string $code = null, ?string $receipt = null, ?string $expectedAccount = null, ?int $expectedPrice = null): StoreOrder
     {
         if (!in_array($method, ['wallet', 'bank', 'receipt'], true)) { $this->fail('روش پرداخت معتبر نیست.'); }
-        return DB::transaction(function () use ($user, $groupId, $sellerId, $method, $key, $code, $receipt, $expectedAccount, $expectedPrice) {
+        $order = DB::transaction(function () use ($user, $groupId, $sellerId, $method, $key, $code, $receipt, $expectedAccount, $expectedPrice) {
             $user = User::lockForUpdate()->findOrFail($user->id);
             $old = StoreOrder::where('checkout_key', $key)->first();
             if ($old) {
@@ -67,8 +67,9 @@ class StoreCheckoutService
             } elseif ($method === 'bank') {
                 app(BankPaymentService::class)->createRequest($user->id, (int) $order->price, $order->id, $expectedAccount);
             }
-            return $order->fresh();
+            return $order;
         }, 3);
+        return $order->fresh();
     }
 
     /** Bank caller already credited the genuine deposit; wallet caller supplies existing credit. */
@@ -87,7 +88,7 @@ class StoreCheckoutService
         app(PromotionService::class)->redeem('order', $order->id);
         // Issue immediately after the durable payment commit, regardless of QUEUE_CONNECTION/worker availability.
         // Never perform external provisioning inside a payment transaction that may be retried.
-        DB::afterCommit(fn () => app(OrderFulfillmentService::class)->fulfill($order->id));
+        DB::afterCommit(fn () => app(OrderFulfillmentService::class)->attemptNow($order->id));
     }
 
     public function approveReceipt(int $orderId, User $operator): void
