@@ -2,125 +2,93 @@
 
 namespace App\Livewire\Agent;
 
-use Livewire\Component;
-use Livewire\Attributes\Title;
-use Livewire\Attributes\Layout;
-use App\Models\User;
 use App\Models\Accounts;
-use App\Models\Financial;
 use App\Models\AgentHiddenGroups;
-use App\Models\Group;
 use App\Models\Announcement;
+use App\Models\Financial;
+use App\Models\Group;
 use App\Models\ServiceStatus;
-use Illuminate\Support\Facades\Auth;
+use App\Models\StoreOrder;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Component;
 
 #[Title('داشبورد نماینده | همراه سیمرغ')]
 #[Layout('layouts.agent')]
 class Dashboard extends Component
 {
-    public function getBalanceProperty()
+    public function getBalanceProperty(): int
     {
         $userId = Auth::id();
+        return (int) Financial::where('for', $userId)->where('approved', 1)->whereIn('type', ['plus', 'minus'])
+            ->selectRaw("COALESCE(SUM(CASE WHEN type = 'plus' THEN price ELSE -price END), 0) as balance")
+            ->value('balance');
+    }
 
-        $plus = Financial::where('for', $userId)
-            ->whereIn('type', ['plus'])
-            ->where('approved', 1)
-            ->sum('price');
-
-        $minus = Financial::where('for', $userId)
-            ->where('type', 'minus')
-            ->where('approved', 1)
-            ->sum('price');
-
-        return $plus - $minus;
+    private function orderCost(StoreOrder $order): ?int
+    {
+        $cost = $order->agent_costs;
+        if (is_numeric($cost)) return (int) $cost;
+        if (is_array($cost)) {
+            foreach (['total', 'cost', 'amount', 'agent_cost'] as $key) {
+                if (isset($cost[$key]) && is_numeric($cost[$key])) return (int) $cost[$key];
+            }
+            return collect($cost)->filter(fn ($value) => is_numeric($value))->sum(fn ($value) => (int) $value) ?: null;
+        }
+        return null;
     }
 
     public function render()
     {
-        $userId = Auth::id();
+        $agentId = Auth::id();
+        $today = Carbon::today();
+        $monthStart = $today->copy()->startOfMonth();
+        $orders = StoreOrder::where('agent_id', $agentId);
+        $approvedOrders = (clone $orders)->whereIn('status', ['approved', 'paid']);
+        $monthOrders = (clone $approvedOrders)->whereBetween('created_at', [$monthStart, Carbon::now()])->get();
 
-        $totalCustomers = User::where('creator', $userId)->where('role', 'customer')->count();
-        $totalAccounts = Accounts::where('creator', $userId)->count();
-        $activeAccounts = Accounts::where('creator', $userId)->where('is_enabled', 1)->count();
+        $monthOrderCount = $monthOrders->count();
+        $monthlySales = (int) $monthOrders->sum(fn ($order) => (int) $order->price);
+        $monthlyProfit = $monthOrders->sum(function ($order) {
+            $cost = $this->orderCost($order);
+            return $cost === null ? 0 : max(0, (int) $order->price - $cost);
+        });
+        $ordersWithCost = $monthOrders->filter(fn ($order) => $this->orderCost($order) !== null)->count();
 
-        $totalSpent = Financial::where('for', $userId)
-            ->where('type', 'minus')
-            ->where('approved', 1)
-            ->sum('price');
-
-        $recentTransactions = Financial::where('for', $userId)->latest('id')->take(5)->get();
-
-        $expiringAccounts = Accounts::where('creator', $userId)
-            ->where('is_enabled', 1)
-            ->whereNotNull('expire_date')
-            ->where('expire_date', '>=', now())
-            ->where('expire_date', '<=', now()->addDays(7))
-            ->orderBy('expire_date', 'asc')
-            ->take(5)
-            ->get();
-
-        $hiddenGroups = AgentHiddenGroups::
-        where('agent_id', $userId)
-            ->pluck('group_id')
-            ->toArray();
-
-        $availableGroups = Group::where('is_enabled', 1)
-            ->whereNotIn('id', $hiddenGroups)
-            ->get();
-
-        $discountPercent = auth()->user()->discount_percent ?? 0;
-
-        $announcements = Announcement::where('is_active', 1)
-            ->whereIn('target', ['all', 'agents'])
-            ->latest()
-            ->get();
-
-        $services = ServiceStatus::all();
-
-// --- بخش تولید داده‌های نمودار برای مقایسه ۳۰ روز اخیر و ۳۰ روز قبل ---
         $chartLabels = [];
-        $currentMonthSales = [];
-        $previousMonthSales = [];
-
-        // دریافت آمار ۳۰ روز (از ۲۹ روز پیش تا امروز)
+        $chartSales = [];
         for ($i = 29; $i >= 0; $i--) {
-            $currentDate = Carbon::today()->subDays($i);
-            $previousDate = Carbon::today()->subDays($i + 30); // دقیقاً ۳۰ روز قبل‌تر از روز متناظر
-
-            // برچسب محور X (مثلاً 06/15)
-            $chartLabels[] = \Morilog\Jalali\Jalalian::fromCarbon($currentDate)->format('m/d');
-
-            // مبلغ خرید شده در بازه فعلی (۳۰ روز اخیر)
-            $currentMonthSales[] = Financial::where('for', $userId)
-                ->where('type', 'minus')
-                ->where('approved', 1)
-                ->whereDate('created_at', $currentDate)
-                ->sum('price');
-
-            // مبلغ خرید شده در بازه قبلی (۳۰ روز قبل‌تر)
-            $previousMonthSales[] = Financial::where('for', $userId)
-                ->where('type', 'minus')
-                ->where('approved', 1)
-                ->whereDate('created_at', $previousDate)
-                ->sum('price');
+            $date = $today->copy()->subDays($i);
+            $chartLabels[] = \Morilog\Jalali\Jalalian::fromCarbon($date)->format('m/d');
+            $chartSales[] = (int) (clone $approvedOrders)->whereDate('created_at', $date)->sum('price');
         }
 
-        return view('livewire.agent.dashboard', [
-            'totalCustomers' => $totalCustomers,
-            'totalAccounts' => $totalAccounts,
-            'activeAccounts' => $activeAccounts,
-            'totalSpent' => $totalSpent,
-            'recentTransactions' => $recentTransactions,
-            'expiringAccounts' => $expiringAccounts,
-            'availableGroups' => $availableGroups,
-            'discountPercent' => $discountPercent,
-            'announcements' => $announcements,
-            'services' => $services,
-            // ارسال متغیرهای جدید به ویو
-            'chartLabels' => $chartLabels,
-            'currentMonthSales' => $currentMonthSales,
-            'previousMonthSales' => $previousMonthSales,
-        ]);
+        $totalCustomers = User::where('creator', $agentId)->where('role', 'customer')->count();
+        $totalAccounts = Accounts::where('creator', $agentId)->count();
+        $activeAccounts = Accounts::where('creator', $agentId)->where('is_enabled', 1)->count();
+        $expiringAccounts = Accounts::where('creator', $agentId)->where('is_enabled', 1)->whereNotNull('expire_date')
+            ->whereBetween('expire_date', [$today, $today->copy()->addDays(7)])->orderBy('expire_date')->take(5)->get();
+        $pendingOrders = (clone $orders)->where(function ($query) {
+            $query->where('status', 'pending')->orWhere(function ($q) {
+                $q->where('status', 'paid')->whereIn('fulfillment_state', ['failed', 'requires_review']);
+            });
+        })->count();
+        $recentOrders = (clone $orders)->with(['user', 'group'])->latest()->take(5)->get();
+        $recentTransactions = Financial::where('for', $agentId)->latest('id')->take(5)->get();
+
+        $hiddenGroups = AgentHiddenGroups::where('agent_id', $agentId)->pluck('group_id')->toArray();
+        $availableGroups = Group::where('is_enabled', 1)->whereNotIn('id', $hiddenGroups)->get();
+        $discountPercent = auth()->user()->discount_percent ?? 0;
+        $announcements = Announcement::where('is_active', 1)->whereIn('target', ['all', 'agents'])->latest()->get();
+        $services = ServiceStatus::all();
+
+        return view('livewire.agent.dashboard', compact(
+            'totalCustomers', 'totalAccounts', 'activeAccounts', 'expiringAccounts', 'pendingOrders',
+            'recentOrders', 'recentTransactions', 'availableGroups', 'discountPercent', 'announcements',
+            'services', 'chartLabels', 'chartSales', 'monthlySales', 'monthOrderCount', 'monthlyProfit', 'ordersWithCost'
+        ));
     }
 }
