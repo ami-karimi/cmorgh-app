@@ -4,7 +4,6 @@ use App\Models\Accounts;
 use App\Services\NotificationService;
 class AccountObserver
 {
-    public function created(Accounts $account): void { $this->notify($account, 'اکانت جدید ساخته شد', "اکانت «{$account->username}» با موفقیت ساخته شد.", 'account.created'); }
     public function updated(Accounts $account): void
     {
         // فقط اعلان‌های مشخص‌شده برای چرخه عمر اکانت ارسال می‌شوند.
@@ -24,13 +23,19 @@ class AccountObserver
             $this->notify($account, 'کلمه عبور تغییر کرد', "کلمه عبور اکانت «{$account->username}» تغییر کرد.", 'account.password');
         }
 
-        $usageFinished = (int) ($account->max_usage ?? 0) > 0
-            && (int) ($account->usage ?? 0) >= (int) $account->max_usage;
-        if ($usageFinished && ($account->wasChanged(['usage', 'max_usage']) || $account->wasRecentlyCreated)) {
+        $currentUsage = (int) ($account->usage ?? $account->download_usage ?? 0);
+        $previousUsage = (int) ($account->getOriginal('usage') ?? $account->getOriginal('download_usage') ?? 0);
+        $maxUsage = (int) ($account->max_usage ?? 0);
+        $usageFinished = $maxUsage > 0 && $currentUsage >= $maxUsage;
+        $usageJustFinished = $usageFinished && $previousUsage < $maxUsage && $account->wasChanged(['usage', 'download_usage', 'max_usage']);
+        if ($usageJustFinished) {
             $this->notify($account, 'حجم اکانت تمام شد', "حجم مصرفی اکانت «{$account->username}» به پایان رسید.", 'account.volume_finished');
         }
 
-        if ($expired && $expirationChanged) {
+        $previousExpire = $account->getOriginal('expire_date');
+        $previousExpired = $previousExpire && now()->greaterThanOrEqualTo($previousExpire);
+        $expiredJustNow = $expired && !$previousExpired && $expirationChanged;
+        if ($expiredJustNow) {
             $this->notify($account, 'اعتبار اکانت تمام شد', "تاریخ اعتبار اکانت «{$account->username}» به پایان رسید.", 'account.expired');
         }
     }
