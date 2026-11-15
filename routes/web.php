@@ -101,6 +101,7 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     Route::get('/payment-methods', \App\Livewire\Admin\AdminPaymentMethods::class)->name('payment.methods');
     Route::get('/system-monitor', \App\Livewire\Admin\SystemMonitor::class)->name('system.monitor');
     Route::get('/system-check', \App\Livewire\Admin\SystemCheck::class)->name('system.check');
+    Route::get('/dns-infrastructure', \App\Livewire\Admin\DnsInfrastructure::class)->name('dns.infrastructure');
     Route::get('/charge/list',\App\Livewire\Admin\ChargeManager::class)->name('charge.list');
     Route::get('/nas/list',\App\Livewire\Admin\ServerManager::class)->name('nas.list');
     Route::get('/groups/list',\App\Livewire\Admin\GroupManager::class)->name('groups.list');
