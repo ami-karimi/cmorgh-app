@@ -43,13 +43,17 @@
                         <input wire:model="title" type="text" class="w-full bg-[#080f1d] border border-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-brand-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-zinc-400 mb-1.5">مخاطب هدف</label>
-                        <select wire:model="target" class="w-full bg-[#080f1d] border border-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-brand-500">
-                            <option value="all">همه کاربران (نمایندگان + مشتریان)</option>
-                            <option value="agents">فقط نمایندگان</option>
-                            <option value="customers">فقط مشتریان</option>
+                        <label class="block text-xs font-bold text-zinc-400 mb-1.5">نوع ارسال</label>
+                        <select wire:model.live="delivery" class="w-full bg-[#080f1d] border border-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-brand-500">
+                            <option value="announcement">اطلاعیه گروهی</option>
+                            <option value="direct">اعلان مستقیم برای یک کاربر</option>
                         </select>
                     </div>
+                    @if($delivery === 'announcement')
+                        <div><label class="block text-xs font-bold text-zinc-400 mb-1.5">مخاطب هدف</label><select wire:model="target" class="w-full bg-[#080f1d] border border-zinc-800 text-white rounded-xl px-4 py-3 text-sm"><option value="all">همه کاربران</option><option value="agents">فقط نمایندگان</option><option value="customers">فقط مشتریان</option></select></div>
+                    @else
+                        <div><label class="block text-xs font-bold text-zinc-400 mb-1.5">انتخاب کاربر</label><select wire:model="recipientId" class="w-full bg-[#080f1d] border border-zinc-800 text-white rounded-xl px-4 py-3 text-sm"><option value="">انتخاب کنید</option>@foreach($users as $user)<option value="{{ $user->id }}">{{ $user->name }} — {{ $user->username }} ({{ $user->role_label }})</option>@endforeach</select></div>
+                    @endif
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-1.5">متن پیام</label>
                         <textarea wire:model="content" rows="4" class="w-full bg-[#080f1d] border border-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-brand-500"></textarea>

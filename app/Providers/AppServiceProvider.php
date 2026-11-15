@@ -8,6 +8,12 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\View;
 use App\Models\User;
 use App\Models\StoreOrder;
+use App\Models\Financial;
+use App\Models\Accounts;
+use App\Observers\UserObserver;
+use App\Observers\FinancialObserver;
+use App\Observers\StoreOrderObserver;
+use App\Observers\AccountObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +34,11 @@ class AppServiceProvider extends ServiceProvider
     {
 
         Carbon::setLocale('fa');
+
+        User::observe(UserObserver::class);
+        Financial::observe(FinancialObserver::class);
+        StoreOrder::observe(StoreOrderObserver::class);
+        Accounts::observe(AccountObserver::class);
 
         View::composer('layouts.customer', function ($view) {
             $host = request()->getHost();

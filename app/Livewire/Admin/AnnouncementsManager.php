@@ -4,10 +4,14 @@ namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use App\Models\Announcement;
+use App\Models\User;
+use App\Services\NotificationService;
 
 class AnnouncementsManager extends Component
 {
     public $title, $content, $target = 'all';
+    public $delivery = 'announcement';
+    public $recipientId = null;
     public $isModalOpen = false;
 
     public function save()
@@ -16,17 +20,22 @@ class AnnouncementsManager extends Component
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'target' => 'required|in:all,agents,customers',
+            'delivery' => 'required|in:announcement,direct',
+            'recipientId' => 'required_if:delivery,direct|nullable|exists:users,id',
         ]);
 
-        Announcement::create([
-            'title' => $this->title,
-            'content' => $this->content,
-            'target' => $this->target,
-            'is_active' => 1,
-        ]);
+        if ($this->delivery === 'direct') {
+            NotificationService::send(User::find($this->recipientId), $this->title, $this->content, 'admin.message');
+            $message = 'اعلان مستقیم برای کاربر ارسال شد.';
+        } else {
+            Announcement::create(['title' => $this->title, 'content' => $this->content, 'target' => $this->target, 'is_active' => 1]);
+            NotificationService::audience($this->target === 'all' ? 'all' : $this->target, $this->title, $this->content, 'announcement');
+            $message = 'اطلاعیه برای مخاطبان انتخاب‌شده منتشر شد.';
+        }
 
-        $this->reset(['title', 'content', 'target', 'isModalOpen']);
-        session()->flash('success', 'اطلاعیه با موفقیت ثبت و منتشر شد.');
+        $this->reset(['title', 'content', 'target', 'delivery', 'recipientId', 'isModalOpen']);
+        $this->target = 'all'; $this->delivery = 'announcement';
+        session()->flash('success', $message);
     }
 
     public function delete($id)
@@ -43,7 +52,8 @@ class AnnouncementsManager extends Component
     public function render()
     {
         $announcements = Announcement::latest()->get();
-        return view('livewire.admin.announcements-manager', compact('announcements'))
+        $users = User::whereIn('role', ['agent', 'sub_agent', 'customer'])->orderBy('role')->orderBy('name')->get(['id', 'name', 'username', 'role']);
+        return view('livewire.admin.announcements-manager', compact('announcements', 'users'))
             ->layout('layouts.admin')->title('مدیریت اطلاعیه‌ها');
     }
 }

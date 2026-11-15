@@ -153,7 +153,7 @@
                     </div>
                 </a>
 
-                <x-ui.announcements />
+                <livewire:shared.notification-bell />
 
                 <!-- User Profile Dropdown -->
                 <div class="relative" x-data="{ open: false }" @click.away="open = false" @keydown.escape.window="open = false">
