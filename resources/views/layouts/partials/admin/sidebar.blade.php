@@ -162,9 +162,14 @@
                 </a>
 
                 <a @click="sidebarOpen = false" href="{{ route('admin.system.monitor') }}" wire:navigate
-                   class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all {{ request()->routeIs('admin.system*') ? 'text-brand-400 bg-brand-500/10 border-r-2 border-brand-400' : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/30' }}">
-                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.system*') ? 'bg-brand-400' : 'bg-zinc-600' }}"></span>
+                   class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all {{ request()->routeIs('admin.system.monitor') ? 'text-brand-400 bg-brand-500/10 border-r-2 border-brand-400' : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/30' }}">
+                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.system.monitor') ? 'bg-brand-400' : 'bg-zinc-600' }}"></span>
                     <span>وضعیت سرورها</span>
+                </a>
+                <a @click="sidebarOpen = false" href="{{ route('admin.system.check') }}" wire:navigate
+                   class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all {{ request()->routeIs('admin.system.check') ? 'text-brand-400 bg-brand-500/10 border-r-2 border-brand-400' : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/30' }}">
+                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.system.check') ? 'bg-brand-400' : 'bg-zinc-600' }}"></span>
+                    <span>بررسی سیستم</span>
                 </a>
                 <a @click="sidebarOpen = false" href="{{ route('admin.tutorial') }}" wire:navigate
                    class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all {{ request()->routeIs('admin.tutorial*') ? 'text-brand-400 bg-brand-500/10 border-r-2 border-brand-400' : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/30' }}">

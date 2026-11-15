@@ -66,6 +66,9 @@ class ServerManager extends Component
 
         $this->mikrotik_server = (bool) $server->mikrotik_server;
         $this->mikrotik_domain = $server->mikrotik_domain;
+        $this->mikrotik_port = $server->mikrotik_port;
+        $this->mikrotik_username = $server->mikrotik_username;
+        $this->mikrotik_password = $server->mikrotik_password;
         // ... (سایر متغیرها را مثل قبل مقداردهی کنید) ...
         $this->l2tp_address = $server->l2tp_address;
         $this->secret = $server->secret;
@@ -129,6 +132,8 @@ class ServerManager extends Component
                 // مقادیر L2TP / Mikrotik
                 'mikrotik_server' => $this->mikrotik_server ? 1 : 0,
                 'mikrotik_domain' => $this->mikrotik_domain,
+                'mikrotik_port' => $this->mikrotik_port ?: 443,
+                'mikrotik_username' => $this->mikrotik_username,
                 'mikrotik_password' => $this->mikrotik_password,
                 'l2tp_address' => $this->l2tp_address,
                 'secret' => $this->secret,

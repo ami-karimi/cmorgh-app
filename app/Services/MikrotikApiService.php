@@ -11,7 +11,8 @@ class MikrotikApiService
     private $port;
     private $user;
     private $pass;
-    private $timeout = 3;
+    private $timeout = 8;
+    private $scheme = 'https';
     private $min_ver = 7.12;
     public $connected = false;
 
@@ -20,11 +21,19 @@ class MikrotikApiService
      */
     public function __construct($mkt)
     {
-        // پشتیبانی از آبجکت یا آرایه برای راحتی استفاده
+        // آدرس REST از API Domain خوانده می‌شود؛ برای سرورهای قدیمی fallback داریم.
         $this->user = is_array($mkt) ? ($mkt['mikrotik_username'] ?? 'admin') : ($mkt->mikrotik_username ?? 'admin');
         $this->pass = is_array($mkt) ? ($mkt['mikrotik_password'] ?? '') : ($mkt->mikrotik_password ?? '');
-        $this->ip   = is_array($mkt) ? ($mkt['l2tp_address'] ?? '') : ($mkt->l2tp_address ?? '');
-        $this->port = is_array($mkt) ? ($mkt['mikrotik_port'] ?? '443') : ($mkt->mikrotik_port ?? '443');
+        $host = is_array($mkt)
+            ? ($mkt['mikrotik_domain'] ?? $mkt['l2tp_address'] ?? '')
+            : ($mkt->mikrotik_domain ?? $mkt->l2tp_address ?? '');
+        $this->ip = trim((string) $host);
+        $this->ip = preg_replace('#^https?://#i', '', $this->ip);
+        $this->ip = explode('/', $this->ip, 2)[0];
+        $this->ip = preg_replace('/:\\d+$/', '', $this->ip);
+        $this->port = (int) (is_array($mkt) ? ($mkt['mikrotik_port'] ?? 443) : ($mkt->mikrotik_port ?? 443));
+        $this->port = $this->port > 0 ? $this->port : 443;
+        $this->scheme = $this->port === 80 ? 'http' : 'https';
     }
 
     /**
@@ -33,7 +42,8 @@ class MikrotikApiService
     private function sendRequest(string $method, string $cmd, array $data = [])
     {
 
-        $url = "https://{$this->ip}:{$this->port}/rest{$cmd}";
+        $cmd = '/' . ltrim($cmd, '/');
+        $url = "{$this->scheme}://{$this->ip}:{$this->port}/rest{$cmd}";
 
         try {
             // استفاده از HTTP Client لاراول به جای cURL خام
@@ -101,9 +111,10 @@ class MikrotikApiService
         }
 
         $res = $this->bs_mkt_rest_api_get('/ppp/secret');
-        if ($res['ok'] && !empty($res['data'])) {
+        // لیست خالی هم پاسخ معتبر است؛ ممکن است کاربر مورد جست‌وجو وجود نداشته باشد.
+        if ($res['ok']) {
             $out['ok'] = 1;
-            $out['data'] = $res['data'];
+            $out['data'] = is_array($res['data']) ? $res['data'] : [];
         } else {
             $out['error'] = $res['error'] ?? 'Failed to get users';
         }
@@ -154,8 +165,13 @@ class MikrotikApiService
             $out['data'] = $response['data'];
         }
 
-        if ($response['code'] == 200 && empty($response['data']['error'])) {
+        $status = (int) $response['code'];
+        if ($status >= 200 && $status < 300 && !(is_array($response['data']) && isset($response['data']['error']))) {
             $out['ok'] = 1;
+        } elseif (is_array($response['data']) && !empty($response['data']['message'])) {
+            $out['error'] = '[' . ($response['data']['error'] ?? 'ERROR') . '] ' . $response['data']['message'];
+        } elseif ($status >= 400) {
+            $out['error'] = 'HTTP ' . $status . ' از RouterOS';
         }
 
         return $out;
