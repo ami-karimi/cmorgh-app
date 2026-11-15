@@ -122,6 +122,31 @@ class MikrotikApiService
         return $out;
     }
 
+    /**
+     * دریافت کاربران فعال و متصل فعلی از MikroTik.
+     * endpoint مربوط به کاربران تعریف‌شده (/ppp/secret) نیست؛
+     * برای وضعیت اتصال باید از /ppp/active استفاده شود.
+     */
+    public function getActiveUsers(): array
+    {
+        $out = ['ok' => 0, 'error' => '', 'data' => []];
+
+        if (!$this->connected) {
+            $out['error'] = 'Router is not connected';
+            return $out;
+        }
+
+        $res = $this->bs_mkt_rest_api_get('/ppp/active');
+        if ($res['ok']) {
+            $out['ok'] = 1;
+            $out['data'] = is_array($res['data']) ? $res['data'] : [];
+        } else {
+            $out['error'] = $res['error'] ?? 'Failed to get active users';
+        }
+
+        return $out;
+    }
+
     public function getAllUsernames(): array
     {
         $users = $this->getAllUsers();

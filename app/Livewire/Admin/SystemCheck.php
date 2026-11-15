@@ -70,19 +70,32 @@ class SystemCheck extends Component
             return ['ok' => false, 'message' => 'اتصال به MikroTik برقرار نشد. ' . ($connection['error'] ?? '')];
         }
 
-        $response = $api->getAllUsers();
-        if (!($response['ok'] ?? false)) {
-            return ['ok' => false, 'message' => 'دریافت کاربران MikroTik ناموفق بود: ' . ($response['error'] ?? 'پاسخ نامعتبر از RouterOS')];
+        $active = $api->getActiveUsers();
+        $secret = $api->getAllUsers();
+
+        if (!($active['ok'] ?? false) && !($secret['ok'] ?? false)) {
+            return ['ok' => false, 'message' => 'دریافت اطلاعات کاربران MikroTik ناموفق بود: ' . ($active['error'] ?? $secret['error'] ?? 'پاسخ نامعتبر از RouterOS')];
         }
 
         $needle = mb_strtolower(trim($this->username));
-        $remote = collect($response['data'] ?? [])->first(fn ($user) => mb_strtolower((string) ($user['name'] ?? '')) === $needle);
-        if (!$remote) {
-            return ['ok' => true, 'found' => false, 'server' => $server->name, 'message' => 'این نام کاربری در سرور MikroTik پیدا نشد.'];
+        $matches = fn ($user) => mb_strtolower((string) ($user['name'] ?? '')) === $needle;
+
+        $activeUser = collect($active['data'] ?? [])->first($matches);
+        $secretUser = collect($secret['data'] ?? [])->first($matches);
+        $isOnline = (bool) $activeUser;
+
+        if (!$activeUser && !$secretUser) {
+            return ['ok' => true, 'found' => false, 'server' => $server->name, 'message' => 'این نام کاربری نه در کاربران فعال و نه در کاربران تعریف‌شده MikroTik پیدا نشد.'];
         }
 
         $account = Accounts::where('username', $this->username)->first();
-        return ['ok' => true, 'found' => true, 'server' => $server->name, 'type' => 'mikrotik', 'remote' => $this->safeMikrotikData($remote), 'account' => $account ? $this->safeAccount($account) : null];
+        $remote = $this->safeMikrotikData($activeUser ?: $secretUser);
+        $remote['وضعیت اتصال'] = $isOnline ? 'آنلاین (در /ppp/active)' : 'آفلاین (فقط در /ppp/secret)';
+        if ($isOnline && $secretUser) {
+            $remote['تعریف‌شده در Secret'] = 'بله';
+        }
+
+        return ['ok' => true, 'found' => true, 'online' => $isOnline, 'server' => $server->name, 'type' => 'mikrotik', 'remote' => $remote, 'account' => $account ? $this->safeAccount($account) : null];
     }
 
     private function checkWireguard(Nas $server): array

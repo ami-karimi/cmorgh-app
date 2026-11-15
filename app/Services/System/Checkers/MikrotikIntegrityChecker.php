@@ -78,8 +78,13 @@ class MikrotikIntegrityChecker extends SystemHealthChecker
             $mikrotikService = new MikrotikApiService($server);
             $users = $mikrotikService->getAllUsers();
 
-            // استخراج نام کاربری از آرایه برگشتی
-            return array_column($users, 'name');
+            if (!($users['ok'] ?? false)) {
+                Log::error("دریافت کاربران MikroTik از سرور {$server->name} ناموفق بود: " . ($users['error'] ?? 'نامشخص'));
+                return [];
+            }
+
+            // استخراج نام کاربری از داده برگشتی
+            return array_column($users['data'] ?? [], 'name');
 
         } catch (\Exception $e) {
             Log::error("خطا در دریافت کاربران MikroTik از سرور {$server->name}: " . $e->getMessage());
