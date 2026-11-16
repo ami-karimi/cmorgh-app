@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './commerce.css';
+@import './admin-sidebar.css';
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* One locally hosted Persian family; no third-party font request. */

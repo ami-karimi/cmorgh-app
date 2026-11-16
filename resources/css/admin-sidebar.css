@@ -1,0 +1,42 @@
+/* Scoped navigation styling: never constrain a text wrapper as an icon. */
+#admin-sidebar {
+    width: 248px;
+    max-width: calc(100vw - 32px);
+    background: #0b1424;
+    border-inline-end: 1px solid #213047;
+    color: #a5b4c9;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    line-height: 1.6;
+    box-shadow: -8px 0 30px #00000010;
+}
+#admin-sidebar .admin-sidebar-brand { height: 72px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid #213047; flex-shrink: 0; }
+#admin-sidebar .admin-sidebar-brand > a { min-width: 0; }
+#admin-sidebar .ui-brand { gap: 9px; }
+#admin-sidebar .ui-brand-mark { width: 32px; height: 32px; border-radius: 10px; }
+#admin-sidebar .ui-brand-name { font-size: 12px; line-height: 1.7; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#admin-sidebar .ui-eyebrow { font-size: 10px; }
+#admin-sidebar .admin-sidebar-close { width: 32px; height: 32px; padding: 7px; border-radius: 8px; flex-shrink: 0; color: #a5b4c9; }
+#admin-sidebar .admin-sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 16px 10px; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+#admin-sidebar .admin-sidebar-caption { padding: 0 12px; margin-bottom: 8px; font-size: 10px; color: #8799b2; font-weight: 400; }
+#admin-sidebar .admin-sidebar-divider { height: 1px; background: #1c2a3d; margin: 12px 10px; }
+#admin-sidebar .admin-menu-group { margin-bottom: 4px; }
+#admin-sidebar .admin-menu-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 9px 12px; border: 0; border-radius: 8px; color: #a5b4c9; background: transparent; text-align: start; font-family: inherit; font-size: 12px; line-height: 20px; font-weight: 500; transition: color .15s, background-color .15s; }
+#admin-sidebar .admin-menu-row:hover { background: #162238; color: #e2e8f0; }
+#admin-sidebar .admin-menu-row.is-active { background: #2563eb1c; color: #93c5fd; box-shadow: inset -2px 0 #60a5fa; }
+#admin-sidebar .admin-menu-row.is-current-group { color: #cbd5e1; }
+#admin-sidebar .admin-menu-icon { width: 18px; height: 18px; flex: 0 0 18px; display: grid; place-items: center; color: #8799b2; }
+#admin-sidebar .admin-menu-icon svg { width: 18px; height: 18px; }
+#admin-sidebar .is-active .admin-menu-icon { color: #60a5fa; }
+#admin-sidebar .admin-menu-text { flex: 1 1 auto; min-width: 0; font-size: inherit; font-weight: inherit; line-height: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#admin-sidebar .admin-menu-chevron { width: 14px; height: 14px; flex: 0 0 14px; color: #8799b2; transition: transform .15s; }
+#admin-sidebar .admin-menu-children { margin: 2px 20px 6px 0; padding: 2px 8px 2px 0; border-right: 1px solid #29384f; }
+#admin-sidebar .admin-menu-child { display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 7px 9px; margin: 2px 0; border-radius: 7px; font-size: 11px; line-height: 20px; font-weight: 400; color: #a5b4c9; transition: background-color .15s, color .15s; }
+#admin-sidebar .admin-menu-child:hover { color: #e2e8f0; background: #162238; }
+#admin-sidebar .admin-menu-child.is-active { color: #93c5fd; background: #2563eb18; }
+#admin-sidebar .admin-menu-dot { flex: 0 0 4px; height: 4px; border-radius: 50%; background: #64748b; }
+#admin-sidebar .is-active .admin-menu-dot { background: #60a5fa; }
+#admin-sidebar .admin-menu-badge { min-width: 18px; padding: 0 5px; font-size: 10px; line-height: 18px; background: #fb71851a; color: #fda4af; border-radius: 5px; flex-shrink: 0; }
+#admin-sidebar .admin-sidebar-footer { display: flex; align-items: center; gap: 7px; padding: 14px 20px; font-size: 10px; font-weight: 400; color: #8799b2; border-top: 1px solid #213047; flex-shrink: 0; }
+#admin-sidebar .admin-sidebar-status { width: 5px; height: 5px; background: #60a5fa; border-radius: 50%; }
+@media (prefers-reduced-motion: reduce) { #admin-sidebar, #admin-sidebar .admin-menu-row, #admin-sidebar .admin-menu-child, #admin-sidebar .admin-menu-chevron { transition: none; } }

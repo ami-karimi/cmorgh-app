@@ -1,16 +1,74 @@
+@php
+    // Match detail/create pages to exactly one menu entry.
+    $adminMenuGroups = [
+        ['id' => 'people', 'label' => 'کاربران و اکانت‌ها', 'icon' => 'users', 'items' => [
+            ['label' => 'مشتریان', 'route' => 'admin.users.index', 'match' => ['admin.users.*']],
+            ['label' => 'مدیران و نمایندگان', 'route' => 'admin.managers.list', 'match' => ['admin.managers.*']],
+            ['label' => 'اکانت‌های سرویس', 'route' => 'admin.accounts.list', 'match' => ['admin.accounts.list', 'admin.accounts.show']],
+            ['label' => 'صدور اکانت', 'route' => 'admin.accounts.create', 'match' => ['admin.accounts.create']],
+            ['label' => 'رخدادهای اکانت', 'route' => 'admin.accounts.logs', 'match' => ['admin.accounts.logs']],
+        ]],
+        ['id' => 'finance', 'label' => 'سفارش‌ها و مالی', 'icon' => 'wallet', 'items' => [
+            ['label' => 'سفارشات فروشگاه', 'route' => 'admin.store.orders', 'match' => ['admin.store.*']],
+            ['label' => 'تراکنش‌های مالی', 'route' => 'admin.financial', 'match' => ['admin.financial']],
+            ['label' => 'روش‌های پرداخت', 'route' => 'admin.payment.methods', 'match' => ['admin.payment.*']],
+            ['label' => 'تأیید پرداخت', 'route' => 'admin.manage_charges', 'match' => ['admin.manage_charges']],
+            ['label' => 'تخفیف و بونوس', 'route' => 'admin.promotions', 'match' => ['admin.promotions']],
+        ]],
+        ['id' => 'infra', 'label' => 'سیستم و زیرساخت', 'icon' => 'shield', 'items' => [
+            ['label' => 'سرورها', 'route' => 'admin.nas.list', 'match' => ['admin.nas.*']],
+            ['label' => 'گروه‌های سرویس', 'route' => 'admin.groups.list', 'match' => ['admin.groups.*']],
+            ['label' => 'تعرفه‌های شارژ', 'route' => 'admin.charge.list', 'match' => ['admin.charge.*']],
+            ['label' => 'وضعیت سرورها', 'route' => 'admin.system.monitor', 'match' => ['admin.system.monitor']],
+            ['label' => 'بررسی سیستم', 'route' => 'admin.system.check', 'match' => ['admin.system.check']],
+            ['label' => 'زیرساخت DNS Game', 'route' => 'admin.dns.infrastructure', 'match' => ['admin.dns.*']],
+        ]],
+        ['id' => 'content', 'label' => 'محتوا و پشتیبانی', 'icon' => 'ticket', 'items' => [
+            ['label' => 'مدیریت پشتیبانی', 'route' => 'admin.support', 'match' => ['admin.support']],
+            ['label' => 'مرکز دانلود', 'route' => 'admin.downloads', 'match' => ['admin.downloads']],
+            ['label' => 'راهنماهای اتصال', 'route' => 'admin.tutorial', 'match' => ['admin.tutorial']],
+            ['label' => 'اطلاعیه‌ها', 'route' => 'admin.announcements', 'match' => ['admin.announcements']],
+        ]],
+    ];
+@endphp
 <div x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-40 bg-zinc-950/80 backdrop-blur-sm lg:hidden" @click="sidebarOpen = false" x-cloak></div>
-<aside :class="sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'" class="fixed inset-y-0 right-0 z-50 w-[248px] bg-[#0b1424] border-l border-zinc-800/80 transition-transform duration-300 flex flex-col shadow-2xl">
-    <div class="h-[76px] flex items-center justify-between px-5 border-b border-zinc-800/80 shrink-0"><x-ui.brand :name="setting('SITE_TITLE', 'همراه سیمرغ')" :logo="setting('SITE_LOGO')" subtitle="پنل مدیریت"/><button type="button" @click="sidebarOpen=false" class="lg:hidden text-zinc-500 hover:text-white" aria-label="بستن منو"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" d="M6 18 18 6M6 6l12 12"/></svg></button></div>
-    <nav class="flex-1 overflow-y-auto px-2.5 py-4 space-y-3 custom-scrollbar">
-        <div class="admin-nav-section"><p class="admin-nav-label">نمای کلی</p><a @click="sidebarOpen=false" href="{{ route('admin.dashboard') }}" wire:navigate class="admin-nav-item {{ request()->routeIs('admin.dashboard')?'active':'' }}"><span>▦</span><b>داشبورد</b></a></div>
-        <div class="admin-nav-section" x-data="{open: {{ request()->routeIs('admin.accounts.*','admin.users.*','admin.managers.*')?'true':'false' }}}"><p class="admin-nav-label">کاربران و فروش</p><div class="admin-nav-group"><button @click="open=!open" :aria-expanded="open" class="admin-nav-item w-full justify-between"><span class="flex items-center gap-3"><span>♧</span><b>کاربران و اکانت‌ها</b></span><i :class="open?'rotate-90':''">›</i></button><div x-show="open" x-collapse x-cloak class="admin-subnav"><a href="{{ route('admin.users.index') }}" wire:navigate class="{{ request()->routeIs('admin.users.*')?'active':'' }}">مشتریان</a><a href="{{ route('admin.managers.list') }}" wire:navigate class="{{ request()->routeIs('admin.managers.*')?'active':'' }}">مدیران و نمایندگان</a><a href="{{ route('admin.accounts.list') }}" wire:navigate class="{{ request()->routeIs('admin.accounts.*')?'active':'' }}">اکانت‌های سرویس</a><a href="{{ route('admin.accounts.create') }}" wire:navigate class="{{ request()->routeIs('admin.accounts.create')?'active':'' }}">صدور اکانت</a></div></div></div>
-        <div class="admin-nav-section" x-data="{open: {{ request()->routeIs('admin.store.*','admin.promotions','admin.financial','admin.payment.*','admin.manage_charges')?'true':'false' }}}"><p class="admin-nav-label">مالی و سفارش‌ها</p><div class="admin-nav-group"><button @click="open=!open" :aria-expanded="open" class="admin-nav-item w-full justify-between"><span class="flex items-center gap-3"><span>₮</span><b>فروش و مالی</b></span><i :class="open?'rotate-90':''">›</i></button><div x-show="open" x-collapse x-cloak class="admin-subnav"><a href="{{ route('admin.store.orders') }}" wire:navigate class="{{ request()->routeIs('admin.store.*')?'active':'' }}">سفارشات فروشگاه</a><a href="{{ route('admin.financial') }}" wire:navigate class="{{ request()->routeIs('admin.financial')?'active':'' }}">تراکنش‌های مالی</a><a href="{{ route('admin.payment.methods') }}" wire:navigate class="{{ request()->routeIs('admin.payment.*')?'active':'' }}">روش‌های پرداخت</a><a href="{{ route('admin.manage_charges') }}" wire:navigate class="{{ request()->routeIs('admin.manage_charges')?'active':'' }}">تأیید پرداخت</a><a href="{{ route('admin.promotions') }}" wire:navigate class="{{ request()->routeIs('admin.promotions')?'active':'' }}">تخفیف و بونوس</a></div></div></div>
-        <div class="admin-nav-section" x-data="{open: {{ request()->routeIs('admin.nas.*','admin.groups.*','admin.system.*','admin.dns.*')?'true':'false' }}}"><p class="admin-nav-label">سیستم و زیرساخت</p><div class="admin-nav-group"><button @click="open=!open" :aria-expanded="open" class="admin-nav-item w-full justify-between"><span class="flex items-center gap-3"><span>⌘</span><b>زیرساخت</b></span><i :class="open?'rotate-90':''">›</i></button><div x-show="open" x-collapse x-cloak class="admin-subnav"><a href="{{ route('admin.nas.list') }}" wire:navigate class="{{ request()->routeIs('admin.nas.*')?'active':'' }}">سرورها</a><a href="{{ route('admin.groups.list') }}" wire:navigate class="{{ request()->routeIs('admin.groups.*')?'active':'' }}">گروه‌های سرویس</a><a href="{{ route('admin.system.monitor') }}" wire:navigate class="{{ request()->routeIs('admin.system.monitor')?'active':'' }}">وضعیت سرورها</a><a href="{{ route('admin.system.check') }}" wire:navigate class="{{ request()->routeIs('admin.system.check')?'active':'' }}">بررسی سیستم</a><a href="{{ route('admin.dns.infrastructure') }}" wire:navigate class="{{ request()->routeIs('admin.dns.*')?'active':'' }}">زیرساخت DNS Game</a></div></div></div>
-        <div class="admin-nav-section" x-data="{open: {{ request()->routeIs('admin.downloads','admin.tutorial','admin.announcements','admin.support')?'true':'false' }}}"><p class="admin-nav-label">محتوا و پشتیبانی</p><div class="admin-nav-group"><button @click="open=!open" :aria-expanded="open" class="admin-nav-item w-full justify-between"><span class="flex items-center gap-3"><span>✦</span><b>محتوا و پشتیبانی</b></span><i :class="open?'rotate-90':''">›</i></button><div x-show="open" x-collapse x-cloak class="admin-subnav"><a href="{{ route('admin.support') }}" wire:navigate class="{{ request()->routeIs('admin.support')?'active':'' }}">مدیریت پشتیبانی</a><a href="{{ route('admin.downloads') }}" wire:navigate class="{{ request()->routeIs('admin.downloads')?'active':'' }}">مرکز دانلود</a><a href="{{ route('admin.tutorial') }}" wire:navigate class="{{ request()->routeIs('admin.tutorial')?'active':'' }}">راهنماهای اتصال</a><a href="{{ route('admin.announcements') }}" wire:navigate class="{{ request()->routeIs('admin.announcements')?'active':'' }}">اطلاعیه‌ها</a></div></div></div>
-        <a @click="sidebarOpen=false" href="{{ route('admin.settings') }}" wire:navigate class="admin-nav-item {{ request()->routeIs('admin.settings')?'active':'' }}"><span>⚙</span><b>تنظیمات سایت</b></a>
+<aside id="admin-sidebar" :class="sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'" class="admin-sidebar fixed inset-y-0 right-0 z-50 transition-transform duration-200 flex flex-col" aria-label="ناوبری پنل مدیریت">
+    <div class="admin-sidebar-brand">
+        <a href="{{ route('admin.dashboard') }}" wire:navigate aria-label="داشبورد مدیریت"><x-ui.brand :name="setting('SITE_TITLE', 'همراه سیمرغ')" :logo="setting('SITE_LOGO')" subtitle="پنل مدیریت" /></a>
+        <button type="button" @click="sidebarOpen = false" class="admin-sidebar-close lg:hidden" aria-label="بستن منو"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M6 18 18 6" /></svg></button>
+    </div>
+    <nav class="admin-sidebar-nav" aria-label="منوی مدیریت" @click="if ($event.target.closest('a')) sidebarOpen = false">
+        <p class="admin-sidebar-caption">فضای مدیریت</p>
+        <a href="{{ route('admin.dashboard') }}" wire:navigate class="admin-menu-row {{ request()->routeIs('admin.dashboard') ? 'is-active' : '' }}" @if(request()->routeIs('admin.dashboard')) aria-current="page" @endif>
+            <span class="admin-menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+            <span class="admin-menu-text">داشبورد</span>
+        </a>
+        <div class="admin-sidebar-divider"></div>
+        @foreach($adminMenuGroups as $group)
+            @php $groupActive = collect($group['items'])->contains(fn ($item) => request()->routeIs(...$item['match'])); @endphp
+            <section class="admin-menu-group" x-data="{ open: {{ $groupActive ? 'true' : 'false' }} }" wire:key="admin-nav-{{ $group['id'] }}">
+                <button type="button" @click="open = !open" :aria-expanded="open" aria-controls="admin-subnav-{{ $group['id'] }}" class="admin-menu-row admin-menu-toggle {{ $groupActive ? 'is-current-group' : '' }}">
+                    <span class="admin-menu-icon"><x-ui.icon :name="$group['icon']" /></span>
+                    <span class="admin-menu-text">{{ $group['label'] }}</span>
+                    <svg class="admin-menu-chevron" :class="open ? '-rotate-90' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m14 7-5 5 5 5" /></svg>
+                </button>
+                <div id="admin-subnav-{{ $group['id'] }}" x-show="open" x-cloak x-transition.opacity.duration.150ms class="admin-menu-children">
+                    @foreach($group['items'] as $item)
+                        @php $itemActive = request()->routeIs(...$item['match']); @endphp
+                        <a href="{{ route($item['route']) }}" wire:navigate class="admin-menu-child {{ $itemActive ? 'is-active' : '' }}" @if($itemActive) aria-current="page" @endif>
+                            <span class="admin-menu-dot" aria-hidden="true"></span>
+                            <span class="admin-menu-text">{{ $item['label'] }}</span>
+                            @if($item['route'] === 'admin.store.orders' && ($pendingOrdersCount ?? 0) > 0)<span class="admin-menu-badge">{{ $pendingOrdersCount }}</span>@endif
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endforeach
+        <div class="admin-sidebar-divider"></div>
+        <a href="{{ route('admin.settings') }}" wire:navigate class="admin-menu-row {{ request()->routeIs('admin.settings') ? 'is-active' : '' }}" @if(request()->routeIs('admin.settings')) aria-current="page" @endif>
+            <span class="admin-menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="#0b1424"/><circle cx="15" cy="12" r="2" fill="#0b1424"/><circle cx="8" cy="18" r="2" fill="#0b1424"/></svg></span>
+            <span class="admin-menu-text">تنظیمات سایت</span>
+        </a>
     </nav>
-    <div class="p-4 border-t border-zinc-800/80"><div class="rounded-xl border border-brand-500/15 bg-brand-500/5 p-3"><p class="text-[10px] text-zinc-500">نسخه پنل</p><p class="text-xs text-brand-300 font-bold mt-1">مدیریت حرفه‌ای سرویس</p></div></div>
+    <div class="admin-sidebar-footer"><span class="admin-sidebar-status" aria-hidden="true"></span><span>پنل مدیریت سرویس</span></div>
 </aside>
-<style>
-.admin-nav-section{padding-bottom:.15rem}.admin-nav-label{padding:0 .65rem;margin:0 0 .3rem;color:#52647d;font-size:.56rem;line-height:1.6;font-weight:800;letter-spacing:.02em}.admin-nav-item{display:flex;align-items:center;gap:.55rem;min-height:36px;padding:.48rem .65rem;border:1px solid transparent;border-radius:.6rem;color:#91a2b8;font-size:.68rem;font-weight:600;line-height:1.5;transition:background .18s,color .18s,border-color .18s}.admin-nav-item:hover,.admin-nav-item.active{color:#bfdbfe;background:#3b82f610;border-color:#3b82f61c}.admin-nav-item.active{box-shadow:inset -2px 0 #3b82f6}.admin-nav-item>span{width:1.1rem;flex:none;text-align:center;color:#64748b;font-size:.9rem}.admin-nav-item.active>span{color:#60a5fa}.admin-nav-item i{font-style:normal;font-size:.95rem;line-height:1;color:#64748b;transition:transform .2s}.admin-subnav{margin:.2rem 0 0;padding:.18rem .5rem .25rem 0;border-right:1px solid #243247;display:grid;gap:.1rem}.admin-subnav a{padding:.38rem .65rem;border-radius:.45rem;color:#687b92;font-size:.63rem;font-weight:600;line-height:1.5;transition:background .18s,color .18s}.admin-subnav a:hover,.admin-subnav a.active{color:#93c5fd;background:#3b82f610}.admin-nav-section+.admin-nav-section{border-top:1px solid #1b2a3d;padding-top:.65rem}
-</style>
