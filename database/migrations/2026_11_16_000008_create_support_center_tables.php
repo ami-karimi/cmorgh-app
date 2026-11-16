@@ -36,7 +36,6 @@ return new class extends Migration {
             // اصلاح ارتباط با سفارش‌ها
             $t->unsignedInteger('order_id')->nullable();
 
-            $t->foreign('order_id');
 
             $t->string('subject');
             $t->text('initial_message');
