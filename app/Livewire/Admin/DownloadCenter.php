@@ -51,6 +51,11 @@ class DownloadCenter extends Component
 
     public function saveItem(): void
     {
+        // A stale Livewire snapshot can still reference an expired/moved upload.
+        // Validate availability before Laravel's file-size validation touches it.
+        if (!$this->inspectUploads()['valid']) {
+            return;
+        }
         $validated = $this->validate([
             'title' => 'required|string|max:255', 'category_id' => 'required|exists:download_categories,id',
             'short_description' => 'nullable|string|max:500', 'description' => 'nullable|string|max:50000',
@@ -158,9 +163,41 @@ class DownloadCenter extends Component
         session()->flash('success', 'فایل حذف شد.');
     }
 
+    private function inspectUploads(): array
+    {
+        $info = ['valid' => true, 'file' => null, 'cover' => null];
+        foreach (['file', 'cover'] as $field) {
+            $upload = $this->$field;
+            if (!$upload) continue;
+            try {
+                if ($upload instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile && !$upload->exists()) {
+                    throw new \RuntimeException('Temporary download upload is missing: '.$field);
+                }
+                $info[$field] = [
+                    'name' => $upload->getClientOriginalName(),
+                    'size' => $upload->getSize(),
+                    'mime' => $upload->getMimeType(),
+                ];
+                if ($field === 'cover' && in_array($info[$field]['mime'], ['image/jpeg', 'image/png', 'image/webp'], true)) {
+                    $info[$field]['preview'] = $upload->temporaryUrl();
+                }
+            } catch (\Throwable $e) {
+                report($e);
+                $this->$field = null;
+                $info[$field] = null;
+                $info['valid'] = false;
+                $this->addError($field, 'فایل موقت در دسترس نیست یا منقضی شده است؛ فایل را دوباره انتخاب و بارگذاری کنید. اطلاعات فرم حفظ شده است.');
+            }
+        }
+        return $info;
+    }
+
     public function render()
     {
+        $uploads = $this->inspectUploads();
         return view('livewire.admin.download-center', [
+            'uploadedFileInfo' => $uploads['file'],
+            'uploadedCoverInfo' => $uploads['cover'],
             'items'=>DownloadItem::with('category')->latest()->get(),
             'categories'=>DownloadCategory::withCount('items')->orderBy('sort_order')->orderBy('name')->get(),
         ]);
