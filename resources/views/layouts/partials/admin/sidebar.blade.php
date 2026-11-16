@@ -186,6 +186,8 @@
 
         <a href="{{ route('admin.downloads') }}" wire:navigate @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold {{ request()->routeIs('admin.downloads') ? 'bg-brand-500/10 text-brand-300' : 'text-zinc-400 hover:bg-zinc-800/50' }}"><span aria-hidden="true">↓</span>مدیریت مرکز دانلود</a>
 
+        <a @click="sidebarOpen = false" href="{{ route('admin.support') }}" wire:navigate class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100 transition-all {{ request()->routeIs('admin.support') ? 'bg-brand-500/10 text-brand-300' : '' }}"><span class="text-lg">?</span><span class="font-medium text-sm">مدیریت پشتیبانی</span></a>
+
         <!-- مدیریت سایت -->
         <a @click="sidebarOpen = false" href="{{route('admin.settings')}}" wire:navigate class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100 transition-all">
             <svg class="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>

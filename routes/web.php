@@ -69,6 +69,7 @@ Route::middleware(['auth', 'is_customer'])->prefix('customer')->name('customer.'
 
  Route::get('/store', \App\Livewire\Store\Storefront::class)->name('store.index');
  Route::get('/tutorials', \App\Livewire\User\ConnectionGuide::class)->name('tutorials.index');
+ Route::get('/support', \App\Livewire\User\SupportCenter::class)->middleware('auth')->name('support.index');
 
 Route::middleware(['auth', 'is_reseller'])->prefix('reseller')->name('reseller.')->group(function () {
 
@@ -104,6 +105,7 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     Route::get('/managers/create',\App\Livewire\Admin\ManagerCreate::class)->name('managers.create');
     Route::get('/managers/{manager}/edit', \App\Livewire\Admin\ManagerEdit::class)->name('managers.edit');
     Route::get('/announcements', \App\Livewire\Admin\AnnouncementsManager::class)->name('announcements');
+    Route::get('/support', \App\Livewire\Admin\SupportManager::class)->name('support');
     Route::get('/financial-transactions', \App\Livewire\Admin\AdminFinancialManager::class)->name('financial');
     Route::get('/payment-methods', \App\Livewire\Admin\AdminPaymentMethods::class)->name('payment.methods');
     Route::get('/system-monitor', \App\Livewire\Admin\SystemMonitor::class)->name('system.monitor');

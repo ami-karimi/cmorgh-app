@@ -25,6 +25,7 @@
         <a href="{{ route('main') }}" wire:navigate aria-label="صفحه اصلی {{ $siteName }}"><x-ui.brand :name="$siteName" :logo="$siteLogo" /></a>
         <nav class="hidden md:flex items-center gap-1" aria-label="منوی اصلی">
             <a href="{{ route('downloads.index') }}" wire:navigate class="ui-nav-link">مرکز دانلود</a>
+            @auth<a href="{{ route('support.index') }}" wire:navigate class="ui-nav-link">پشتیبانی</a>@endauth
             <a href="{{ route('store.index') }}" wire:navigate class="ui-nav-link" @if(request()->routeIs('store.*')) aria-current="page" @endif>فروشگاه</a>
             <a href="{{ route('tutorials.index') }}" wire:navigate class="ui-nav-link" @if(request()->routeIs('tutorials.*')) aria-current="page" @endif>راهنمای اتصال</a>
         </nav>

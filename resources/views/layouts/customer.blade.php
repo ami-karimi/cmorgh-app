@@ -42,6 +42,7 @@
                 </a>
 
                 <a href="{{ route('customer.wallet') }}" wire:navigate class="px-3 py-2 rounded-lg text-sm font-bold {{ request()->routeIs('customer.wallet') ? 'text-brand-400 bg-brand-500/10' : 'text-zinc-500' }}">کیف پول و شارژ خودکار</a>
+                <a href="{{ route('support.index') }}" wire:navigate class="px-3 py-2 rounded-lg text-sm font-bold {{ request()->routeIs('support.*') ? 'text-brand-400 bg-brand-500/10' : 'text-zinc-500' }}">پشتیبانی</a>
             </nav>
         </div>
 

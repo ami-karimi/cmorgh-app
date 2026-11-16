@@ -111,6 +111,8 @@
 
             <div class="space-y-1.5"><p class="px-3 text-[10px] font-black text-zinc-600 mb-2">فایل‌ها و ابزارها</p><a href="{{ route('downloads.index') }}" wire:navigate @click="sidebarOpen = false" class="flex items-center gap-3 px-3 py-3 rounded-xl {{ request()->routeIs('downloads.*') ? 'bg-brand-500/10 text-brand-300' : 'text-zinc-400 hover:bg-zinc-800' }}"><span class="text-xl" aria-hidden="true">↓</span><span class="text-sm font-bold">مرکز دانلود</span></a></div>
 
+            <div class="space-y-1.5"><p class="px-3 text-[10px] font-black text-zinc-600 mb-2">پشتیبانی</p><a href="{{ route('support.index') }}" wire:navigate @click="sidebarOpen = false" class="flex items-center gap-3 px-3 py-3 rounded-xl {{ request()->routeIs('support.*') ? 'bg-brand-500/10 text-brand-300' : 'text-zinc-400 hover:bg-zinc-800' }}"><span class="text-xl" aria-hidden="true">?</span><span class="text-sm font-bold">مرکز پشتیبانی</span></a></div>
+
             <!-- Group: System -->
             <div class="space-y-1.5 pb-4">
                 <p class="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-2">سیستم</p>
