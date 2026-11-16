@@ -46,6 +46,9 @@
 
         <!-- Left: CTA & Profile -->
         <div class="flex items-center gap-3">
+            @if(session()->has('impersonating_admin_id'))
+                <form method="POST" action="{{ route('admin.impersonation.leave') }}"><input type="hidden" name="_token" value="{{ csrf_token() }}"><button type="submit" class="hidden sm:inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold">بازگشت به مدیریت</button></form>
+            @endif
             <livewire:shared.notification-bell />
             <a href="{{ route('store.index') }}" wire:navigate class="ui-button hidden sm:flex text-xs">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>

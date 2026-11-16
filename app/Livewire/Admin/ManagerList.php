@@ -42,12 +42,14 @@ class ManagerList extends Component
             abort(403, 'شما دسترسی ورود به حساب نمایندگان را ندارید.');
         }
 
-        // لاگین مستقیم با ID کاربر مورد نظر
-        Auth::loginUsingId($userId);
+        $user = User::whereKey($userId)->whereIn('role', ['agent', 'sub_agent', 'manager', 'admin'])->firstOrFail();
+        session(['impersonating_admin_id' => auth()->id()]);
+        Auth::login($user);
 
-        $user = User::where('id',$userId)->first();
-        // هدایت (ریدایرکت) به مسیر داشبورد نماینده
-        return redirect()->route('login');
+        return match ($user->role) {
+            'agent', 'sub_agent' => redirect()->route('reseller.dashboard'),
+            default => redirect()->route('admin.dashboard'),
+        };
     }
 
     public function bulkAction($action)

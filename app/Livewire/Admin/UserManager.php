@@ -70,7 +70,9 @@ class UserManager extends Component
         ];
 
         if (!$this->userId) {
-            $rules['password'] = 'required\vert{}string\vert{}min:6';                  } else {$rules['password'] = 'nullable|string|min:6';
+            $rules['password'] = 'required|string|min:6';
+        } else {
+            $rules['password'] = 'nullable|string|min:6';
         }
 
         $this->validate($rules);
@@ -92,6 +94,17 @@ class UserManager extends Component
 
         session()->flash('message', $this->userId ? 'اطلاعات مشتری ویرایش شد.' : 'مشتری جدید ثبت شد.');
         $this->resetForm();
+    }
+
+    public function loginAs($userId)
+    {
+        abort_unless(auth()->check() && in_array(auth()->user()->role, ['admin', 'manager'], true), 403);
+
+        $customer = User::whereKey($userId)->where('role', 'customer')->firstOrFail();
+        session(['impersonating_admin_id' => auth()->id()]);
+        \Illuminate\Support\Facades\Auth::login($customer);
+
+        return redirect()->route('customer.dashboard');
     }
 
     public function toggleStatus($id)

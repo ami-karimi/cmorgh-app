@@ -151,6 +151,9 @@
 
                         <td class="p-5 text-center">
                             <div class="flex items-center justify-center gap-2">
+                                <button wire:click="loginAs({{ $user->id }})" title="ورود به پنل مشتری" class="p-2 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white rounded-lg border border-emerald-500/20 transition inline-flex items-center justify-center shadow-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                                </button>
                                 <a href="{{ route('admin.users.show', $user->id) }}" wire:navigate title="مشاهده پروفایل مشتری" class="p-2 bg-zinc-800/60 hover:bg-zinc-700 text-zinc-400 hover:text-emerald-400 rounded-lg border border-zinc-700/50 transition inline-flex items-center justify-center shadow-sm">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                 </a>

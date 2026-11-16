@@ -45,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
         return redirect('/login');
     })->name('logout');
 
+    Route::post('/impersonation/leave', [\App\Http\Controllers\ImpersonationController::class, 'leave'])->name('impersonation.leave');
     Route::get('/dashboard')->name('user.dashboard');
 });
 
@@ -95,6 +96,7 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     Route::get('/store-orders', \App\Livewire\Admin\StoreOrdersManager::class)->name('store.orders');
     Route::get('/promotions', \App\Livewire\Admin\PromotionsManager::class)->name('promotions');
     Route::get('/managers/list',\App\Livewire\Admin\ManagerList::class)->name('managers.list');
+    Route::get('/managers/create',\App\Livewire\Admin\ManagerCreate::class)->name('managers.create');
     Route::get('/managers/{manager}/edit', \App\Livewire\Admin\ManagerEdit::class)->name('managers.edit');
     Route::get('/announcements', \App\Livewire\Admin\AnnouncementsManager::class)->name('announcements');
     Route::get('/financial-transactions', \App\Livewire\Admin\AdminFinancialManager::class)->name('financial');
