@@ -70,9 +70,18 @@ class DownloadCenter extends Component
         $newFile = $newCover = null;
         try {
             if ($this->file) {
+                // Livewire may MOVE the temporary upload when source and destination
+                // disks match. Read all metadata before store() removes that source.
+                $fileMetadata = [
+                    'file_name' => basename(str_replace('\\', '/', $this->file->getClientOriginalName())),
+                    'file_mime' => $this->file->getMimeType(),
+                    'file_size' => $this->file->getSize(),
+                ];
                 $newFile = $this->file->store('downloads/files', 'local');
-                if (!$newFile) throw new \RuntimeException('Download storage failed.');
-                $validated += ['file_path'=>$newFile, 'file_name'=>basename(str_replace('\\', '/', $this->file->getClientOriginalName())), 'file_mime'=>$this->file->getMimeType(), 'file_size'=>$this->file->getSize()];
+                if (!$newFile || !Storage::disk('local')->exists($newFile)) {
+                    throw new \RuntimeException('Download storage failed.');
+                }
+                $validated += ['file_path' => $newFile] + $fileMetadata;
             }
             if ($this->cover) {
                 $newCover = $this->cover->store('downloads/covers', 'public');
