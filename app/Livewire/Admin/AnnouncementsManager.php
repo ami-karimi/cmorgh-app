@@ -52,7 +52,11 @@ class AnnouncementsManager extends Component
     public function render()
     {
         $announcements = Announcement::latest()->get();
-        $users = User::whereIn('role', ['agent', 'sub_agent', 'customer'])->orderBy('role')->orderBy('name')->get(['id', 'name', 'username', 'role']);
+        // جدول users این پروژه username ندارد؛ برای انتخاب گیرنده از اطلاعات موجود استفاده می‌کنیم.
+        $users = User::whereIn('role', ['agent', 'sub_agent', 'customer'])
+            ->orderBy('role')
+            ->orderBy('name')
+            ->get(['id', 'name', 'phone', 'email', 'role']);
         return view('livewire.admin.announcements-manager', compact('announcements', 'users'))
             ->layout('layouts.admin')->title('مدیریت اطلاعیه‌ها');
     }

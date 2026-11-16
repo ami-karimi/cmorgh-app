@@ -52,7 +52,7 @@
                     @if($delivery === 'announcement')
                         <div><label class="block text-xs font-bold text-zinc-400 mb-1.5">مخاطب هدف</label><select wire:model="target" class="w-full bg-[#080f1d] border border-zinc-800 text-white rounded-xl px-4 py-3 text-sm"><option value="all">همه کاربران</option><option value="agents">فقط نمایندگان</option><option value="customers">فقط مشتریان</option></select></div>
                     @else
-                        <div><label class="block text-xs font-bold text-zinc-400 mb-1.5">انتخاب کاربر</label><select wire:model="recipientId" class="w-full bg-[#080f1d] border border-zinc-800 text-white rounded-xl px-4 py-3 text-sm"><option value="">انتخاب کنید</option>@foreach($users as $user)<option value="{{ $user->id }}">{{ $user->name }} — {{ $user->username }} ({{ $user->role_label }})</option>@endforeach</select></div>
+                        <div><label class="block text-xs font-bold text-zinc-400 mb-1.5">انتخاب کاربر</label><select wire:model="recipientId" class="w-full bg-[#080f1d] border border-zinc-800 text-white rounded-xl px-4 py-3 text-sm"><option value="">انتخاب کنید</option>@foreach($users as $user)<option value="{{ $user->id }}">{{ $user->name }} — {{ $user->phone ?: ($user->email ?: 'بدون اطلاعات تماس') }} ({{ $user->role_label }})</option>@endforeach</select></div>
                     @endif
                     <div>
                         <label class="block text-xs font-bold text-zinc-400 mb-1.5">متن پیام</label>
