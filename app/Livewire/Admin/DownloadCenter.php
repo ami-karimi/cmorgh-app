@@ -58,7 +58,13 @@ class DownloadCenter extends Component
             'is_featured' => 'boolean', 'is_published' => 'boolean',
             'file' => ($this->editingId ? 'nullable' : 'required').'|file|max:102400|extensions:apk,xapk,exe,msi,dmg,pkg,deb,rpm,zip,rar,7z,tar,gz,pdf,txt,conf,ovpn,doc,docx,mp4',
             'cover' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
-        ], [], ['title'=>'عنوان', 'category_id'=>'دسته‌بندی', 'file'=>'فایل اصلی', 'cover'=>'تصویر کاور']);
+        ], [
+            'file.required' => 'فایل اصلی هنوز به سرور نرسیده است. فایل را انتخاب کنید و تا نمایش پیام «فایل اصلی دریافت شد» صبر کنید.',
+            'file.uploaded' => 'آپلود فایل اصلی ناموفق بود؛ محدودیت حجم PHP و وب‌سرور را بررسی کنید.',
+            'file.max' => 'حجم فایل اصلی نباید بیشتر از ۱۰۰ مگابایت باشد.',
+            'file.extensions' => 'پسوند فایل اصلی پشتیبانی نمی‌شود.',
+            'cover.max' => 'حجم تصویر کاور نباید بیشتر از ۵ مگابایت باشد.',
+        ], ['title'=>'عنوان', 'category_id'=>'دسته‌بندی', 'file'=>'فایل اصلی', 'cover'=>'تصویر کاور']);
         $old = $this->editingId ? DownloadItem::findOrFail($this->editingId) : null;
         unset($validated['file'], $validated['cover']);
         $newFile = $newCover = null;
