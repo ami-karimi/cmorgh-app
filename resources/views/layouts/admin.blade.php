@@ -21,7 +21,7 @@
 
 <a href="#main-content" class="ui-skip-link">رفتن به محتوای اصلی</a>
   @include('layouts.partials.admin.sidebar')
-<div class="flex flex-col min-h-screen lg:mr-[260px] transition-all duration-300">
+<div class="flex flex-col min-h-screen lg:mr-[248px] transition-all duration-300">
 
     @include('layouts.partials.admin.header')
 
