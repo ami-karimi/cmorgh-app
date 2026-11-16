@@ -304,14 +304,9 @@ class AccountDetails extends Component
         $account = Accounts::findOrFail($this->accountId);
         $server = Nas::findOrFail($this->newWgServerId);
         $service = new WireguardService($server);
-        $existing = WireGuardUsers::where('user_id', $account->id)->where('server_id', $server->id)->first();
 
-        if ($existing) {
-            $response = $service->rebuildClient($existing);
-            $this->toast($response['status'] ? 'success' : 'error', $response['message']);
-            return;
-        }
-
+        // «ساخت کانفیگ» همیشه یک Peer/کلید/IP جدید روی سرور انتخابی می‌سازد.
+        // ریبیلد فقط از دکمه rebuildWgConfig استفاده می‌کند.
         $response = $service->createClient($account->username);
         if ($response['status']) {
             WireGuardUsers::create([
@@ -320,7 +315,7 @@ class AccountDetails extends Component
                 'client_private_key' => $response['data']['client_private_key'], 'user_ip' => $response['data']['ip_address'],
                 'rx' => 0, 'tx' => 0, 'is_enabled' => 1,
             ]);
-            $this->toast('success', 'کانفیگ روی سرور انتخاب‌شده ساخته شد.');
+            $this->toast('success', 'یک کانفیگ جدید روی سرور انتخاب‌شده ساخته شد.');
         } else {
             $this->toast('error', $response['message'] ?? 'ساخت کانفیگ انجام نشد.');
         }
