@@ -33,6 +33,7 @@
 
             <!-- Desktop Nav -->
             <nav class="hidden md:flex items-center gap-1.5">
+                <a href="{{ route('downloads.index') }}" wire:navigate class="px-3 py-2 rounded-lg text-sm font-bold text-brand-300">مرکز دانلود</a>
                 <a href="{{ route('customer.dashboard') }}" wire:navigate class="px-3 py-2 rounded-lg text-sm font-bold transition-all {{ request()->routeIs('customer.dashboard') ? 'bg-zinc-100 dark:bg-zinc-800/80 text-brand-600 dark:text-brand-300' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }}">
                     سرویس‌های من
                 </a>
@@ -86,6 +87,7 @@
          x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2"
          class="md:hidden absolute top-[72px] left-0 w-full bg-white dark:bg-[#111c2e] border-b border-zinc-200 dark:border-zinc-800 shadow-xl z-40">
         <nav class="flex flex-col p-4 space-y-1.5 text-sm font-bold">
+            <a href="{{ route('downloads.index') }}" wire:navigate @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-brand-300">مرکز دانلود</a>
             <a href="{{ route('store.index') }}" wire:navigate @click="mobileMenuOpen = false" class="ui-button mb-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                 خرید سرویس جدید

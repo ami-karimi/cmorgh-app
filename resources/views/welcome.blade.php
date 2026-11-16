@@ -71,4 +71,5 @@
 @if(!empty($storeData['support_link']) && $storeData['support_link'] !== '#')
     <section class="ui-container mb-16" data-reveal><div class="home-support"><div><span class="home-section-label">نیاز به راهنمایی دارید؟</span><h2 class="font-bold text-xl mt-2 text-white">ما برای انتخاب بهتر کنار شما هستیم.</h2><p class="ui-muted mt-2">اگر در انتخاب سرویس یا راه‌اندازی آن سوالی دارید، با پشتیبانی در ارتباط باشید.</p></div><a href="{{ $storeData['support_link'] }}" target="_blank" rel="noopener noreferrer" class="ui-button home-secondary-button">ارتباط با پشتیبانی <span>↗</span></a></div></section>
 @endif
+<section class="ui-container mb-16"><div class="home-support"><div><span class="home-section-label">ابزارهای موردنیاز شما</span><h2 class="font-bold text-xl mt-2 text-white">همه فایل‌ها؛ یک مرکز دانلود</h2><p class="ui-muted mt-2">برنامه‌های اتصال، راهنماها و فایل‌های موردنیاز را بر اساس دسته‌بندی پیدا و دانلود کنید.</p></div><a href="{{ route('downloads.index') }}" wire:navigate class="ui-button">ورود به مرکز دانلود ↓</a></div></section>
 @endcomponent

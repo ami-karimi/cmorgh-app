@@ -8,6 +8,10 @@ use Illuminate\Http\Request;
 Route::get('/', [\App\Http\Controllers\WelcomeController::class,'index'])->name('main');
 Route::get('/convert', [\App\Http\Controllers\WelcomeController::class,'convert'])->name('convert');
 
+Route::get('/downloads', \App\Livewire\User\DownloadLibrary::class)->name('downloads.index');
+Route::get('/downloads/{slug}/file', [\App\Http\Controllers\DownloadCenterController::class, 'download'])->middleware('throttle:60,1')->name('downloads.file');
+Route::get('/downloads/{slug}', [\App\Http\Controllers\DownloadCenterController::class, 'show'])->name('downloads.show');
+
 Route::get('/sub/{hash}', \App\Livewire\User\PublicAccountView::class)->name('public.account.show');
 
 
@@ -93,6 +97,7 @@ Route::middleware(['auth', 'is_reseller'])->prefix('reseller')->name('reseller.'
 Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/',\App\Livewire\Admin\Dashboard::class)->name('dashboard');
     Route::get('/tutorial', \App\Livewire\Admin\TutorialManager::class)->name('tutorial');
+    Route::get('/downloads', \App\Livewire\Admin\DownloadCenter::class)->name('downloads');
     Route::get('/store-orders', \App\Livewire\Admin\StoreOrdersManager::class)->name('store.orders');
     Route::get('/promotions', \App\Livewire\Admin\PromotionsManager::class)->name('promotions');
     Route::get('/managers/list',\App\Livewire\Admin\ManagerList::class)->name('managers.list');

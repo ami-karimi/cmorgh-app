@@ -24,6 +24,7 @@
     <div class="ui-container flex h-[72px] items-center justify-between gap-4">
         <a href="{{ route('main') }}" wire:navigate aria-label="صفحه اصلی {{ $siteName }}"><x-ui.brand :name="$siteName" :logo="$siteLogo" /></a>
         <nav class="hidden md:flex items-center gap-1" aria-label="منوی اصلی">
+            <a href="{{ route('downloads.index') }}" wire:navigate class="ui-nav-link">مرکز دانلود</a>
             <a href="{{ route('store.index') }}" wire:navigate class="ui-nav-link" @if(request()->routeIs('store.*')) aria-current="page" @endif>فروشگاه</a>
             <a href="{{ route('tutorials.index') }}" wire:navigate class="ui-nav-link" @if(request()->routeIs('tutorials.*')) aria-current="page" @endif>راهنمای اتصال</a>
         </nav>
@@ -43,6 +44,7 @@
         </div>
     </div>
     <nav id="site-mobile-menu" x-show="mobileMenuOpen" x-cloak x-transition class="md:hidden border-t border-zinc-800 ui-container py-3" aria-label="منوی موبایل">
+        <a href="{{ route('downloads.index') }}" wire:navigate @click="mobileMenuOpen = false" class="ui-nav-link">مرکز دانلود</a>
         <a href="{{ route('store.index') }}" wire:navigate @click="mobileMenuOpen = false" class="ui-nav-link">فروشگاه</a>
         <a href="{{ route('tutorials.index') }}" wire:navigate @click="mobileMenuOpen = false" class="ui-nav-link">راهنمای اتصال</a>
         @auth
@@ -57,6 +59,7 @@
         <div class="flex flex-wrap items-center gap-5 text-xs text-zinc-400">
             <a href="{{ route('store.index') }}" wire:navigate class="hover:text-brand-300">خرید اشتراک</a>
             <a href="{{ route('tutorials.index') }}" wire:navigate class="hover:text-brand-300">راهنمای اتصال</a>
+            <a href="{{ route('downloads.index') }}" wire:navigate class="hover:text-brand-300">مرکز دانلود</a>
             <span>© {{ date('Y') }} {{ $siteName }}</span>
         </div>
     </div>
