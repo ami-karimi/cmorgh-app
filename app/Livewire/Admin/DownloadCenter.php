@@ -94,7 +94,10 @@ class DownloadCenter extends Component
             if ($newFile) Storage::disk('local')->delete($newFile);
             if ($newCover) Storage::disk('public')->delete($newCover);
             report($e);
-            $this->addError('file', 'ذخیره انجام نشد؛ فایل قبلی حفظ شده است. فضای ذخیره‌سازی و گزارش سرور را بررسی کنید.');
+            // A same-disk store may already have moved the upload. Do not render
+            // metadata or retry validation against the now-missing temp source.
+            $this->reset(['file', 'cover']);
+            $this->addError('file', 'ذخیره انجام نشد؛ فایل قبلی حفظ شده است. فضای ذخیره‌سازی و گزارش سرور را بررسی و فایل جدید را دوباره بارگذاری کنید.');
             return;
         }
         // فایل‌های جایگزین‌شده برای جلوگیری از حذف اشتباهی حفظ می‌شوند؛ پاک‌سازی جداگانه انجام می‌شود.
