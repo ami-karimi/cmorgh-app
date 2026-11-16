@@ -115,8 +115,16 @@ class WireguardService
         if ((int) $client->server_id !== (int) $this->server->id) {
             return ['status' => false, 'message' => 'این کانفیگ متعلق به سرور انتخاب‌شده نیست.'];
         }
-        if (!$client->public_key || !$client->client_private_key || !$client->user_ip || !$client->profile_name) {
-            return ['status' => false, 'message' => 'اطلاعات کلید، IP یا نام کانفیگ ناقص است.'];
+        if (!$client->profile_name) {
+            return ['status' => false, 'message' => 'نام کانفیگ ثبت نشده است؛ ابتدا یک کانفیگ جدید بسازید.'];
+        }
+
+        // اطلاعات قدیمی ممکن است در رکورد DB ناقص باشد، اما در فایل کانفیگ موجود است.
+        $config = $this->readExistingConfig($client->profile_name);
+        $privateKey = $client->client_private_key ?: ($config['private_key'] ?? null);
+        $ipAddress = $client->user_ip ?: ($config['ip_address'] ?? null);
+        if (!$privateKey || !$ipAddress) {
+            return ['status' => false, 'message' => 'کلید خصوصی یا IP در رکورد و فایل کانفیگ پیدا نشد؛ ابتدا کانفیگ جدید بسازید.'];
         }
         if (!$this->connect()) {
             return ['status' => false, 'message' => 'سرور MikroTik/WireGuard در دسترس نیست.'];
@@ -126,15 +134,29 @@ class WireguardService
         if (!$interface['status']) return $interface;
 
         $peerResponse = $this->api->bs_mkt_rest_api_get('/interface/wireguard/peers');
-        $peer = collect($peerResponse['data'] ?? [])->first(
-            fn ($item) => hash_equals((string) ($item['public-key'] ?? ''), (string) $client->public_key)
-        );
+        $peer = null;
+        if ($client->public_key) {
+            $peer = collect($peerResponse['data'] ?? [])->first(fn ($item) => hash_equals((string) ($item['public-key'] ?? ''), (string) $client->public_key));
+        }
+        if (!$peer) {
+            $peer = collect($peerResponse['data'] ?? [])->first(fn ($item) => trim((string) ($item['allowed-address'] ?? '')) === trim($ipAddress . '/32'));
+            if ($peer && !empty($peer['public-key'])) {
+                $client->public_key = $peer['public-key'];
+                $client->user_ip = $ipAddress;
+                $client->client_private_key = $privateKey;
+                $client->save();
+            }
+        }
+        $publicKey = $client->public_key ?: ($peer['public-key'] ?? null);
+        if (!$publicKey) {
+            return ['status' => false, 'message' => 'Public Key این کانفیگ روی سرور پیدا نشد؛ کانفیگ جدید نسازید تا ابتدا وضعیت سرور بررسی شود.'];
+        }
 
         if (!$peer) {
             $created = $this->api->bs_mkt_rest_api_add('/interface/wireguard/peers', [
                 'interface' => 'ROS_WG_USERS',
-                'allowed-address' => $client->user_ip . '/32',
-                'public-key' => $client->public_key,
+                'allowed-address' => $ipAddress . '/32',
+                'public-key' => $publicKey,
                 'disabled' => $client->is_enabled ? 'no' : 'yes',
             ]);
             if (!($created['ok'] ?? false)) {
@@ -142,12 +164,12 @@ class WireguardService
             }
         }
 
-        $queue = $this->api->bs_mkt_rest_api_get('/queue/simple?target=' . rawurlencode($client->user_ip . '/32'));
+        $queue = $this->api->bs_mkt_rest_api_get('/queue/simple?target=' . rawurlencode($ipAddress . '/32'));
         if (!($queue['ok'] ?? false) || empty($queue['data'])) {
             $limit = $client->config_limit ?: '80M/10M';
             $queueResult = $this->api->bs_mkt_rest_api_add('/queue/simple', [
                 'name' => $client->profile_name,
-                'target' => $client->user_ip . '/32',
+                'target' => $ipAddress . '/32',
                 'max-limit' => $limit,
             ]);
             if (!($queueResult['ok'] ?? false)) {
@@ -156,9 +178,9 @@ class WireguardService
         }
 
         $this->generateConfigFile(
-            $client->client_private_key,
+            $privateKey,
             $interface['public_key'],
-            $client->user_ip,
+            $ipAddress,
             $interface['listen_port'],
             $client->profile_name
         );
@@ -472,6 +494,16 @@ class WireguardService
             'private' => base64_encode(sodium_crypto_kx_secretkey($keypair)),
             'public' => base64_encode(sodium_crypto_kx_publickey($keypair)),
         ];
+    }
+
+    private function readExistingConfig(string $profileName): array
+    {
+        $path = public_path('configs/' . basename($profileName) . '.conf');
+        if (!is_file($path) || !is_readable($path)) return [];
+        $content = file_get_contents($path) ?: '';
+        preg_match('/^PrivateKey\s*=\s*(.+)$/mi', $content, $private);
+        preg_match('/^Address\s*=\s*([^\/\s]+)(?:\/\d+)?$/mi', $content, $address);
+        return ['private_key' => trim($private[1] ?? ''), 'ip_address' => trim($address[1] ?? '')];
     }
 
     private function generateConfigFile($clientPrivKey, $serverPubKey, $ipAddress, $serverPort, $fileName): void

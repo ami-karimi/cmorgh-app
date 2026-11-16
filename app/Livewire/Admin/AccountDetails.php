@@ -293,24 +293,36 @@ class AccountDetails extends Component
         }
     }
 
-    public function createWgConfig()
+    public function createWgConfig(): void
     {
+        try {
+            $this->validate(['newWgServerId' => 'required|exists:nas,id'], ['newWgServerId.required' => 'ابتدا سرور WireGuard را انتخاب کنید.']);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('toast', type: 'error', title: 'انتخاب سرور لازم است', message: collect($e->errors())->flatten()->first());
+            throw $e;
+        }
         $account = Accounts::findOrFail($this->accountId);
-        $server = Nas::findOrFail($account->wg_server_id ?? Nas::first()->id);
-        $response = (new WireguardService($server))->createClient($account->username);
+        $server = Nas::findOrFail($this->newWgServerId);
+        $service = new WireguardService($server);
+        $existing = WireGuardUsers::where('user_id', $account->id)->where('server_id', $server->id)->first();
+
+        if ($existing) {
+            $response = $service->rebuildClient($existing);
+            $this->toast($response['status'] ? 'success' : 'error', $response['message']);
+            return;
+        }
+
+        $response = $service->createClient($account->username);
         if ($response['status']) {
             WireGuardUsers::create([
-                'profile_name' => $response['data']['config_file'],
-                'user_id' => $account->id,
-                'server_id' => $server->id,
-                'public_key' => $response['data']['client_public_key'],
-                'client_private_key' => $response['data']['client_private_key'],
-                'user_ip' => $response['data']['ip_address'],
-                'rx' => 0, 'tx' => 0, 'is_enabled' => 1
+                'profile_name' => $response['data']['config_file'], 'user_id' => $account->id,
+                'server_id' => $server->id, 'public_key' => $response['data']['client_public_key'],
+                'client_private_key' => $response['data']['client_private_key'], 'user_ip' => $response['data']['ip_address'],
+                'rx' => 0, 'tx' => 0, 'is_enabled' => 1,
             ]);
-            session()->flash('message', 'کانفیگ ساخته شد.');
+            $this->toast('success', 'کانفیگ روی سرور انتخاب‌شده ساخته شد.');
         } else {
-            session()->flash('error', $response['message']);
+            $this->toast('error', $response['message'] ?? 'ساخت کانفیگ انجام نشد.');
         }
     }
 
@@ -319,7 +331,13 @@ class AccountDetails extends Component
         $wgUser = WireGuardUsers::where('id', $configId)->where('user_id', $this->accountId)->firstOrFail();
         $server = Nas::findOrFail($wgUser->server_id);
         $response = (new WireguardService($server))->rebuildClient($wgUser);
-        session()->flash($response['status'] ? 'message' : 'error', $response['message']);
+        $this->toast($response['status'] ? 'success' : 'error', $response['message']);
+    }
+
+    private function toast(string $type, string $message): void
+    {
+        $this->dispatch('toast', type: $type, title: $type === 'success' ? 'انجام شد' : 'خطا', message: $message);
+        session()->flash($type === 'success' ? 'message' : 'error', $message);
     }
 
     public function deleteWgConfig($configId)

@@ -199,6 +199,7 @@ class AccountDetail extends Component
         abort_unless((int) $wgUser->server_id === (int) ($this->account->wg_server_id ?? $wgUser->server_id), 403);
         $server = Nas::findOrFail($wgUser->server_id);
         $response = (new \App\Services\WireguardService($server))->rebuildClient($wgUser);
+        $this->dispatch('toast', type: $response['status'] ? 'success' : 'error', title: $response['status'] ? 'انجام شد' : 'خطا', message: $response['message']);
         session()->flash($response['status'] ? 'message' : 'error', $response['message']);
     }
 
