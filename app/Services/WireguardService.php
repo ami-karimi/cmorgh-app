@@ -107,6 +107,66 @@ class WireguardService
     }
 
     /**
+     * بازسازی کانفیگ روی همان سرور با همان کلیدها و IP.
+     * اگر Peer روی روتر وجود نداشته باشد، با همان Public Key دوباره ساخته می‌شود.
+     */
+    public function rebuildClient(WireGuardUsers $client): array
+    {
+        if ((int) $client->server_id !== (int) $this->server->id) {
+            return ['status' => false, 'message' => 'این کانفیگ متعلق به سرور انتخاب‌شده نیست.'];
+        }
+        if (!$client->public_key || !$client->client_private_key || !$client->user_ip || !$client->profile_name) {
+            return ['status' => false, 'message' => 'اطلاعات کلید، IP یا نام کانفیگ ناقص است.'];
+        }
+        if (!$this->connect()) {
+            return ['status' => false, 'message' => 'سرور MikroTik/WireGuard در دسترس نیست.'];
+        }
+
+        $interface = $this->getInterfaceInfo();
+        if (!$interface['status']) return $interface;
+
+        $peerResponse = $this->api->bs_mkt_rest_api_get('/interface/wireguard/peers');
+        $peer = collect($peerResponse['data'] ?? [])->first(
+            fn ($item) => hash_equals((string) ($item['public-key'] ?? ''), (string) $client->public_key)
+        );
+
+        if (!$peer) {
+            $created = $this->api->bs_mkt_rest_api_add('/interface/wireguard/peers', [
+                'interface' => 'ROS_WG_USERS',
+                'allowed-address' => $client->user_ip . '/32',
+                'public-key' => $client->public_key,
+                'disabled' => $client->is_enabled ? 'no' : 'yes',
+            ]);
+            if (!($created['ok'] ?? false)) {
+                return ['status' => false, 'message' => 'ساخت مجدد Peer با همان Public Key ناموفق بود: ' . ($created['error'] ?? 'خطای RouterOS')];
+            }
+        }
+
+        $queue = $this->api->bs_mkt_rest_api_get('/queue/simple?target=' . rawurlencode($client->user_ip . '/32'));
+        if (!($queue['ok'] ?? false) || empty($queue['data'])) {
+            $limit = $client->config_limit ?: '80M/10M';
+            $queueResult = $this->api->bs_mkt_rest_api_add('/queue/simple', [
+                'name' => $client->profile_name,
+                'target' => $client->user_ip . '/32',
+                'max-limit' => $limit,
+            ]);
+            if (!($queueResult['ok'] ?? false)) {
+                return ['status' => false, 'message' => 'Peer ساخته شد، اما Queue سرعت ساخته نشد: ' . ($queueResult['error'] ?? 'خطای RouterOS')];
+            }
+        }
+
+        $this->generateConfigFile(
+            $client->client_private_key,
+            $interface['public_key'],
+            $client->user_ip,
+            $interface['listen_port'],
+            $client->profile_name
+        );
+
+        return ['status' => true, 'message' => $peer ? 'کانفیگ با همان Peer بازسازی شد.' : 'Peer با همان Public Key ساخته و کانفیگ بازسازی شد.', 'peer_recreated' => !$peer];
+    }
+
+    /**
      * تغییر دستی لیمیت سرعت (Queue) در میکروتیک
      */
     public function updateClientSpeed(string $ipAddress, string $profileName, string $newSpeed): array

@@ -314,6 +314,14 @@ class AccountDetails extends Component
         }
     }
 
+    public function rebuildWgConfig($configId): void
+    {
+        $wgUser = WireGuardUsers::where('id', $configId)->where('user_id', $this->accountId)->firstOrFail();
+        $server = Nas::findOrFail($wgUser->server_id);
+        $response = (new WireguardService($server))->rebuildClient($wgUser);
+        session()->flash($response['status'] ? 'message' : 'error', $response['message']);
+    }
+
     public function deleteWgConfig($configId)
     {
         $wgUser = WireGuardUsers::findOrFail($configId);$server = Nas::findOrFail($wgUser->server_id);$response = (new WireguardService($server))->removeClient($wgUser->public_key);

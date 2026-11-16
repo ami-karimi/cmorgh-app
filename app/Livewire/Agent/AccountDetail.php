@@ -193,6 +193,15 @@ class AccountDetail extends Component
         session()->flash('message', 'وضعیت کانفیگ تغییر کرد.');
     }
 
+    public function rebuildWgConfig($configId): void
+    {
+        $wgUser = WireGuardUsers::where('id', $configId)->where('user_id', $this->account->id)->firstOrFail();
+        abort_unless((int) $wgUser->server_id === (int) ($this->account->wg_server_id ?? $wgUser->server_id), 403);
+        $server = Nas::findOrFail($wgUser->server_id);
+        $response = (new \App\Services\WireguardService($server))->rebuildClient($wgUser);
+        session()->flash($response['status'] ? 'message' : 'error', $response['message']);
+    }
+
     public function openChangeServerModal($configId)
     {
         $this->selectedWgConfigId = $configId;
