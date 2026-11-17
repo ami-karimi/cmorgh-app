@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Admin\BackupDownloadController;
+use App\Livewire\Admin\BackupManager;
 
 
 Route::get('/', [\App\Http\Controllers\WelcomeController::class,'index'])->name('main');
@@ -123,6 +125,12 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     Route::get('/manage-charges',\App\Livewire\Admin\ManageCharges::class)->name('manage_charges');
     Route::get('/users/{id}',\App\Livewire\Admin\UserDetails::class)->name('users.show');
     Route::get('/users/{id}',\App\Livewire\Admin\UserDetails::class)->name('users.show');
+    Route::get('/backups', BackupManager::class)->name('backups');
+
+    Route::get('/backups/{backup}/download', BackupDownloadController::class)
+        ->middleware('signed')
+        ->name('backups.download');
+
 
 });
 

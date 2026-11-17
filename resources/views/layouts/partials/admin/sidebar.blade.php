@@ -1,35 +1,41 @@
 @php
-    // Match detail/create pages to exactly one menu entry.
-    $adminMenuGroups = [
-        ['id' => 'people', 'label' => 'کاربران و اکانت‌ها', 'icon' => 'users', 'items' => [
-            ['label' => 'مشتریان', 'route' => 'admin.users.index', 'match' => ['admin.users.*']],
-            ['label' => 'مدیران و نمایندگان', 'route' => 'admin.managers.list', 'match' => ['admin.managers.*']],
-            ['label' => 'اکانت‌های سرویس', 'route' => 'admin.accounts.list', 'match' => ['admin.accounts.list', 'admin.accounts.show']],
-            ['label' => 'صدور اکانت', 'route' => 'admin.accounts.create', 'match' => ['admin.accounts.create']],
-            ['label' => 'رخدادهای اکانت', 'route' => 'admin.accounts.logs', 'match' => ['admin.accounts.logs']],
-        ]],
-        ['id' => 'finance', 'label' => 'سفارش‌ها و مالی', 'icon' => 'wallet', 'items' => [
-            ['label' => 'سفارشات فروشگاه', 'route' => 'admin.store.orders', 'match' => ['admin.store.*']],
-            ['label' => 'تراکنش‌های مالی', 'route' => 'admin.financial', 'match' => ['admin.financial']],
-            ['label' => 'روش‌های پرداخت', 'route' => 'admin.payment.methods', 'match' => ['admin.payment.*']],
-            ['label' => 'تأیید پرداخت', 'route' => 'admin.manage_charges', 'match' => ['admin.manage_charges']],
-            ['label' => 'تخفیف و بونوس', 'route' => 'admin.promotions', 'match' => ['admin.promotions']],
-        ]],
-        ['id' => 'infra', 'label' => 'سیستم و زیرساخت', 'icon' => 'shield', 'items' => [
-            ['label' => 'سرورها', 'route' => 'admin.nas.list', 'match' => ['admin.nas.*']],
-            ['label' => 'گروه‌های سرویس', 'route' => 'admin.groups.list', 'match' => ['admin.groups.*']],
-            ['label' => 'تعرفه‌های شارژ', 'route' => 'admin.charge.list', 'match' => ['admin.charge.*']],
-            ['label' => 'وضعیت سرورها', 'route' => 'admin.system.monitor', 'match' => ['admin.system.monitor']],
-            ['label' => 'بررسی سیستم', 'route' => 'admin.system.check', 'match' => ['admin.system.check']],
-            ['label' => 'زیرساخت DNS Game', 'route' => 'admin.dns.infrastructure', 'match' => ['admin.dns.*']],
-        ]],
-        ['id' => 'content', 'label' => 'محتوا و پشتیبانی', 'icon' => 'ticket', 'items' => [
-            ['label' => 'مدیریت پشتیبانی', 'route' => 'admin.support', 'match' => ['admin.support']],
-            ['label' => 'مرکز دانلود', 'route' => 'admin.downloads', 'match' => ['admin.downloads']],
-            ['label' => 'راهنماهای اتصال', 'route' => 'admin.tutorial', 'match' => ['admin.tutorial']],
-            ['label' => 'اطلاعیه‌ها', 'route' => 'admin.announcements', 'match' => ['admin.announcements']],
-        ]],
-    ];
+    $failedBackupsCount = cache()->remember(
+         'failed_backups_count',
+         120,
+         fn () => \App\Models\Backup::where('status', 'failed')->count()
+     );
+     // Match detail/create pages to exactly one menu entry.
+     $adminMenuGroups = [
+         ['id' => 'people', 'label' => 'کاربران و اکانت‌ها', 'icon' => 'users', 'items' => [
+             ['label' => 'مشتریان', 'route' => 'admin.users.index', 'match' => ['admin.users.*']],
+             ['label' => 'مدیران و نمایندگان', 'route' => 'admin.managers.list', 'match' => ['admin.managers.*']],
+             ['label' => 'اکانت‌های سرویس', 'route' => 'admin.accounts.list', 'match' => ['admin.accounts.list', 'admin.accounts.show']],
+             ['label' => 'صدور اکانت', 'route' => 'admin.accounts.create', 'match' => ['admin.accounts.create']],
+             ['label' => 'رخدادهای اکانت', 'route' => 'admin.accounts.logs', 'match' => ['admin.accounts.logs']],
+         ]],
+         ['id' => 'finance', 'label' => 'سفارش‌ها و مالی', 'icon' => 'wallet', 'items' => [
+             ['label' => 'سفارشات فروشگاه', 'route' => 'admin.store.orders', 'match' => ['admin.store.*']],
+             ['label' => 'تراکنش‌های مالی', 'route' => 'admin.financial', 'match' => ['admin.financial']],
+             ['label' => 'روش‌های پرداخت', 'route' => 'admin.payment.methods', 'match' => ['admin.payment.*']],
+             ['label' => 'تأیید پرداخت', 'route' => 'admin.manage_charges', 'match' => ['admin.manage_charges']],
+             ['label' => 'تخفیف و بونوس', 'route' => 'admin.promotions', 'match' => ['admin.promotions']],
+         ]],
+         ['id' => 'infra', 'label' => 'سیستم و زیرساخت', 'icon' => 'shield', 'items' => [
+             ['label' => 'سرورها', 'route' => 'admin.nas.list', 'match' => ['admin.nas.*']],
+             ['label' => 'گروه‌های سرویس', 'route' => 'admin.groups.list', 'match' => ['admin.groups.*']],
+             ['label' => 'تعرفه‌های شارژ', 'route' => 'admin.charge.list', 'match' => ['admin.charge.*']],
+             ['label' => 'وضعیت سرورها', 'route' => 'admin.system.monitor', 'match' => ['admin.system.monitor']],
+             ['label' => 'بررسی سیستم', 'route' => 'admin.system.check', 'match' => ['admin.system.check']],
+             ['label' => 'زیرساخت DNS Game', 'route' => 'admin.dns.infrastructure', 'match' => ['admin.dns.*']],
+         ]],
+         ['id' => 'content', 'label' => 'محتوا و پشتیبانی', 'icon' => 'ticket', 'items' => [
+             ['label' => 'مدیریت پشتیبانی', 'route' => 'admin.support', 'match' => ['admin.support']],
+             ['label' => 'مرکز دانلود', 'route' => 'admin.downloads', 'match' => ['admin.downloads']],
+             ['label' => 'راهنماهای اتصال', 'route' => 'admin.tutorial', 'match' => ['admin.tutorial']],
+             ['label' => 'پشتیبان‌گیری', 'route' => 'admin.backups', 'match' => ['admin.backups', 'admin.backups.*'], 'badge' => $failedBackupsCount ?? 0],
+             ['label' => 'اطلاعیه‌ها', 'route' => 'admin.announcements', 'match' => ['admin.announcements']],
+         ]],
+     ];
 @endphp
 <div x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-40 bg-zinc-950/80 backdrop-blur-sm lg:hidden" @click="sidebarOpen = false" x-cloak></div>
 <aside id="admin-sidebar" :class="sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'" class="admin-sidebar fixed inset-y-0 right-0 z-50 transition-transform duration-200 flex flex-col" aria-label="ناوبری پنل مدیریت">

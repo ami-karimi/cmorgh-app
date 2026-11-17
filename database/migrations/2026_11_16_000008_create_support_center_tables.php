@@ -33,7 +33,7 @@ return new class extends Migration {
                 ->constrained('accounts')
                 ->nullOnDelete();
 
-            // اصلاح ارتباط با سفارش‌ها
+            // عمداً FK سفارش در این migration ساخته نمی‌شود؛ نوع جدول store_orders در نصب‌های legacy متفاوت است.
             $t->unsignedInteger('order_id')->nullable();
 
 

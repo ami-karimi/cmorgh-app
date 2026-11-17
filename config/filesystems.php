@@ -29,7 +29,32 @@ return [
     */
 
     'disks' => [
+        'backup_host' => [
+            // اگر SFTP است:
+            'driver' => 'sftp',
+            'host' => env('BACKUP_HOST'),
+            'username' => env('BACKUP_HOST_USERNAME'),
+            'password' => env('BACKUP_HOST_PASSWORD'),
+            'privateKey' => env('BACKUP_HOST_PRIVATE_KEY'),
+            'port' => (int) env('BACKUP_HOST_PORT', 22),
+            'root' => env('BACKUP_HOST_ROOT', '/'),
+            'timeout' => 120,
+            'visibility' => 'private',
 
+            // آدرسی که کاربر از آن دانلود میکند
+            'url' => env('BACKUP_HOST_URL'),
+
+            // اگر FTP است، پنج خط بالا را با این جایگزین کن:
+            // 'driver'   => 'ftp',
+            // 'host'     => env('BACKUP_HOST'),
+            // 'username' => env('BACKUP_HOST_USERNAME'),
+            // 'password' => env('BACKUP_HOST_PASSWORD'),
+            // 'port'     => (int) env('BACKUP_HOST_PORT', 21),
+            // 'root'     => env('BACKUP_HOST_ROOT', '/'),
+            // 'passive'  => true,
+            // 'ssl'      => false,
+            // 'timeout'  => 120,
+        ],
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
