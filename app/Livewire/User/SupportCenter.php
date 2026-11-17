@@ -30,10 +30,10 @@ class SupportCenter extends Component
         $this->validate(['message'=>'required|string|max:20000']);$ticket=SupportTicket::visibleTo(auth()->user())->findOrFail($this->selectedTicket);abort_if($ticket->status==='closed',403);$ticket->messages()->create(['user_id'=>auth()->id(),'message'=>$this->message]);$ticket->update(['status'=>'new','last_reply_at'=>now()]);$this->message='';
     }
     public function render(){
-        $accounts=Accounts::with('group')->where(function($q){$q->where('creator',auth()->id())->orWhereHas('users',fn($u)=>$u->whereKey(auth()->id()));})->latest()->get();
-        $categories=SupportCategory::where('is_active',true)->orderBy('sort_order')->get();
-        $faqs=SupportFaq::published()->with('category')->when($this->categoryId,fn($q)=>$q->where('category_id',$this->categoryId))->when($this->search,fn($q)=>$q->where(fn($x)=>$x->where('question','like','%'.$this->search.'%')->orWhere('answer','like','%'.$this->search.'%')))->orderByDesc('is_published')->orderBy('sort_order')->limit(12)->get();
-        $tickets=SupportTicket::visibleTo(auth()->user())->with('category')->latest()->limit(10)->get();$selected=$this->selectedTicket?SupportTicket::visibleTo(auth()->user())->with('messages.user','category','account')->find($this->selectedTicket):null;
+        $categories=SupportCategory::where('is_active',true)->withCount(['faqs'=>fn($q)=>$q->where('is_published',true)])->orderBy('sort_order')->orderBy('name')->get();
+        $faqs=SupportFaq::published()->with('category')->when($this->categoryId,fn($q)=>$q->where('category_id',$this->categoryId))->when($this->search,fn($q)=>$q->where(fn($x)=>$x->where('question','like','%'.$this->search.'%')->orWhere('answer','like','%'.$this->search.'%')))->orderBy('sort_order')->latest('id')->limit($this->search||$this->categoryId?30:8)->get();
+        $accounts=$this->step===2?Accounts::with('group')->where(fn($q)=>$q->where('creator',auth()->id())->orWhereHas('users',fn($u)=>$u->whereKey(auth()->id())))->latest()->get():collect();
+        $tickets=SupportTicket::visibleTo(auth()->user())->with('category')->latest()->limit(8)->get();$selected=$this->selectedTicket?SupportTicket::visibleTo(auth()->user())->with('messages.user','category','account')->find($this->selectedTicket):null;
         $layout=in_array(auth()->user()->role,['agent','sub_agent'],true)?'layouts.agent':'layouts.customer';return view('livewire.user.support-center',compact('accounts','categories','faqs','tickets','selected'))->layout($layout)->title('مرکز پشتیبانی');
     }
 }
