@@ -13,9 +13,11 @@ class SupportCenter extends Component
 {
     use WithFileUploads;
     public int $step=1; public string $categoryId=''; public string $accountId=''; public string $search=''; public string $subject=''; public string $message=''; public string $priority='normal'; public $attachment; public ?int $selectedTicket=null;
-    public function chooseCategory($id): void {$this->categoryId=(string)$id;$this->step=2;}
+    public function chooseCategory($id): void {$this->categoryId=(string)$id;$this->accountId='';$this->step=2;}
     public function chooseAccount($id): void {$this->accountId=(string)$id;$this->step=3;}
-    public function showFaq($id): void {SupportFaq::published()->whereKey($id)->increment('views');}
+    public function backToCategory(): void {$this->step=1;}
+    public function backToAccount(): void {$this->step=2;}
+    // FAQها بدون درخواست Livewire باز و بسته می‌شوند تا جزئیات با هر کلیک بسته نشود.
     public function submitTicket(): void
     {
         $this->validate(['categoryId'=>'nullable|exists:support_categories,id','accountId'=>'nullable|exists:accounts,id','subject'=>'required|string|max:255','message'=>'required|string|max:20000','priority'=>'required|in:low,normal,high','attachment'=>'nullable|file|max:10240|mimes:jpg,jpeg,png,webp,pdf,txt,zip']);
