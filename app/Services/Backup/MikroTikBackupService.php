@@ -287,9 +287,9 @@ class MikroTikBackupService
                 );
             }
 
-            ftp_pasv(
+            @ftp_pasv(
                 $connection,
-                (bool) config('backup.ftp.passive', true)
+                true
             );
 
             /*
