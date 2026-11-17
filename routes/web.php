@@ -53,6 +53,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/impersonation/leave', [\App\Http\Controllers\ImpersonationController::class, 'leave'])->name('impersonation.leave');
     Route::get('/dashboard')->name('user.dashboard');
+
+    Route::get('/support', \App\Livewire\User\SupportCenter::class)->middleware('auth')->name('support.index');
+
 });
 
 Route::middleware(['auth', 'is_customer'])->prefix('customer')->name('customer.')->group(function () {
@@ -67,11 +70,11 @@ Route::middleware(['auth', 'is_customer'])->prefix('customer')->name('customer.'
     Route::get('/dashboard', \App\Livewire\Customer\Dashboard::class)->name('dashboard');
     Route::get('/my-orders', \App\Livewire\Customer\MyOrders::class)->name('orders');
     Route::get('/wallet', \App\Livewire\Customer\Wallet::class)->name('wallet');
+
 });
 
  Route::get('/store', \App\Livewire\Store\Storefront::class)->name('store.index');
  Route::get('/tutorials', \App\Livewire\User\ConnectionGuide::class)->name('tutorials.index');
- Route::get('/support', \App\Livewire\User\SupportCenter::class)->middleware('auth')->name('support.index');
 
 Route::middleware(['auth', 'is_reseller'])->prefix('reseller')->name('reseller.')->group(function () {
 
