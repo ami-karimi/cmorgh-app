@@ -7,13 +7,17 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "evilfreelancer/routeros-api-php": "^1.8",
         "ippanelcom/laravel-sdk": "^1.0",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.3",
         "laravel/tinker": "^2.10.1",
+        "league/flysystem-ftp": "^3.36",
+        "league/flysystem-sftp-v3": "^3.36",
         "livewire/livewire": "^4.3",
         "morilog/jalali": "^3.5",
-        "nutgram/laravel": "^1.7"
+        "nutgram/laravel": "^1.7",
+        "phpseclib/phpseclib": "^3.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
