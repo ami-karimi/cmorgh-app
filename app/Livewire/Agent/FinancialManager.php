@@ -289,6 +289,7 @@ class FinancialManager extends Component
                 'approved' => 1,
             ]);
 
+            /*
             // ۲. تراکنش برای نماینده
             $agentTransactionType = $this->subType === 'plus' ? 'minus' : 'plus';
             $agentDesc = $this->subType === 'plus'
@@ -303,6 +304,7 @@ class FinancialManager extends Component
                 'description' => $agentDesc,
                 'approved' => 1,
             ]);
+            */
         });
 
         $this->reset(['subAgentId', 'subAmount', 'subDescription', 'subType']);
@@ -379,17 +381,19 @@ class FinancialManager extends Component
         // تایید (status = 1)
         if ($status == 1 && $transaction->approved == 0) {
             if ($agent->balance < $transaction->price) {
+                /*
                 $this->dispatch('toast', [
                     'type' => 'error',
                     'title' => 'موجودی کافی نیست',
                     'message' => 'موجودی شما برای تایید این فیش کافی نیست.'
                 ]);
                 return;
+                */
             }
 
             DB::transaction(function () use ($agent, $transaction) {
                 $transaction->update(['approved' => 1]);
-
+                /*
                 Financial::create([
                     'creator' => $agent->id,
                     'for' => $agent->id,
@@ -398,6 +402,7 @@ class FinancialManager extends Component
                     'description' => "تایید فیش و کسر مبلغ برای زیرنماینده (#{$transaction->for})",
                     'approved' => 1,
                 ]);
+                */
             });
 
             $this->isReviewModalOpen = false;
