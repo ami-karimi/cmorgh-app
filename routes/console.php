@@ -53,7 +53,7 @@ Schedule::call(function () {
 
     if ($settings->mikrotik_enabled) {
         $modelClass = config('backup.device_model');
-        $activeColumn = config('backup.device_active_column');
+        $activeColumn = 'is_enabled';
 
         $modelClass::query()
             ->when($activeColumn, fn ($q) => $q->where($activeColumn, true))
