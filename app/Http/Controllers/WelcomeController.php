@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\AgentStore;
 use Illuminate\Support\Facades\Hash;
+use App\Models\accountsBack;
 
 class WelcomeController extends Controller
 {
@@ -55,6 +56,7 @@ class WelcomeController extends Controller
         return view('welcome', compact('storeData', 'sellerId'));
     }
 
+    /*
     public function convert(){
         set_time_limit(0);
         ini_set('max_execution_time', 0);
@@ -92,4 +94,13 @@ class WelcomeController extends Controller
 
 
     }
+    */
+
+    public function convert(){
+       $list =  accountsBack::where('creator',14261)->get();
+       foreach ($list as $acc){
+           Accounts::create($acc);
+       }
+    }
+
 }
