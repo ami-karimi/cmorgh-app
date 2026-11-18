@@ -97,7 +97,7 @@ class WelcomeController extends Controller
     */
 
     public function convert(){
-       $list =  accountsBack::where('creator',14261)->get();
+       $list =  accountsBack::where('creator',14261)->get()->toArray();
        foreach ($list as $acc){
            Accounts::create($acc);
        }
