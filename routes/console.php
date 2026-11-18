@@ -22,17 +22,18 @@ Schedule::command('vpn:sync-wg-usage')
 
 Schedule::command('orders:fulfill-paid')->everyMinute()->withoutOverlapping();
 
-/*
+
 Schedule::command('bank:sync-payment')
     ->everyMinute()
     ->withoutOverlapping();
-*/
+
 
 
 Schedule::command('vpn:sync-radius-usage')
     ->everyMinute()
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/radius_sync.log'));
+
 
 Schedule::command('vpn:clear-radius')
     ->everySixHours()
